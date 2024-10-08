@@ -24,20 +24,4 @@ defmodule TimeManagerWeb.ClockController do
     clock = Timesheet.get_clock!(id)
     render(conn, :show, clock: clock)
   end
-
-  def update(conn, %{"id" => id, "clock" => clock_params}) do
-    clock = Timesheet.get_clock!(id)
-
-    with {:ok, %Clock{} = clock} <- Timesheet.update_clock(clock, clock_params) do
-      render(conn, :show, clock: clock)
-    end
-  end
-
-  def delete(conn, %{"id" => id}) do
-    clock = Timesheet.get_clock!(id)
-
-    with {:ok, %Clock{}} <- Timesheet.delete_clock(clock) do
-      send_resp(conn, :no_content, "")
-    end
-  end
 end
