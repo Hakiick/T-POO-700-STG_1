@@ -1,4 +1,4 @@
-defmodule TimeManager.User do
+defmodule TimeManager.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -14,7 +14,5 @@ defmodule TimeManager.User do
     user
     |> cast(attrs, [:username, :email])
     |> validate_required([:username, :email])
-    |> unique_constraint(:email)
-    |> unique_constraint(:username)
   end
 end
