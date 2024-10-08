@@ -2,7 +2,7 @@
 
 To start your Phoenix server:
 
-- Run `docker-compose -p time-manager -f docker-compose.yml` to start the project
+- Run `docker-compose -p time-manager -f docker-compose.yml up` to start the project
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
