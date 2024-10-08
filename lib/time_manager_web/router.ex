@@ -1,5 +1,5 @@
-defmodule TodolistWeb.Router do
-  use TodolistWeb, :router
+defmodule TimeManager.Router do
+  use TimeManager, :router
 
   pipeline :api do
     plug :accepts, ["json"]
