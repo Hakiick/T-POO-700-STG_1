@@ -1,11 +1,11 @@
-defmodule TimeManager.Router do
-  use TimeManager, :router
+defmodule TimeManagerWeb.Router do
+  use TimeManagerWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api", TimeManager do
+  scope "/api", TimeManagerWeb do
     pipe_through :api
 
     # USER Routes
@@ -39,7 +39,7 @@ defmodule TimeManager.Router do
     scope "/dev" do
       pipe_through [:fetch_session, :protect_from_forgery]
 
-      live_dashboard "/dashboard", metrics: TodolistWeb.Telemetry
+      live_dashboard "/dashboard", metrics: TimeManagerWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
