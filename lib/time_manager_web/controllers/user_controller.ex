@@ -20,7 +20,8 @@ defmodule TimeManagerWeb.UserController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
+  def show(conn, %{"userID" => id}) do
+    id_int = String.to_integer(id)
     user = Accounts.get_user!(id)
     render(conn, :show, user: user)
   end

@@ -35,7 +35,9 @@ defmodule TimeManager.Timesheet do
       ** (Ecto.NoResultsError)
 
   """
-  def get_clock!(id), do: Repo.get!(Clock, id)
+  def get_clock!(user_id) do
+    Repo.all(from c in Clock, where: c.user_id == ^user_id)
+  end
 
   @doc """
   Creates a clock.

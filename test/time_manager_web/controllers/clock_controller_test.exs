@@ -19,19 +19,22 @@ defmodule TimeManagerWeb.ClockControllerTest do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
-  describe "index" do
-    test "lists all clocks from a user", %{conn: conn} do
-      conn = get(conn, ~p"/api/clocks/")
+  describe "show" do
+    test "lists a clock from a user", %{conn: conn} do
+      user_id = 1
+
+      conn = get(conn, ~p"/api/clocks/#{user_id}")
       assert json_response(conn, 200)["data"] == []
     end
   end
 
   describe "create clock" do
     test "renders clock when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/clocks", clock: @create_attrs)
+      user_id = 1
+      conn = post(conn, ~p"/api/clocks/#{user_id}", clock: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
-      conn = get(conn, ~p"/api/clocks/#{id}")
+      conn = get(conn, ~p"/api/clocks/#{user_id}")
 
       assert %{
                "id" => ^id,
