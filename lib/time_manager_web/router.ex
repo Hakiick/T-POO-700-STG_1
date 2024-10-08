@@ -1,14 +1,5 @@
-defmodule TimeManagerWeb.Router do
-  use TimeManagerWeb, :router
-
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, html: {TimeManagerWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
-  end
+defmodule TodolistWeb.Router do
+  use TodolistWeb, :router
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -16,23 +7,28 @@ defmodule TimeManagerWeb.Router do
 
   scope "/api", TodolistWeb do
     pipe_through :api
-    resources "/users", UserController, except: [:new, :edit]
-    resources "/tasks", UserController, except: [:new, :edit]
+
+    # USER Routes
+    get "/users", UserController, :get_user_by_email_and_username
+    get "/users/:userID", UserController, :show
+    post "/users", UserController, :create
+    put "/users/:userID", UserController, :update
+    delete "/users/:userID", UserController, :delete
+
+    # WORKING TIME Routes
+    get "/workingtime/:userID", WorkingController, :get_all_by_user
+    get "/workingtime/:userID/:id", WorkingController, :show
+    post "/workingtime/:userID", WorkingController, :create
+    put "/workingtime/:id", WorkingController, :update
+    delete "/workingtime/:id", WorkingController, :delete
+
+    # CLOCKING Routes
+    get "/clocks/:userID", ClockController, :get_by_user
+    post "/clocks/:userID", ClockController, :create
   end
-
-  scope "/", TimeManagerWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", TimeManagerWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:time_manager, :dev_routes) do
+  if Application.compile_env(:api, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
     # If your application does not have an admins-only section yet,
@@ -41,9 +37,9 @@ defmodule TimeManagerWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through [:fetch_session, :protect_from_forgery]
 
-      live_dashboard "/dashboard", metrics: TimeManagerWeb.Telemetry
+      live_dashboard "/dashboard", metrics: TodolistWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
