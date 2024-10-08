@@ -5,11 +5,11 @@ defmodule TimeManager.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", TodolistWeb do
+  scope "/api", TimeManager do
     pipe_through :api
 
     # USER Routes
-    get "/users", UserController, :get_user_by_email_and_username
+    get "/users", UserController, :index
     get "/users/:userID", UserController, :show
     post "/users", UserController, :create
     put "/users/:userID", UserController, :update
@@ -23,7 +23,7 @@ defmodule TimeManager.Router do
     delete "/workingtime/:id", WorkingController, :delete
 
     # CLOCKING Routes
-    get "/clocks/:userID", ClockController, :index
+    get "/clocks/:userID", ClockController, :show
     post "/clocks/:userID", ClockController, :create
   end
 
