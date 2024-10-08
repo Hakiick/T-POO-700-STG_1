@@ -16,14 +16,14 @@ defmodule TodolistWeb.Router do
     delete "/users/:userID", UserController, :delete
 
     # WORKING TIME Routes
-    get "/workingtime/:userID", WorkingController, :get_all_by_user
+    get "/workingtime/:userID", WorkingController, :index
     get "/workingtime/:userID/:id", WorkingController, :show
     post "/workingtime/:userID", WorkingController, :create
     put "/workingtime/:id", WorkingController, :update
     delete "/workingtime/:id", WorkingController, :delete
 
     # CLOCKING Routes
-    get "/clocks/:userID", ClockController, :get_by_user
+    get "/clocks/:userID", ClockController, :index
     post "/clocks/:userID", ClockController, :create
   end
 
