@@ -1,6 +1,6 @@
 FROM oven/bun:1 AS build
 
-WORKDIR /app
+WORKDIR /app/frontend
 
 # Install dependencies
 COPY bun.lockb package.json ./
