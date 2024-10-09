@@ -55,7 +55,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
     end
   end
 
-  def update(conn, %{"userID" => id, "working_time" => working_time_params}) do
+  def update(conn, %{"id" => id, "working_time" => working_time_params}) do
     working_time = Timesheet.get_working_time!(id)
 
     with {:ok, %WorkingTime{} = working_time} <-
@@ -64,7 +64,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
     end
   end
 
-  def delete(conn, %{"userID" => id}) do
+  def delete(conn, %{"id" => id}) do
     working_time = Timesheet.get_working_time!(id)
 
     with {:ok, %WorkingTime{}} <- Timesheet.delete_working_time(working_time) do
