@@ -36,7 +36,7 @@ defmodule TimeManagerWeb.ClockControllerTest do
   describe "show" do
     test "lists a clock from a user", %{conn: conn, user_id: user_id} do
       conn = get(conn, ~p"/api/clocks/#{user_id}")
-      assert json_response(conn, 200)["data"] == %{"error" => "No clocks found"}
+      assert json_response(conn, 404) == %{"error" => "No clocks found"}
     end
   end
 
@@ -50,7 +50,7 @@ defmodule TimeManagerWeb.ClockControllerTest do
       assert [%{
                "id" => 2,
                "status" => true,
-               "time" => "2024-10-07T12:18:00"
+               "time" => "2024-10-07T12:18:00Z"
              }] = json_response(conn, 200)["data"]
     end
 

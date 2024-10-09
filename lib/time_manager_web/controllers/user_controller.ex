@@ -6,9 +6,16 @@ defmodule TimeManagerWeb.UserController do
 
   action_fallback TimeManagerWeb.FallbackController
 
-  def index(conn, _params) do
-    users = Accounts.list_users()
-    render(conn, :index, users: users)
+  def show_from_mail_and_username(conn, %{"email" => email, "username" => username}) do
+    case Accounts.get_user_by_email_and_username(email, username) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "User not found"})
+
+      user ->
+        render(conn, "show.json", user: user)
+    end
   end
 
   def create(conn, %{"user" => user_params}) do
@@ -21,8 +28,15 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def show(conn, %{"userID" => id}) do
-    user = Accounts.get_user!(id)
-    render(conn, :show, user: user)
+    try do
+      user = Accounts.get_user!(id)
+      render(conn, :show, user: user)
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "User not found"})
+    end
   end
 
   def update(conn, %{"userID" => id, "user" => user_params}) do

@@ -7,11 +7,11 @@ defmodule TimeManagerWeb.UserControllerTest do
 
   @create_attrs %{
     username: "some username",
-    email: "some email"
+    email: "some@mail.com"
   }
   @update_attrs %{
     username: "some updated username",
-    email: "some updated email"
+    email: "someupdated@mail.com"
   }
   @invalid_attrs %{username: nil, email: nil}
 
@@ -19,10 +19,30 @@ defmodule TimeManagerWeb.UserControllerTest do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
-  describe "index" do
-    test "lists all users", %{conn: conn} do
-      conn = get(conn, ~p"/api/users")
-      assert json_response(conn, 200)["data"] == []
+  describe "show" do
+    test "get a users from mail and user name", %{conn: conn} do
+      conn = get(conn, ~p"/api/users?email=Karl_le_pd@pd.com&username=Karl_le_pd")
+
+      assert json_response(conn, 200)["data"] == %{
+               "email" => "Karl_le_pd@pd.com",
+               "id" => 1,
+               "username" => "Karl_le_pd"
+             }
+    end
+
+    test "get a users", %{conn: conn} do
+      conn = get(conn, ~p"/api/users/1")
+
+      assert json_response(conn, 200)["data"] == %{
+               "email" => "Karl_le_pd@pd.com",
+               "id" => 1,
+               "username" => "Karl_le_pd"
+             }
+    end
+
+    test "get a 404", %{conn: conn} do
+      conn = get(conn, ~p"/api/users/999")
+      assert json_response(conn, 404) == %{"error" => "User not found"}
     end
   end
 
@@ -35,7 +55,7 @@ defmodule TimeManagerWeb.UserControllerTest do
 
       assert %{
                "id" => ^id,
-               "email" => "some email",
+               "email" => "some@mail.com",
                "username" => "some username"
              } = json_response(conn, 200)["data"]
     end
@@ -57,7 +77,7 @@ defmodule TimeManagerWeb.UserControllerTest do
 
       assert %{
                "id" => ^id,
-               "email" => "some updated email",
+               "email" => "someupdated@mail.com",
                "username" => "some updated username"
              } = json_response(conn, 200)["data"]
     end
@@ -75,9 +95,8 @@ defmodule TimeManagerWeb.UserControllerTest do
       conn = delete(conn, ~p"/api/users/#{user}")
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/api/users/#{user}")
-      end
+      conn = get(conn, ~p"/api/users/#{user}")
+      assert response(conn, 404)
     end
   end
 

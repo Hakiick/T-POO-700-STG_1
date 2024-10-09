@@ -32,9 +32,14 @@ defmodule TimeManagerWeb.ClockController do
       user = Accounts.get_user!(id)
 
       clocks = Timesheet.get_clock!(user.id)
-      # IO.inspect(clocks)
 
-      render(conn, :show, clock: clocks)
+      if clocks == [] do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No clocks found"})
+      else
+        render(conn, :show, clock: clocks)
+      end
     rescue
       Ecto.NoResultsError ->
         conn
