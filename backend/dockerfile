@@ -5,7 +5,7 @@ WORKDIR /app/backend
 COPY mix.exs .
 # COPY mix.lock .
 
-RUN mix local.hex
-RUN mix deps.get
+RUN mix deps.get --only prod
+RUN mix deps.compile
 
 CMD mix setup && mix phx.server

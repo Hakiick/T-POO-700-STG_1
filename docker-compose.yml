@@ -28,7 +28,15 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ./backend/:/app/backend
+      # - ./backend/:/app/backend
+      - ./backend/.elixir-tools:/app/backend/.elixir-tools
+      - ./backend/_build:/app/backend/_build
+      - ./backend/assets:/app/backend/assets
+      - ./backend/config:/app/backend/config
+      - ./backend/deps:/app/backend/deps
+      - ./backend/lib:/app/backend/lib:cached
+      - ./backend/priv:/app/backend/priv:cached
+      - ./backend/test:/app/backend/test
 
   frontend:
     build:

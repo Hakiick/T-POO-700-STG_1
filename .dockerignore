@@ -1,0 +1,4 @@
+backend/deps/*
+
+backend/mix.lock
+frontend/node_modules
