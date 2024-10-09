@@ -16,4 +16,10 @@ defmodule TimeManager.Timesheet.WorkingTime do
     |> cast(attrs, [:start, :end, :user_id])
     |> validate_required([:start, :end, :user_id])
   end
+
+  def changeset_id(working_time, attrs) do
+    working_time
+    |> cast(attrs, [:start, :end])
+    |> validate_required([:start, :end])
+  end
 end

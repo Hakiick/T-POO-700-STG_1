@@ -174,6 +174,12 @@ defmodule TimeManager.Timesheet do
     |> Repo.update()
   end
 
+  def update_working_time_from_id(%WorkingTime{} = working_time, attrs) do
+    working_time
+    |> WorkingTime.changeset_id(attrs)
+    |> Repo.update()
+  end
+
   @doc """
   Deletes a working_time.
 

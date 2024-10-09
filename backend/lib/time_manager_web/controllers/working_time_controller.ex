@@ -59,7 +59,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
     working_time = Timesheet.get_working_time!(id)
 
     with {:ok, %WorkingTime{} = working_time} <-
-           Timesheet.update_working_time(working_time, working_time_params) do
+           Timesheet.update_working_time_from_id(working_time, working_time_params) do
       render(conn, :show, working_time: working_time)
     end
   end
