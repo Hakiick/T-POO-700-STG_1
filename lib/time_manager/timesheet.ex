@@ -133,7 +133,10 @@ defmodule TimeManager.Timesheet do
       ** (Ecto.NoResultsError)
 
   """
-  def get_working_time!(user_id, id), do: Repo.get_by!(WorkingTime, user_id: user_id, id: id)
+  def get_working_time!(id), do: Repo.get!(WorkingTime, id)
+
+  def get_working_time_by_user!(user_id, id),
+    do: Repo.get_by!(WorkingTime, user_id: user_id, id: id)
 
   @doc """
   Creates a working_time.
