@@ -122,9 +122,8 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
       conn = delete(conn, ~p"/api/workingtime/#{working_time}")
       assert response(conn, 204)
 
-      assert_error_sent(404, fn ->
-        get(conn, ~p"/api/workingtime/#{working_time}")
-      end)
+      conn = get(conn, ~p"/api/workingtime/#{working_time}")
+      assert response(conn, 404)
     end
   end
 
