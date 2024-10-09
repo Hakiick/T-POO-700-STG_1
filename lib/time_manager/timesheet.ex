@@ -115,8 +115,8 @@ defmodule TimeManager.Timesheet do
       [%WorkingTime{}, ...]
 
   """
-  def list_workingtime do
-    Repo.all(WorkingTime)
+  def list_workingtime_from_a_user(user_id) do
+    Repo.all(from w in WorkingTime, where: w.user_id == ^user_id)
   end
 
   @doc """
@@ -133,7 +133,7 @@ defmodule TimeManager.Timesheet do
       ** (Ecto.NoResultsError)
 
   """
-  def get_working_time!(id), do: Repo.get!(WorkingTime, id)
+  def get_working_time!(user_id, id), do: Repo.get_by!(WorkingTime, user_id: user_id, id: id)
 
   @doc """
   Creates a working_time.
