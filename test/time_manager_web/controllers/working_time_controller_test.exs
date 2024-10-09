@@ -3,6 +3,9 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
 
   import TimeManager.TimesheetFixtures
 
+  alias TimeManager.Accounts
+  alias TimeManager.Accounts.User
+  alias TimeManager.Repo
   alias TimeManager.Timesheet.WorkingTime
 
   @create_attrs %{
@@ -15,33 +18,71 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
   }
   @invalid_attrs %{start: nil, end: nil}
 
+    # Define your valid attributes for creating a user
+    @valid_user_attrs %{
+      username: "john_doe",
+      email: "john@example.com"
+    }
+
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    user =
+      %User{}
+      |> User.changeset(@valid_user_attrs)
+      |> Repo.insert!()
+
+    {:ok, conn: put_req_header(conn, "accept", "application/json"), user_id: user.id}
   end
 
   describe "index" do
-    test "lists all workingtime", %{conn: conn} do
-      conn = get(conn, ~p"/api/workingtime")
-      assert json_response(conn, 200)["data"] == []
+    test "lists all workingtime", %{conn: conn, user_id: user_id} do
+      conn = get(conn, ~p"/api/workingtime/1")
+
+      assert json_response(conn, 200)["data"] == [%{
+        "id" => 2,
+        "end" => "2024-10-07T17:00:00Z",
+        "start" => "2024-10-07T09:00:00Z"
+      }]
+    end
+
+    test "get a 404", %{conn: conn} do
+      conn = get(conn, ~p"/api/workingtime/999")
+      assert json_response(conn, 404) == %{"error" => "User not found"}
+    end
+  end
+
+  describe "show" do
+    test "get a workingtime", %{conn: conn, user_id: user_id} do
+      conn = get(conn, ~p"/api/workingtime/1/1")
+
+      assert json_response(conn, 200)["data"] == %{
+        "id" => 2,
+        "end" => "2024-10-07T17:00:00Z",
+        "start" => "2024-10-07T09:00:00Z"
+      }
+    end
+
+    test "get a 404", %{conn: conn} do
+      conn = get(conn, ~p"/api/workingtime/999/666")
+      assert json_response(conn, 404) == %{"error" => "Working time or user not found"}
     end
   end
 
   describe "create working_time" do
-    test "renders working_time when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/workingtime", working_time: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+    test "renders working_time when data is valid", %{conn: conn, user_id: user_id} do
+      conn = post(conn, ~p"/api/workingtime/#{user_id}", working_time: @create_attrs)
+      assert json_response(conn, 201)
 
-      conn = get(conn, ~p"/api/workingtime/#{id}")
+      conn = get(conn, ~p"/api/workingtime/#{user_id}")
 
-      assert %{
-               "id" => ^id,
-               "end" => "2024-10-07T12:18:00",
-               "start" => "2024-10-07T12:18:00"
-             } = json_response(conn, 200)["data"]
+      assert [%{
+               "id" => 2,
+               "end" => "2024-10-07T12:18:00Z",
+               "start" => "2024-10-07T12:18:00Z"
+             }] = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/workingtime", working_time: @invalid_attrs)
+      conn = post(conn, ~p"/api/workingtime/234", working_time: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -61,8 +102,8 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
       assert [
                %{
                  "id" => ^id,
-                 "end" => "2024-10-08T12:18:00",
-                 "start" => "2024-10-08T12:18:00"
+                 "end" => "2024-10-08T12:18:00Z",
+                 "start" => "2024-10-08T12:18:00Z"
                }
              ] = json_response(conn, 200)["data"]
     end
