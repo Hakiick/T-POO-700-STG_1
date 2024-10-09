@@ -9,6 +9,7 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
   alias TimeManager.Timesheet.WorkingTime
 
   @create_attrs %{
+    user_id: 1,
     start: ~N[2024-10-07 12:18:00],
     end: ~N[2024-10-07 12:18:00]
   }
