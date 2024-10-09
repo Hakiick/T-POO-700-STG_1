@@ -95,7 +95,7 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
       conn: conn,
       working_time: %WorkingTime{id: id} = working_time
     } do
-      conn = put(conn, ~p"/api/workingtime/#{working_time}", working_time: @update_attrs)
+      conn = put(conn, ~p"/api/workingtime/#{working_time.id}", working_time: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = get(conn, ~p"/api/workingtime/#{id}")
