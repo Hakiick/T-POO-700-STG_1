@@ -1,0 +1,52 @@
+-- User (Utilisateur)
+
+O - id (PK) : Identifiant unique de l'utilisateur
+O - name : Nom de l'utilisateur
+O - email : Email de l'utilisateur
+X - password : Mot de passe pour l'authentification
+X - role : Rôle de l'utilisateur (employee, manager, general_manager)
+X - is_active : Statut d'activation du compte
+X - team_id (FK) : Clé étrangère vers l'équipe (facultatif pour les employés non assignés)
+
+
+-- Team (Équipe)
+
+X - id (PK) : Identifiant unique de l'équipe
+X - name : Nom de l'équipe
+X - manager_id (FK) : Référence vers l'utilisateur qui est le manager de l'équipe
+
+
+-- Timesheet (Feuille de temps)
+
+O - id (PK) : Identifiant unique de la feuille de temps
+O - user_id (FK) : Référence vers l'utilisateur qui enregistre ses heures
+O - start_time : Heure d'arrivée
+O - end_time : Heure de départ
+O - date : Date d'enregistrement
+
+
+-- Clock (Horodatage)
+
+O - id (PK) : Identifiant unique de l'enregistrement
+O - status : Statut de l'horaire (true pour arrivée, false pour départ)
+O - time : Heure de l'événement (UTC)
+O - user_id (FK) : Référence vers l'utilisateur concerné
+
+
+
+
+Relations entre les entités :
+Un Utilisateur peut avoir plusieurs Feuilles de temps (relation 1-N).
+Un Manager peut gérer plusieurs Équipes (relation 1-N).
+Un Manager ou Directeur Général peut consulter les feuilles de temps des membres de l'équipe.
+Le Directeur Général peut soumettre une Demande de promotion pour un employé, ou gérer les rôles.
+Diagramme des relations :
+User — (1,N) — Timesheet
+Team — (1,N) — User
+User (Manager) — (1,N) — Team
+RoleChangeRequest — (1,1) — User
+Explication des relations :
+Chaque utilisateur (employé, manager ou directeur général) a un compte et peut enregistrer ses heures de travail.
+Les managers peuvent regrouper les employés en équipes.
+Les managers et le directeur général peuvent consulter les feuilles de temps de leurs équipes et des employés sous leur gestion.
+Le directeur général a des droits supplémentaires pour promouvoir des employés ou supprimer des comptes.
