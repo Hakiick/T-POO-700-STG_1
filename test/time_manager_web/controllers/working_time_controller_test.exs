@@ -35,8 +35,13 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
 
   describe "index" do
     test "lists all workingtime", %{conn: conn, user_id: user_id} do
-      conn = get(conn, ~p"/api/workingtime/#{user_id}")
-      assert json_response(conn, 404) == %{"error" => "No workingtimes found"}
+      conn = get(conn, ~p"/api/workingtime/1")
+
+      assert json_response(conn, 200)["data"] == [%{
+        "id" => 2,
+        "end" => "2024-10-07T17:00:00Z",
+        "start" => "2024-10-07T09:00:00Z"
+      }]
     end
 
     test "get a 404", %{conn: conn} do
@@ -46,14 +51,15 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
   end
 
   describe "show" do
-    test "get a workingtime", %{
-      conn: conn,
-      working_time: %WorkingTime{id: id} = working_time,
-      user_id: user_id} do
-      conn = get(conn, ~p"/api/workingtime/#{user_id}/#{working_time}")
-      assert json_response(conn, 404) == %{"error" => "No workingtimes found"}
-    end
+    test "get a workingtime", %{conn: conn, user_id: user_id} do
+      conn = get(conn, ~p"/api/workingtime/1/1")
 
+      assert json_response(conn, 200)["data"] == %{
+        "id" => 2,
+        "end" => "2024-10-07T17:00:00Z",
+        "start" => "2024-10-07T09:00:00Z"
+      }
+    end
 
     test "get a 404", %{conn: conn} do
       conn = get(conn, ~p"/api/workingtime/999/666")

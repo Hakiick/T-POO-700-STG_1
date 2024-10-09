@@ -1,5 +1,5 @@
 defmodule EmailValidator do
-  @w3c_email_regex ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i
+  @w3c_email_regex ~r/^[\w.!#$%&’*+\/=?`{|}~^-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
   def valid_email?(email) do
     Regex.match?(@w3c_email_regex, email)
