@@ -24,9 +24,9 @@ defmodule TimeManagerWeb.ClockJSON do
     }
   end
 
-  # Handle empty list or nil case
-  defp data([]), do: %{error: "No clocks found"}
-  defp data(nil), do: %{error: "No clocks found"}
+  # # Handle empty list or nil case
+  # defp data([]), do: %{error: "No clocks found"}
+  # defp data(nil), do: %{error: "No clocks found"}
 
   # Handle a list of Clock structs
   defp data(clocks) when is_list(clocks) do

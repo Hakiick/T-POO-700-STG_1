@@ -9,7 +9,7 @@ defmodule TimeManagerWeb.Router do
     pipe_through :api
 
     # USER Routes
-    get "/users", UserController, :index
+    get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
     post "/users", UserController, :create
     put "/users/:userID", UserController, :update

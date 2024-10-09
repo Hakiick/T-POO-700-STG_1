@@ -22,4 +22,14 @@ defmodule TimeManagerWeb.UserJSON do
       email: user.email
     }
   end
+
+  # Handle empty list or nil case
+  defp data([]), do: %{error: "No user found"}
+  defp data(nil), do: %{error: "No user found"}
+
+  # Handle a list of User structs
+  defp data(users) when is_list(users) do
+    # Map each user to the data function
+    Enum.map(users, &data/1)
+  end
 end
