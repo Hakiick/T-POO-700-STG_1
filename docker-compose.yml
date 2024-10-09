@@ -13,7 +13,9 @@ services:
       - "database:/var/lib/postgresql/data/"
 
   backend:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: dockerfile
     depends_on:
       - db
     # environment:
@@ -26,7 +28,18 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - .:/app
+      - ./backend/:/app/backend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/:/app/frontend
+    stdin_open: true
+    tty: true
 
 volumes:
   database:
