@@ -51,7 +51,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
       Ecto.NoResultsError ->
         conn
         |> put_status(:not_found)
-        |> json(%{error: "Working time not found"})
+        |> json(%{error: "Working time or user not found"})
     end
   end
 

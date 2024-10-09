@@ -7,16 +7,36 @@ defmodule TimeManagerWeb.UserController do
   action_fallback TimeManagerWeb.FallbackController
 
   def show_from_mail_and_username(conn, %{"email" => email, "username" => username}) do
-    case Accounts.get_user_by_email_and_username(email, username) do
-      nil ->
+    cond do
+      String.trim(email) == "" && String.trim(username) == "" ->
         conn
-        |> put_status(:not_found)
-        |> json(%{error: "User not found"})
+        |> put_status(:bad_request)
+        |> json(%{error: "Both email and username cannot be empty"})
 
-      user ->
-        render(conn, "show.json", user: user)
+      String.trim(email) == "" ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Email cannot be empty"})
+
+      String.trim(username) == "" ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Username cannot be empty"})
+
+      true ->
+        case Accounts.get_user_by_email_and_username(email, username) do
+          nil ->
+            conn
+            |> put_status(:not_found)
+            |> json(%{error: "User not found"})
+
+          user ->
+            render(conn, "show.json", user: user)
+        end
     end
   end
+
+
 
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
