@@ -6,10 +6,6 @@ export default createRouter({
         {
             path: '/',
             component: () => import('./components/HelloWorld.vue')
-        },
-        {
-            path: '/me',
-            component: () => import('./components/Me.vue')
         }
     ]
 })
