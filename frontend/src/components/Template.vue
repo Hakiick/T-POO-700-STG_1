@@ -22,14 +22,14 @@ import {
   TabsList,
   TabsTrigger,
 } from './ui/tabs'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const user = ref(null); // user starts as null
 
 onMounted(async () => {
   user.value = await getUser(1);
-  console.log(user.value.data);
-  console.log('test');
+  // console.log(user.value.data);
+  // console.log('test');
 });
 
 </script>
