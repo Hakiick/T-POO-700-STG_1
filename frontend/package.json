@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-        "@radix-icons/vue": "^1.0.0",
+    "@radix-icons/vue": "^1.0.0",
     "@types/node": "^22.7.5",
     "@unovis/ts": "^1.4.3-beta.0",
     "@unovis/vue": "^1.4.3-beta.0",
     "@vueuse/core": "^11.1.0",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "icons": "^1.0.0",

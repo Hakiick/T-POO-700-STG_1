@@ -6,6 +6,7 @@ import RecentSales from './RecentSales.vue'
 import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
+import { getUser } from '../api/apiUser'
 
 import { Button } from './ui/button'
 import {
@@ -21,6 +22,11 @@ import {
   TabsList,
   TabsTrigger,
 } from './ui/tabs'
+
+
+console.log(user);
+console.log("test");
+
 </script>
 
 <template>
@@ -30,7 +36,7 @@ import {
       light: '/examples/dashboard-light.png',
     }" />
   </div>
-  
+
   <div class="hidden flex-col md:flex">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
