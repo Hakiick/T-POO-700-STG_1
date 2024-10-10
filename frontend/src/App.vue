@@ -30,6 +30,10 @@ import {
       light: '/examples/dashboard-light.png',
     }" />
   </div>
+  
+  <template>
+  <RouterView />
+</template>
 
   <div class="hidden flex-col md:flex">
     <div class="border-b">
