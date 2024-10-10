@@ -3,7 +3,7 @@ FROM bitwalker/alpine-elixir-phoenix:latest
 WORKDIR /app/backend
 
 COPY mix.exs .
-# COPY mix.lock .
+#COPY mix.lock .
 
 RUN mix deps.get --only prod
 RUN mix deps.compile
