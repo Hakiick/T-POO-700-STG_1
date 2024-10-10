@@ -27,7 +27,6 @@ import {
 
 <template>
   <RouterView />
-</template>
 
 
 <!-- NavBar + Team recherche -->
