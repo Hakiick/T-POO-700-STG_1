@@ -7,9 +7,5 @@ export default createRouter({
             path: '/',
             component: () => import('./components/Template.vue')
         },
-        {
-            path: '/me',
-            component: () => import('./components/Me.vue')
-        }
     ]
 })
