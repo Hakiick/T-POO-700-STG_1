@@ -22,10 +22,14 @@ import {
   TabsList,
   TabsTrigger,
 } from './ui/tabs'
+import { onMounted } from 'vue'
 
 
-console.log(user);
-console.log("test");
+onMounted(async () => {
+  const user = await getUser(1);
+  console.log(user);
+  console.log('test');
+});
 
 </script>
 
