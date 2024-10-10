@@ -5,7 +5,7 @@ export default createRouter({
     routes: [
         {
             path: '/',
-            component: () => import('./components/Template.vue')
+            component: () => import('./components/LoginPage.vue')
         },
     ]
 })
