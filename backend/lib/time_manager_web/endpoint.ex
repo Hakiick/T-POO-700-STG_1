@@ -41,6 +41,9 @@ defmodule TimeManagerWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
+  # Allow your frontend's origin
+  plug CORSPlug, origin: ["http://frontend:5173"]
+
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],

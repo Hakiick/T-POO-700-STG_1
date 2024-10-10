@@ -5,6 +5,17 @@ import { fileURLToPath, URL } from "url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      // Proxy API requests to the backend container
+      "/api": {
+        target: "http://backend:4000", // The backend service in Docker
+        changeOrigin: true, // Needed for virtual hosted sites
+        // rewrite: (path) => path.replace(/^\/api/, ""), // Remove `/api` prefix from the request path
+      },
+    },
+  },
+
   plugins: [
     vue(),
     Icons({
