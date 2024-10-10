@@ -2,7 +2,7 @@
 import Overview from './components/Overview.vue'
 import DateRangePicker from './components/DateRangePicker.vue'
 import MainNav from './components/MainNav.vue'
-import RecentSales from './components/RecentSales.vue'
+import WorkingTime from './components/WorkingTime.vue'
 import Search from './components/Search.vue'
 import TeamSwitcher from './components/TeamSwitcher.vue'
 import UserNav from './components/UserNav.vue'
@@ -35,6 +35,7 @@ import {
   <RouterView />
 </template>
 
+<!-- NavBar + Team recherche -->
   <div class="hidden flex-col md:flex">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
@@ -46,16 +47,25 @@ import {
         </div>
       </div>
     </div>
+
+    <Div class="hidden flex-col md:flex">
+      <!-- Ici chantier du pointage -->
+    </Div>
+
+    <!-- Dashboard -->
     <div class="flex-1 space-y-4 p-8 pt-6">
       <div class="flex items-center justify-between space-y-2">
         <h2 class="text-3xl font-bold tracking-tight">
-          Dashboard
+          Tableau de bord
         </h2>
         <div class="flex items-center space-x-2">
           <DateRangePicker />
-          <Button>Download</Button>
+          <Button>Appliquer</Button>
         </div>
       </div>
+      <p class="text-xl tracking-tight">
+        Vous trouverez ici vos informations de pointage
+      </p>
       <Tabs default-value="overview" class="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">
@@ -72,109 +82,68 @@ import {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="overview" class="space-y-4">
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Total Revenue
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  $45,231.89
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +20.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Subscriptions
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +2350
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +180.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Sales
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +12,234
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +19% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Active Now
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +573
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +201 since last hour
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card class="col-span-4">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent class="pl-2">
-                <Overview />
-              </CardContent>
-            </Card>
-            <Card class="col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>
-                  You made 265 sales this month.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RecentSales />
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+  <!-- Première partie : les trois Cards en haut à gauche, occupant 70% de l'écran -->
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-10">
+    <!-- Colonne principale (70%) -->
+    <div class="col-span-7 space-y-4">
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Heures Travaillées Aujourd'hui</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">8h 30m</div>
+            <p class="text-xs text-muted-foreground">Heures travaillées aujourd'hui</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Heures Travaillées Cette Semaine</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">40h 15m</div>
+            <p class="text-xs text-muted-foreground">Heures travaillées cette semaine</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Heures Travaillées Ce Mois</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">160h 45m</div>
+            <p class="text-xs text-muted-foreground">Heures travaillées ce mois</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Bloc Overview, en dessous des trois Cards -->
+      <Card class="mt-4">
+        <CardHeader>
+          <CardTitle>Overview</CardTitle>
+        </CardHeader>
+        <CardContent class="pl-2">
+          <Overview />
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Colonne droite (30%) avec WorkingTime -->
+    <div class="col-span-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>Temps des pointages</CardTitle>
+          <CardDescription>Temps travaillés les X derniers jours.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <WorkingTime />
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</TabsContent>
+
       </Tabs>
     </div>
   </div>
