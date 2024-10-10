@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import Overview from './components/Overview.vue'
 import DateRangePicker from './components/DateRangePicker.vue'
 import MainNav from './components/MainNav.vue'
@@ -21,19 +22,13 @@ import {
   TabsList,
   TabsTrigger,
 } from './components/ui/tabs'
+
 </script>
 
 <template>
-  <div class="md:hidden">
-    <VPImage alt="Dashboard" width="1280" height="1214" class="block" :image="{
-      dark: '/examples/dashboard-dark.png',
-      light: '/examples/dashboard-light.png',
-    }" />
-  </div>
-  
-  <template>
   <RouterView />
 </template>
+
 
 <!-- NavBar + Team recherche -->
   <div class="hidden flex-col md:flex">
@@ -148,3 +143,18 @@ import {
     </div>
   </div>
 </template>
+
+<style scoped>
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vue:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
+}
+</style>
