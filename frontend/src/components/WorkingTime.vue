@@ -1,13 +1,12 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-lg font-semibold">Derniers Jours de Pointage</h2>
     <div v-for="(day, index) in workDays" :key="index" class="flex items-center justify-between">
       <div class="flex flex-col">
         <span class="text-sm font-medium">{{ day.start }}</span>
         <span class="text-xs text-muted-foreground">{{ day.date }}</span>
       </div>
       <div class="mx-4 font-medium">
-        {{ day.durationFormatted }} 
+        {{ day.durationFormatted }}
       </div>
       <div class="flex flex-col">
         <span class="text-sm font-medium">{{ day.end }}</span>
@@ -30,7 +29,6 @@ const rawData = [
   { name: '2024-10-01', start: '2024-10-01T09:00:00Z', end: '2024-10-01T17:50:00Z' },
   { name: '2024-09-30', start: '2024-09-30T09:00:00Z', end: '2024-09-30T17:00:00Z' },
   { name: '2024-09-29', start: '2024-09-29T09:00:00Z', end: '2024-09-29T15:55:00Z' },
-  { name: '2024-09-28', start: '2024-09-28T09:00:00Z', end: '2024-09-28T17:00:00Z' },
 ];
 
 // Fonction pour calculer la durée en heures et minutes entre deux dates

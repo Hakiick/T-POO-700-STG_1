@@ -15,6 +15,15 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+  },
+})
+// console.log("testdsafsd", props.user.data.username)
+
 </script>
 
 <template>
@@ -31,10 +40,10 @@ import {
       <DropdownMenuLabel class="font-normal flex">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            shadcn
+            {{ props.user.data.username || "Loading" }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            m@example.com
+            {{ props.user.data.email }}
           </p>
         </div>
       </DropdownMenuLabel>
