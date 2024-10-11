@@ -48,7 +48,7 @@ const groups = [
     ],
   },
   {
-    label: 'Teams',
+    label: 'Groups',
     teams: [
       {
         label: 'Acme Inc.',
@@ -116,7 +116,7 @@ const selectedTeam = ref<Team>(groups[0].teams[0])
                   showNewTeamDialog = true
                 }">
                   <PlusCircledIcon class="mr-2 h-5 w-5" />
-                  Create Team
+                  Create Group
                 </CommandItem>
               </DialogTrigger>
             </CommandGroup>
@@ -126,7 +126,7 @@ const selectedTeam = ref<Team>(groups[0].teams[0])
     </Popover>
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Create team</DialogTitle>
+        <DialogTitle>Create group</DialogTitle>
         <DialogDescription>
           Add a new team to manage products and customers.
         </DialogDescription>

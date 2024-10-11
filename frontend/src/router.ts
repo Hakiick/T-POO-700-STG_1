@@ -8,8 +8,12 @@ export default createRouter({
             component: () => import('./components/Template.vue')
         },
         {
-            path: '/me',
-            component: () => import('./components/AdminPanel.vue')
-        }
+          path: '/login',
+          component: () => import("./components/LoginPage.vue")
+        },
+        {
+          path: '/me',
+          component: () => import('./components/AdminPanel.vue')
+      }
     ]
 })
