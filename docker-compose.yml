@@ -50,5 +50,14 @@ services:
     stdin_open: true
     tty: true
 
+  zap:
+    image: zaproxy/zap-stable
+    container_name: zap
+    ports:
+      - "8080:8080"
+      - "8090:8090"
+    command: >
+      sh -c "zap-webswing.sh"
+
 volumes:
   database:
