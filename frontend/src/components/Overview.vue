@@ -1,10 +1,30 @@
-<template>
-  <div id="chartContainer" style="height: 370px; width: 100%;"></div>
-</template>
-
 <script setup lang="ts">
-// Import du composant onMounted
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import { getWorkingTime } from '../api/apiWorkingTime';
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+  },
+});
+
+const workingtime = ref<any>(null);
+const workDays = ref<any[]>([]);
+
+onMounted(async () => {
+  workingtime.value = await getWorkingTime(1);
+
+  workDays.value = workingtime.value.data.map(entry => {
+    const { durationFormatted } = calculateDuration(entry.start, entry.end);
+    return {
+      date: entry.name,
+      start: entry.start.split('T')[1].slice(0, 5), // Heure de début (HH:MM)
+      end: entry.end.split('T')[1].slice(0, 5), // Heure de fin (HH:MM)
+      durationFormatted,
+    };
+  });
+});
 
 // Fonction pour calculer la durée en heures et minutes entre deux dates
 function calculateDuration(start: string, end: string) {
@@ -77,3 +97,8 @@ onMounted(() => {
   chart.render();
 });
 </script>
+
+
+<template>
+  <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</template>
