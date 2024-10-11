@@ -4,6 +4,6 @@ import { Input } from './ui/input'
 
 <template>
   <div>
-    <Input type="search" placeholder="Search..." class="md:w-[100px] lg:w-[300px]" />
+    <Input type="search" placeholder="Search..." class="md:w-[250px] lg:w-[400px]" />
   </div>
 </template>
