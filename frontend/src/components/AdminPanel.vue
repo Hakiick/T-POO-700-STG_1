@@ -1,177 +1,272 @@
 <script setup lang="ts">
-import Overview from './Overview.vue'
-import DateRangePicker from './DateRangePicker.vue'
+import {
+  FlexRender,
+  createColumnHelper,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useVueTable,
+} from '@tanstack/vue-table'
+
+import { defineComponent, h } from 'vue'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './ui/table'
 import MainNav from './MainNav.vue'
-import RecentSales from './RecentSales.vue'
 import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
+import Button from './ui/button/Button.vue'
+import { Cross1Icon, Pencil2Icon } from '@radix-icons/vue'
+</script>
 
-import { Button } from './ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from './ui/card'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from './ui/tabs'
+<script lang="ts">
+
+export default defineComponent({
+  data(): Data{
+    return {
+      users: [
+    { id: 1, username: 'blablou1', email: 'blablou1@gmail.com' },
+    { id: 2, username: 'blablou2', email: 'blablou2@gmail.com' },
+    { id: 3, username: 'blablou3', email: 'blablou3@gmail.com' },
+    { id: 4, username: 'blablou4', email: 'blablou4@gmail.com' },
+    { id: 5, username: 'blablou5', email: 'blablou5@gmail.com' },
+    { id: 6, username: 'blablou6', email: 'blablou6@gmail.com' },
+    { id: 7, username: 'blablou7', email: 'blablou7@gmail.com' },
+    { id: 8, username: 'blablou8', email: 'blablou8@gmail.com' },
+    { id: 9, username: 'blablou9', email: 'blablou9@gmail.com' },
+    { id: 10, username: 'blablou10', email: 'blablou10@gmail.com' },
+    { id: 11, username: 'blablou11', email: 'blablou11@gmail.com' },
+    { id: 12, username: 'blablou12', email: 'blablou12@gmail.com' },
+    { id: 13, username: 'blablou13', email: 'blablou13@gmail.com' },
+    { id: 14, username: 'blablou14', email: 'blablou14@gmail.com' },
+    { id: 15, username: 'blablou15', email: 'blablou15@gmail.com' },
+    { id: 16, username: 'blablou16', email: 'blablou16@gmail.com' },
+    { id: 17, username: 'blablou17', email: 'blablou17@gmail.com' },
+    { id: 18, username: 'blablou18', email: 'blablou18@gmail.com' },
+    { id: 19, username: 'blablou19', email: 'blablou19@gmail.com' },
+    { id: 20, username: 'blablou20', email: 'blablou20@gmail.com' },
+    { id: 21, username: 'blablou21', email: 'blablou21@gmail.com' },
+    { id: 22, username: 'blablou22', email: 'blablou22@gmail.com' },
+    { id: 23, username: 'blablou23', email: 'blablou23@gmail.com' },
+    { id: 24, username: 'blablou24', email: 'blablou24@gmail.com' },
+    { id: 25, username: 'blablou25', email: 'blablou25@gmail.com' },
+    { id: 26, username: 'blablou26', email: 'blablou26@gmail.com' },
+    { id: 27, username: 'blablou27', email: 'blablou27@gmail.com' },
+    { id: 28, username: 'blablou28', email: 'blablou28@gmail.com' },
+    { id: 29, username: 'blablou29', email: 'blablou29@gmail.com' },
+    { id: 30, username: 'blablou30', email: 'blablou30@gmail.com' },
+    { id: 31, username: 'blablou31', email: 'blablou31@gmail.com' },
+    { id: 32, username: 'blablou32', email: 'blablou32@gmail.com' },
+    { id: 33, username: 'blablou33', email: 'blablou33@gmail.com' },
+    { id: 34, username: 'blablou34', email: 'blablou34@gmail.com' },
+    { id: 35, username: 'blablou35', email: 'blablou35@gmail.com' },
+    { id: 36, username: 'blablou36', email: 'blablou36@gmail.com' },
+    { id: 37, username: 'blablou37', email: 'blablou37@gmail.com' },
+    { id: 38, username: 'blablou38', email: 'blablou38@gmail.com' },
+    { id: 39, username: 'blablou39', email: 'blablou39@gmail.com' },
+    { id: 40, username: 'blablou40', email: 'blablou40@gmail.com' },
+    { id: 41, username: 'blablou41', email: 'blablou41@gmail.com' },
+    { id: 42, username: 'blablou42', email: 'blablou42@gmail.com' },
+    { id: 43, username: 'blablou43', email: 'blablou43@gmail.com' },
+    { id: 44, username: 'blablou44', email: 'blablou44@gmail.com' },
+    { id: 45, username: 'blablou45', email: 'blablou45@gmail.com' },
+    { id: 46, username: 'blablou46', email: 'blablou46@gmail.com' },
+    { id: 47, username: 'blablou47', email: 'blablou47@gmail.com' },
+    { id: 48, username: 'blablou48', email: 'blablou48@gmail.com' },
+    { id: 49, username: 'blablou49', email: 'blablou49@gmail.com' },
+    { id: 50, username: 'blablou50', email: 'blablou50@gmail.com' },
+    { id: 51, username: 'blablou51', email: 'blablou51@gmail.com' },
+    { id: 52, username: 'blablou52', email: 'blablou52@gmail.com' },
+    { id: 53, username: 'blablou53', email: 'blablou53@gmail.com' },
+    { id: 54, username: 'blablou54', email: 'blablou54@gmail.com' },
+    { id: 55, username: 'blablou55', email: 'blablou55@gmail.com' },
+    { id: 56, username: 'blablou56', email: 'blablou56@gmail.com' },
+    { id: 57, username: 'blablou57', email: 'blablou57@gmail.com' },
+    { id: 58, username: 'blablou58', email: 'blablou58@gmail.com' },
+    { id: 59, username: 'blablou59', email: 'blablou59@gmail.com' },
+    { id: 60, username: 'blablou60', email: 'blablou60@gmail.com' },
+    { id: 61, username: 'blablou61', email: 'blablou61@gmail.com' },
+    { id: 62, username: 'blablou62', email: 'blablou62@gmail.com' },
+    { id: 63, username: 'blablou63', email: 'blablou63@gmail.com' },
+    { id: 64, username: 'blablou64', email: 'blablou64@gmail.com' },
+    { id: 65, username: 'blablou65', email: 'blablou65@gmail.com' },
+    { id: 66, username: 'blablou66', email: 'blablou66@gmail.com' },
+    { id: 67, username: 'blablou67', email: 'blablou67@gmail.com' },
+    { id: 68, username: 'blablou68', email: 'blablou68@gmail.com' },
+    { id: 69, username: 'blablou69', email: 'blablou69@gmail.com' },
+    { id: 70, username: 'blablou70', email: 'blablou70@gmail.com' },
+    { id: 71, username: 'blablou71', email: 'blablou71@gmail.com' },
+    { id: 72, username: 'blablou72', email: 'blablou72@gmail.com' },
+    { id: 73, username: 'blablou73', email: 'blablou73@gmail.com' },
+    { id: 74, username: 'blablou74', email: 'blablou74@gmail.com' },
+    { id: 75, username: 'blablou75', email: 'blablou75@gmail.com' },
+    { id: 76, username: 'blablou76', email: 'blablou76@gmail.com' },
+    { id: 77, username: 'blablou77', email: 'blablou77@gmail.com' },
+    { id: 78, username: 'blablou78', email: 'blablou78@gmail.com' },
+    { id: 79, username: 'blablou79', email: 'blablou79@gmail.com' },
+    { id: 80, username: 'blablou80', email: 'blablou80@gmail.com' },
+    { id: 81, username: 'blablou81', email: 'blablou81@gmail.com' },
+    { id: 82, username: 'blablou82', email: 'blablou82@gmail.com' },
+    { id: 83, username: 'blablou83', email: 'blablou83@gmail.com' },
+    { id: 84, username: 'blablou84', email: 'blablou84@gmail.com' },
+    { id: 85, username: 'blablou85', email: 'blablou85@gmail.com' },
+    { id: 86, username: 'blablou86', email: 'blablou86@gmail.com' },
+    { id: 87, username: 'blablou87', email: 'blablou87@gmail.com' },
+    { id: 88, username: 'blablou88', email: 'blablou88@gmail.com' },
+    { id: 89, username: 'blablou89', email: 'blablou89@gmail.com' },
+    { id: 90, username: 'blablou90', email: 'blablou90@gmail.com' },
+    { id: 91, username: 'blablou91', email: 'blablou91@gmail.com' },
+    { id: 92, username: 'blablou92', email: 'blablou92@gmail.com' },
+    { id: 93, username: 'blablou93', email: 'blablou93@gmail.com' },
+    { id: 94, username: 'blablou94', email: 'blablou94@gmail.com' },
+    { id: 95, username: 'blablou95', email: 'blablou95@gmail.com' },
+    { id: 96, username: 'blablou96', email: 'blablou96@gmail.com' },
+    { id: 97, username: 'blablou97', email: 'blablou97@gmail.com' },
+    { id: 98, username: 'blablou98', email: 'blablou98@gmail.com' },
+    { id: 99, username: 'blablou99', email: 'blablou99@gmail.com' },
+    { id: 100, username: 'blablou100', email: 'blablou100@gmail.com' }
+    ]
+    }
+
+  },
+  methods: {
+    deleteElement(id: number) {
+      this.$data.users = this.$data.users.filter(e => e.id != id);
+    }
+  },
+  computed: {
+    user() {
+      return false;
+    },
+    table() {
+      const columnHelper = createColumnHelper<User>();
+
+      const columns = [
+        columnHelper.accessor('username', {
+          header: 'Username',
+          cell: ({ row }) => h('div', { class: 'capitalize'}, row.getValue('username'))
+        }),
+        columnHelper.accessor('email', {
+          header: 'Email',
+          cell: ({ row }) => h('div', { class: 'lowercase' }, row.getValue('email')),
+        }),
+        columnHelper.accessor('id', {
+          header: () => h('div', {class: 'text-right'}, 'Username'),
+          cell: ({ row }) => h('div', { class: 'text-right'}, [
+            h(Button, {  }, Pencil2Icon),
+            h(Button, { variant: 'destructive', onClick: () => this.deleteElement(row.getValue('id'))}, Cross1Icon)
+          ])
+        })
+      ]
+
+      return useVueTable({
+        data: this.$data.users,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+      })
+    }
+  }
+})
+
+
+
+export interface User {
+  id: number
+  username: string
+  email: string
+}
+
+export interface Data {
+  users: User[]
+}
+
+
+
 </script>
 
 <template>
-  <div class="md:hidden">
-    <VPImage alt="Dashboard" width="1280" height="1214" class="block" :image="{
-      dark: '/examples/dashboard-dark.png',
-      light: '/examples/dashboard-light.png',
-    }" />
-  </div>
-  
-  <div class="hidden flex-col md:flex">
+
+
+  <div class="h-full w-full">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
         <TeamSwitcher />
         <MainNav class="mx-6" />
-        <div class="ml-auto flex items-center space-x-4">
+        <div v-if="user" class="ml-auto flex items-center space-x-4">
           <Search />
-          <UserNav />
+          <UserNav :user="user" />
         </div>
       </div>
     </div>
-    <div class="flex-1 space-y-4 p-8 pt-6">
-      <div class="flex items-center justify-between space-y-2">
-        <h2 class="text-3xl font-bold tracking-tight">
-          Dashboard
-        </h2>
-        <div class="flex items-center space-x-2">
-          <DateRangePicker />
-          <Button>Download</Button>
-        </div>
+    <div class="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead
+              v-for="header in headerGroup.headers" :key="header.id" :data-pinned="header.column.getIsPinned()"
+            >
+              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <template v-if="table.getRowModel().rows?.length">
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow :data-state="row.getIsSelected() && 'selected'">
+                <TableCell
+                  v-for="cell in row.getVisibleCells()" :key="cell.id" :data-pinned="cell.column.getIsPinned()"
+                >
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                </TableCell>
+              </TableRow>
+              <TableRow v-if="row.getIsExpanded()">
+                <TableCell :colspan="row.getAllCells().length">
+                  {{ row.original }}
+                </TableCell>
+              </TableRow>
+            </template>
+          </template>
+
+          <TableRow v-else>
+            <TableCell
+              :colspan="columns.length"
+              class="h-24 text-center"
+            >
+              No results.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+
+    <div class="flex items-center justify-end space-x-2 py-4">
+      <div class="space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()"
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()"
+        >
+          Next
+        </Button>
       </div>
-      <Tabs default-value="overview" class="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="analytics" disabled>
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="reports" disabled>
-            Reports
-          </TabsTrigger>
-          <TabsTrigger value="notifications" disabled>
-            Notifications
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" class="space-y-4">
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Total Revenue
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  $45,231.89
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +20.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Subscriptions
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +2350
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +180.1% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Sales
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +12,234
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +19% from last month
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle class="text-sm font-medium">
-                  Active Now
-                </CardTitle>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" class="h-4 w-4 text-muted-foreground">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div class="text-2xl font-bold">
-                  +573
-                </div>
-                <p class="text-xs text-muted-foreground">
-                  +201 since last hour
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card class="col-span-4">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent class="pl-2">
-                <Overview />
-              </CardContent>
-            </Card>
-            <Card class="col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>
-                  You made 265 sales this month.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RecentSales />
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   </div>
 </template>

@@ -12,7 +12,7 @@ export default createRouter({
           component: () => import("./components/LoginPage.vue")
         },
         {
-          path: '/me',
+          path: '/admin/users',
           component: () => import('./components/AdminPanel.vue')
       }
     ]
