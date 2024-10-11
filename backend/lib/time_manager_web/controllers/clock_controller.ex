@@ -18,6 +18,16 @@ defmodule TimeManagerWeb.ClockController do
 
     # Insert the clock into the database
     with {:ok, %Clock{} = clock} <- Timesheet.create_clock(clock_params) do
+      if clock.status == false do
+        last_clock_in = Timesheet.get_last_clock_in(user_id)
+
+        Timesheet.create_working_time(%{
+          start: last_clock_in.time,
+          end: clock.time,
+          user_id: user_id
+        })
+      end
+
       conn
       |> put_status(:created)
       |> json(%{data: "created"})
