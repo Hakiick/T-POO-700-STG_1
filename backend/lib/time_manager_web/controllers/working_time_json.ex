@@ -24,9 +24,7 @@ defmodule TimeManagerWeb.WorkingTimeJSON do
     }
   end
 
-  # Handle a list of Clock structs
   defp data(working_times) when is_list(working_times) do
-    # Map each clock to the data function
     Enum.map(working_times, &data/1)
   end
 end

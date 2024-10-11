@@ -6,37 +6,18 @@ defmodule TimeManagerWeb.UserController do
 
   action_fallback TimeManagerWeb.FallbackController
 
-  def show_from_mail_and_username(conn, %{"email" => email, "username" => username}) do
-    cond do
-      String.trim(email) == "" && String.trim(username) == "" ->
+  def show_from_mail_and_username(conn, params) do
+    try do
+      user = Accounts.get_user!(params)
+
+      render(conn, "show.json", user: user)
+    rescue
+      Ecto.NoResultsError ->
         conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Both email and username cannot be empty"})
-
-      String.trim(email) == "" ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Email cannot be empty"})
-
-      String.trim(username) == "" ->
-        conn
-        |> put_status(:bad_request)
-        |> json(%{error: "Username cannot be empty"})
-
-      true ->
-        case Accounts.get_user_by_email_and_username(email, username) do
-          nil ->
-            conn
-            |> put_status(:not_found)
-            |> json(%{error: "User not found"})
-
-          user ->
-            render(conn, "show.json", user: user)
-        end
+        |> put_status(:not_found)
+        |> json(%{error: "User not found"})
     end
   end
-
-
 
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
@@ -49,7 +30,7 @@ defmodule TimeManagerWeb.UserController do
 
   def show(conn, %{"userID" => id}) do
     try do
-      user = Accounts.get_user!(id)
+      user = Accounts.get_user!(%{"id" => id})
       render(conn, :show, user: user)
     rescue
       Ecto.NoResultsError ->
@@ -60,7 +41,7 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def update(conn, %{"userID" => id, "user" => user_params}) do
-    user = Accounts.get_user!(id)
+    user = Accounts.get_user!(%{"id" => id})
 
     with {:ok, %User{} = user} <- Accounts.update_user(user, user_params) do
       render(conn, :show, user: user)
@@ -68,7 +49,7 @@ defmodule TimeManagerWeb.UserController do
   end
 
   def delete(conn, %{"userID" => id}) do
-    user = Accounts.get_user!(id)
+    user = Accounts.get_user!(%{"id" => id})
 
     with {:ok, %User{}} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")

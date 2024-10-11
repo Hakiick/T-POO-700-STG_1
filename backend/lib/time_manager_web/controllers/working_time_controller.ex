@@ -7,18 +7,17 @@ defmodule TimeManagerWeb.WorkingTimeController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  def index(conn, %{"userID" => id}) do
+  def index(conn, params) do
     try do
-      user = Accounts.get_user!(id)
+      # user = Accounts.get_user!(%{"id" => params["userID"]})
+      working_times = Timesheet.list_workingtime_from_a_user!(params)
 
-      workingtimes = Timesheet.list_workingtime_from_a_user(user.id)
-
-      if workingtimes == [] do
+      if working_times == [] or working_times == nil do
         conn
         |> put_status(:not_found)
         |> json(%{error: "No workingtimes found"})
       else
-        render(conn, :index, workingtime: workingtimes)
+        render(conn, :show, working_time: working_times)
       end
     rescue
       Ecto.NoResultsError ->
@@ -32,7 +31,7 @@ defmodule TimeManagerWeb.WorkingTimeController do
     # Merge the user_id into clock_params
     working_time_params = Map.put(working_time_params, "user_id", user_id)
 
-    with {:ok, %WorkingTime{} = working_time} <-
+    with {:ok, %WorkingTime{}} <-
            Timesheet.create_working_time(working_time_params) do
       conn
       |> put_status(:created)
