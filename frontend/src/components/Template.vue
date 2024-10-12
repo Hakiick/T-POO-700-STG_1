@@ -153,8 +153,8 @@ const handleChangeClock = (checked: boolean) => {
                 <CardHeader>
                   <CardTitle>Overview</CardTitle>
                 </CardHeader>
-                <CardContent class="pl-2 h-full">
-                  <Overview />
+                <CardContent class="bottom-p-0 h-full" v-if="user">
+                  <Overview :user="user" />
                 </CardContent>
               </Card>
             </div>

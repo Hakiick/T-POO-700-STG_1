@@ -9,21 +9,39 @@ const props = defineProps({
   },
 });
 
+// Données fictives pour les heures prévues (générées aléatoirement)
+const generateFictiveData = () => {
+  return Array.from({ length: 10 }, (_, i) => ({
+    name: `Jour ${i + 1}`, // Placeholder pour les jours
+    planned: Math.floor(Math.random() * 4) + 6, // Heures prévues entre 6 et 10
+  }));
+};
+
 const workingtime = ref<any>(null);
 const workDays = ref<any[]>([]);
+const data = ref<any[]>([]);
 
 onMounted(async () => {
   workingtime.value = await getWorkingTime(1);
+  console.log(workingtime.value);
 
-  workDays.value = workingtime.value.data.map(entry => {
-    const { durationFormatted } = calculateDuration(entry.start, entry.end);
+  // Récupérer les données réelles et formater pour le graphique
+  workDays.value = workingtime.value.data.map((entry, i) => {
+    const { durationNumeric } = calculateDuration(entry.start, entry.end);
+    console.log(`Jour ${i + 1}: ${durationNumeric}`);
     return {
-      date: entry.name,
-      start: entry.start.split('T')[1].slice(0, 5), // Heure de début (HH:MM)
-      end: entry.end.split('T')[1].slice(0, 5), // Heure de fin (HH:MM)
-      durationFormatted,
+      name: `Jour ${i + 1}`,
+      real: durationNumeric,
     };
   });
+
+  // Générer les données combinées pour le graphique
+  const fictiveData = generateFictiveData();
+  data.value = workDays.value.map((day, i) => ({
+    name: day.name,
+    planned: fictiveData[i]?.planned ?? 0, 
+    real: day.real,
+  }));
 });
 
 // Fonction pour calculer la durée en heures et minutes entre deux dates
@@ -37,68 +55,21 @@ function calculateDuration(start: string, end: string) {
   const minutes = durationInMinutes % 60;
 
   return {
-    durationNumeric: durationInMinutes / 60,
-    durationFormatted: `${hours}h ${minutes}m`,
+    durationNumeric: durationInMinutes / 60, // Durée en heures numériques
+    durationFormatted: `${hours}h ${minutes}m`, // Formatée en texte
   };
 }
-
-// Fonction pour formater la date en 'dd/MM'
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}`;
-}
-
-// Données fictives pour les 10 derniers jours avec formatage de la date
-const rawData = [
-  { name: '2024-10-07', start: '2024-10-07T09:00:00Z', end: '2024-10-07T16:00:00Z' },
-  { name: '2024-10-06', start: '2024-10-06T09:00:00Z', end: '2024-10-06T15:00:00Z' },
-  { name: '2024-10-05', start: '2024-10-05T09:00:00Z', end: '2024-10-05T18:00:00Z' },
-  { name: '2024-10-04', start: '2024-10-04T09:00:00Z', end: '2024-10-04T17:00:00Z' },
-  { name: '2024-10-03', start: '2024-10-03T09:00:00Z', end: '2024-10-03T17:30:00Z' },
-  { name: '2024-10-02', start: '2024-10-02T09:00:00Z', end: '2024-10-02T17:00:00Z' },
-  { name: '2024-10-01', start: '2024-10-01T09:00:00Z', end: '2024-10-01T17:50:00Z' },
-  { name: '2024-09-30', start: '2024-09-30T09:00:00Z', end: '2024-09-30T17:00:00Z' },
-  { name: '2024-09-29', start: '2024-09-29T09:00:00Z', end: '2024-09-29T15:55:00Z' },
-  { name: '2024-09-28', start: '2024-09-28T09:00:00Z', end: '2024-09-28T17:00:00Z' },
-];
-
-// Transforme les données pour le graphique
-const data = rawData.map(entry => {
-  const { durationNumeric, durationFormatted } = calculateDuration(entry.start, entry.end);
-  return {
-    name: formatDate(entry.name),
-    duration: durationNumeric,
-    durationFormatted
-  };
-});
-
-// Utilisation de CanvasJS pour créer le graphique une fois le composant monté
-onMounted(() => {
-  var chart = new CanvasJS.Chart("chartContainer", {
-    animationEnabled: true,
-    title: {
-      text: "Durée de travail par jour (en heures)"
-    },
-    axisY: {
-      title: "Durée (heures)",
-      includeZero: true
-    },
-    data: [{
-      type: "column", // Type de graphique
-      dataPoints: data.map(d => ({
-        label: d.name,
-        y: d.duration
-      }))
-    }]
-  });
-
-  chart.render();
-});
 </script>
 
-
 <template>
-  <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+  <BarChart
+  :data="[
+      { name: 'Jour 1', planned: 8, real: 7 },
+      { name: 'Jour 2', planned: 9, real: 8 },
+      { name: 'Jour 3', planned: 6, real: 5 },
+    ]"
+    index="name"
+    :categories="['planned', 'real']"
+    :y-formatter="(tick: number) => `${tick}h`"
+  />
 </template>
