@@ -3,10 +3,9 @@ import { ref } from 'vue'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-
-import { cn } from '@/lib/utils'
-import LucideSpinner from '~icons/lucide/loader-2'
-import GitHubLogo from '~icons/radix-icons/github-logo'
+import { createUser } from '../api/apiUser';
+import router from '../router';
+import { useUserStore } from './store/userStore';
 
 // Variables pour le formulaire de connexion
 const isLoadingSignIn = ref(false)
@@ -17,6 +16,10 @@ const errorMessageSignIn = ref('')
 const isLoadingSignUp = ref(false)
 const isCheckedSignUp = ref(false)
 const errorMessageSignUp = ref('')
+const emailSignup = ref('')
+const passwordSignup = ref('')
+
+const userStore = useUserStore()
 
 // Variable pour suivre quelle div est actuellement active
 const activeDiv = ref<'signin' | 'signup' | null>(null)
@@ -47,7 +50,7 @@ async function onSubmitSignUp(event: Event) {
   // Simuler un chargement
   setTimeout(() => {
     isLoadingSignUp.value = false
-  }, 3000)
+  }, 300)
 
   if (!isCheckedSignUp.value) {
     errorMessageSignUp.value = "You haven't accepted our Terms of Service and Privacy Policy."
@@ -56,6 +59,22 @@ async function onSubmitSignUp(event: Event) {
 
   // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignUp.value = true
+
+  // console.log({ email: emailSignup.value, username: passwordSignup.value })
+  const response = await createUser(passwordSignup.value, emailSignup.value)
+  console.log(response.data)
+  if (response.data.id) {
+    //navitage to home page 
+    console.log("created")
+    userStore.setUser(response.data)
+    router.push({ name: 'home' })
+  }
+  //catch error 
+  if (response.status === 400) {
+    errorMessageSignUp.value = "error has occured"
+    return
+  }
+
   errorMessageSignUp.value = ''  // Réinitialiser le message d'erreur
 }
 </script>
@@ -63,11 +82,8 @@ async function onSubmitSignUp(event: Event) {
 <template>
   <div class="flex flex-col md:flex-row">
     <!-- Première div (Sign In) -->
-    <div 
-      class="min-h-screen flex-1 flex items-center justify-center bg-gray-900 text-white"
-      @mouseenter="activeDiv = 'signin'" 
-      @mouseleave="activeDiv = null"
-    >
+    <div class="min-h-screen flex-1 flex items-center justify-center bg-gray-900 text-white"
+      @mouseenter="activeDiv = 'signin'" @mouseleave="activeDiv = null">
       <div v-if="activeDiv === 'signup'">
         <!-- Afficher l'image de Batman si la div "Create an account" est active -->
         <img src="./ui/images/batman.jpg" alt="Batman coding" class="max-w-xs" />
@@ -84,29 +100,15 @@ async function onSubmitSignUp(event: Event) {
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="name@example.com"
-                type="email"
-                auto-capitalize="none"
-                auto-complete="email"
-                auto-correct="off"
-                :disabled="isLoadingSignIn"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-              />
+              <Input id="email" placeholder="name@example.com" type="email" auto-capitalize="none" auto-complete="email"
+                auto-correct="off" :disabled="isLoadingSignIn"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             </div>
-            <Input 
-              id="password"
-              placeholder="Enter your password"
-              type="password"
-              auto-capitalize="none"
-              auto-complete="password"
-              auto-correct="off"
-              :disabled="isLoadingSignIn"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-            />
+            <Input id="password" placeholder="Enter your password" type="password" auto-capitalize="none"
+              auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
+              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignIn">
-              <LucideSpinner v-if="isLoadingSignIn" class="mr-2 h-4 w-4 animate-spin" />
+              <!-- <LucideSpinner v-if="isLoadingSignIn" class="mr-2 h-4 w-4 animate-spin" /> -->
               Sign In with Email
             </Button>
           </div>
@@ -125,14 +127,11 @@ async function onSubmitSignUp(event: Event) {
         <!-- Conditions générales -->
         <p class="text-xs text-center text-gray-500">
           <!-- Checkbox pour Sign In -->
-          <input
-            type="checkbox"
-            id="agree-signin"
-            v-model="isCheckedSignIn"
+          <input type="checkbox" id="agree-signin" v-model="isCheckedSignIn"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignIn"
-          />
-          By clicking continue, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>.
+            :disabled="isLoadingSignIn" />
+          By clicking continue, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#"
+            class="underline">Privacy Policy</a>.
         </p>
         <!-- Message d'erreur -->
         <p v-if="errorMessageSignIn" class="text-red-500 text-sm text-center">
@@ -142,11 +141,8 @@ async function onSubmitSignUp(event: Event) {
     </div>
 
     <!-- Deuxième div (Create an account) -->
-    <div 
-      class="min-h-screen flex-1 flex items-center justify-center bg-gray-900 text-white"
-      @mouseenter="activeDiv = 'signup'" 
-      @mouseleave="activeDiv = null"
-    >
+    <div class="min-h-screen flex-1 flex items-center justify-center bg-gray-900 text-white"
+      @mouseenter="activeDiv = 'signup'" @mouseleave="activeDiv = null">
       <div v-if="activeDiv === 'signin'">
         <!-- Afficher l'image de Batman si la div "Sign In" est active -->
         <img src="./ui/images/batman.jpg" alt="Batman coding" class="max-w-xs" />
@@ -163,29 +159,15 @@ async function onSubmitSignUp(event: Event) {
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email-signup">Email</Label>
-              <Input
-                id="email-signup"
-                placeholder="name@example.com"
-                type="email"
-                auto-capitalize="none"
-                auto-complete="email"
-                auto-correct="off"
-                :disabled="isLoadingSignUp"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-              />
+              <Input v-model="emailSignup" id="email-signup" placeholder="name@example.com" type="email"
+                auto-capitalize="none" auto-complete="email" auto-correct="off" :disabled="isLoadingSignUp"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             </div>
-            <Input 
-              id="password-signup"
-              placeholder="Enter your password"
-              type="password"
-              auto-capitalize="none"
-              auto-complete="password"
-              auto-correct="off"
-              :disabled="isLoadingSignUp"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-            />
+            <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
+              auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
+              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignUp">
-              <LucideSpinner v-if="isLoadingSignUp" class="mr-2 h-4 w-4 animate-spin" />
+              <!-- <LucideSpinner v-if="isLoadingSignUp" class="mr-2 h-4 w-4 animate-spin" /> -->
               Sign Up
             </Button>
           </div>
@@ -204,14 +186,11 @@ async function onSubmitSignUp(event: Event) {
         <!-- Conditions générales -->
         <p class="text-xs text-center text-gray-500">
           <!-- Checkbox pour Sign Up -->
-          <input
-            type="checkbox"
-            id="agree-signup"
-            v-model="isCheckedSignUp"
+          <input type="checkbox" id="agree-signup" v-model="isCheckedSignUp"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignUp"
-          />
-          By clicking continue, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#" class="underline">Privacy Policy</a>.
+            :disabled="isLoadingSignUp" />
+          By clicking continue, you agree to our <a href="#" class="underline">Terms of Service</a> and <a href="#"
+            class="underline">Privacy Policy</a>.
         </p>
         <!-- Message d'erreur -->
         <p v-if="errorMessageSignUp" class="text-red-500 text-sm text-center">

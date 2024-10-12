@@ -1,4 +1,8 @@
 <script setup lang="ts">
+defineOptions({
+  name: 'HomePage',
+  displayName: 'Home Page',
+});
 import Overview from './Overview.vue'
 import DateRangePicker from './DateRangePicker.vue'
 import MainNav from './MainNav.vue'
@@ -10,54 +14,52 @@ import WorkingTime from './WorkingTime.vue'
 
 import { Button } from './ui/button'
 import { Switch } from './ui/switch'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from './ui/card'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from './ui/tabs'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { onMounted, ref } from 'vue'
 import { createClock, getClockFromUser } from '../api/apiClock'
 import moment from 'moment'
+import { useUserStore } from './store/userStore';
 
-const user = ref(null); // user starts as null
-const clock = ref(null); // user starts as null
-const last_clock = ref(null); // user starts as null
+const userStore = useUserStore()
 
-const clock_value = ref(false);
+const user = ref(userStore.user);
+const clocks = ref(null);
+const last_clock = ref(null);
+
+const last_clock_value = ref(false);
 const clock_diable = ref(false);
 
-const current_time = ref(null);
+const current_time = ref("");
 
 onMounted(async () => {
-  user.value = await getUser(1);
-  clock.value = await getClockFromUser(1);
-  // console.log(clock.value.data[0]);
-  last_clock.value = clock.value.data[0];
-  clock_value.value = last_clock.value.status
-  // console.log(last_clock.value);
-  // console.log(user.value.data);
-  // console.log('test');
+  if (!user.value) {
+    user.value = await getUser(1);
+  }
+  console.log(user.value);
+
+  const response_clock = await getClockFromUser(user.value.id);
+  console.log(response_clock);
+  if (response_clock.status === 200) {
+    clocks.value = response_clock.data;
+    last_clock.value = clocks.value.data[0];
+    last_clock_value.value = last_clock.value.status
+  }
+
   current_time.value = moment().format('HH[h] mm[m]');
   // console.log(moment().format('HH:mm:ss'));
   // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
 });
 
-const handleChangeClock = (checked: boolean) => {
-  clock_value.value = checked;
-  console.log(clock_value.value);
+const handleChangeClock = async (checked: boolean) => {
+  last_clock_value.value = checked;
+  console.log(last_clock_value.value);
   clock_diable.value = true;
 
-  const response = createClock(
-    { time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), status: clock_value.value }, 1
+  const response = await createClock(
+    { time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), status: last_clock_value.value }, user.value.id
   );
+  console.log(response);
 }
 
 </script>
@@ -77,9 +79,6 @@ const handleChangeClock = (checked: boolean) => {
       </div>
     </div>
 
-    <Div class="hidden flex-col md:flex">
-      <!-- Ici chantier du pointage -->
-    </Div>
 
     <!-- Dashboard -->
     <div class="flex-1 space-y-0 p-8 pt-6">
@@ -90,16 +89,16 @@ const handleChangeClock = (checked: boolean) => {
 
         <Card class="h-28 ml-auto xl:ml-32 min-w-52">
           <CardHeader class="flex flex-row items-center space-y-0 pb-1 ml-auto px-6 pt-3">
-            <CardTitle v-if="!clock_value" class="text-xl font-bold">Clock in</CardTitle>
+            <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
             <p v-else class="text-xs text-muted-foreground">Clock in</p>
           </CardHeader>
           <CardContent>
             <div class="text-2xl font-bold text-primary flex">
               {{ current_time || "..." }}
-              <Switch vsl class="mt-2 ml-auto" :disabled="clock_diable" :checked="clock_value"
+              <Switch vsl class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
                 @update:checked="handleChangeClock" />
             </div>
-            <CardTitle v-if="clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
+            <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
             <p v-else class="text-xs text-muted-foreground pt-1">Clock out</p>
           </CardContent>
         </Card>

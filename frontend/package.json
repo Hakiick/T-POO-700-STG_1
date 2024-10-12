@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "icons": "^1.0.0",
     "lucide-vue-next": "^0.451.0",
+    "pinia": "^2.2.4",
     "radix-icons": "^1.0.0",
     "radix-vue": "^1.9.7",
     "tailwind-merge": "^2.5.3",

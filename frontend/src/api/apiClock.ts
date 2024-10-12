@@ -4,10 +4,14 @@ import { apiClient } from "./api";
 export const getClockFromUser = async (user_id: number) => {
   try {
     const response = await apiClient.get(`/clocks/${user_id}`);
-    return response.data;
+    return response;
   } catch (error) {
-    console.error("Error fetching clocks:", error);
-    throw error;
+    if (error.response.status !== 404) {
+      console.error("Error fetching clocks:", error);
+    }
+    // console.log("Error fetching clocks:", error);
+    return error;
+    // throw error;
   }
 };
 
