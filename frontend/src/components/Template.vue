@@ -20,6 +20,9 @@ import { onMounted, ref } from 'vue'
 import { createClock, getClockFromUser } from '../api/apiClock'
 import moment from 'moment'
 import { useUserStore } from './store/userStore';
+import { AxiosResponse } from 'axios';
+
+type response_clock = AxiosResponse;
 
 const userStore = useUserStore()
 
@@ -38,7 +41,7 @@ onMounted(async () => {
   }
   console.log(user.value);
 
-  const response_clock = await getClockFromUser(user.value.id);
+  const response_clock: response_clock = await getClockFromUser(user.value.id);
   console.log(response_clock);
   if (response_clock.status === 200) {
     clocks.value = response_clock.data;

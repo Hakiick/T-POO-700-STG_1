@@ -2,12 +2,18 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-const user = ref(null);
+interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+const user = ref<User | null>(null);
 
 export const useUserStore = defineStore("user", () => {
   // console.log(user);
 
-  const setUser = (userInfo) => {
+  const setUser = (userInfo: User) => {
     user.value = userInfo;
   };
 
