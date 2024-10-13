@@ -19,16 +19,10 @@ export const getClockFromUser = async (
 };
 
 // Example: Create a new user
-export const createClock = async (
-  clockData: {
-    time: String;
-    status: boolean;
-  },
-  user_id: number,
-) => {
+export const createClock = async (status: boolean, user_id: number) => {
   try {
     const response = await apiClient.post(`/clocks/${user_id}`, {
-      clock: { time: clockData.time, status: clockData.status },
+      clock_status: status,
     });
     return response.data;
   } catch (error) {

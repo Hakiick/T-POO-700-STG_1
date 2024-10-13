@@ -2,7 +2,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-interface User {
+export interface User {
   id: number;
   username: string;
   email: string;

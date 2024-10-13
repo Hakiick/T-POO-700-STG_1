@@ -40,6 +40,8 @@ onMounted(async () => {
     user.value = await getUser(1);
   }
   console.log(user.value);
+  // const response_test = await deleteWorkingTime({ id: 1, start: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), end: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') });
+  // console.log(response_test);
 
   const response_clock: response_clock = await getClockFromUser(user.value.id);
   console.log(response_clock);
@@ -60,7 +62,7 @@ const handleChangeClock = async (checked: boolean) => {
   clock_diable.value = true;
 
   const response = await createClock(
-    { time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), status: last_clock_value.value }, user.value.id
+    checked, user.value.id
   );
   console.log(response);
 }
