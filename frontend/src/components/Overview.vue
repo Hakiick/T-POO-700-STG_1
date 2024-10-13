@@ -1,22 +1,80 @@
 <script setup lang="ts">
-import { BarChart } from './ui/chart-bar'
 
-const data = [
-  { name: 'Jan', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Feb', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Mar', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Apr', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'May', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Jun', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Jul', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Aug', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Sep', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Oct', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Nov', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Dec', total: Math.floor(Math.random() * 5000) + 1000 },
-]
+import { onMounted, ref } from 'vue';
+import { getWorkingTime } from '../api/apiWorkingTime';
+import { BarChart } from '../components/ui/chart-bar';
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+  },
+});
+
+const workingtime = ref<any>(null);
+const workDays = ref<any[]>([]);
+const data = ref<any[]>([]);
+
+onMounted(async () => {
+  workingtime.value = await getWorkingTime(1);
+  console.log(workingtime.value);
+
+  // Récupérer les données réelles et formater pour le graphique
+  workDays.value = workingtime.value.data.map((entry) => {
+    const { durationNumeric } = calculateDuration(entry.start, entry.end);
+    const formattedDate = formatDate(entry.start); // Formater la date en dd/MM
+
+    return {
+      name: formattedDate,
+      real: durationNumeric,
+    };
+  });
+
+  // Générer les données fictives
+  const fictiveData = generateFictiveData();
+  
+  // Combiner les données réelles et plannifiées
+  data.value = workDays.value.map((day, i) => ({
+    name: day.name,
+    planned: fictiveData[i]?.planned ?? 0, 
+    real: day.real,
+  }));
+});
+
+// Fonction pour formater les dates au format dd/MM
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+}
+
+// Fonction pour calculer la durée entre deux dates
+function calculateDuration(start: string, end: string) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
+  const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
+
+  return {
+    durationNumeric: durationInMinutes / 60, // Durée en heures numériques
+  };
+}
+
+// Données fictives pour les heures prévues
+function generateFictiveData() {
+  return Array.from({ length: 10 }, (_, i) => ({
+    name: `Jour ${i + 1}`,
+    planned: Math.floor(Math.random() * 4) + 6, // Heures prévues entre 6 et 10
+  }));
+}
 </script>
 
 <template>
-  <BarChart :data="data" :categories="['total']" :index="'name'" :rounded-corners="4" />
+  <BarChart
+    :data="data"
+    index="name"
+    :categories="['planned', 'real']"
+    :colors="['#3498db', '#2ecc71']" 
+    :y-formatter="(tick) => `${tick}h`" 
+    showGridLine
+  />
 </template>
