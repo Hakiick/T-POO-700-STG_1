@@ -37,8 +37,8 @@ defmodule TimeManagerWeb.WorkingTimeController do
       |> put_status(:created)
       |> json(%{data: "created"})
 
-      # |> put_resp_header("location", ~p"/api/workingtime/#{working_time}")
-      # |> render(:show, working_time: working_time)
+      |> put_resp_header("location", ~p"/api/workingtime/#{working_time}")
+      |> render(:show, working_time: working_time)
     end
   end
 

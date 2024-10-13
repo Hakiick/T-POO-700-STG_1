@@ -71,8 +71,7 @@ const handleChangeClock = async (checked: boolean) => {
 
 <template>
   <!-- NavBar + Team recherche -->
-  <!-- <div class="hidden flex-col md:flex"> -->
-  <div class=" flex-col flex">
+  <div class="flex-col flex">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
         <TeamSwitcher />
@@ -85,6 +84,7 @@ const handleChangeClock = async (checked: boolean) => {
     </div>
 
 
+
     <!-- Dashboard -->
     <div class="flex-1 space-y-0 p-8 pt-6">
       <div class="flex items-center flex-wrap  space-y-2">
@@ -95,101 +95,106 @@ const handleChangeClock = async (checked: boolean) => {
         <Card class="h-28 ml-auto xl:ml-32 min-w-52">
           <CardHeader class="flex flex-row items-center space-y-0 pb-1 ml-auto px-6 pt-3">
             <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
+
             <p v-else class="text-xs text-muted-foreground">Clock in</p>
           </CardHeader>
-          <CardContent>
-            <div class="text-2xl font-bold text-primary flex">
+          <CardContent class="flex flex-col items-center justify-center text-center">
+            <div class="text-2xl font-bold text-primary flex items-center justify-center">
               {{ current_time || "..." }}
+
               <Switch vsl class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
                 @update:checked="handleChangeClock" />
             </div>
             <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
             <p v-else class="text-xs text-muted-foreground pt-1">Clock out</p>
+
           </CardContent>
         </Card>
-        <div class="flex flex-row flex-wrap items-end space-x-2 ml-auto">
-          <DateRangePicker />
-          <Button class="sm:mt-3">Appliquer</Button>
+
+        <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center">
+          Tableau de bord
+        </h1>
+
+        <!-- Cartes alignées en ligne, responsive sur différents écrans -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full mt-7">
+          <!-- Carte Heures Travaillées Aujourd'hui -->
+          <Card class="flex flex-col items-center justify-center text-center w-full">
+            <CardHeader>
+              <CardTitle class="text-xl font-medium">Heures Travaillées Aujourd'hui</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold text-primary">8h 30m</div>
+            </CardContent>
+          </Card>
+
+          <!-- Carte Heures Travaillées Cette Semaine -->
+          <Card class="flex flex-col items-center justify-center text-center w-full">
+            <CardHeader>
+              <CardTitle class="text-xl font-medium">Heures Travaillées Cette Semaine</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold">40h 15m</div>
+            </CardContent>
+          </Card>
+
+          <!-- Carte Heures Travaillées Ce Mois -->
+          <Card class="flex flex-col items-center justify-center text-center w-full">
+            <CardHeader>
+              <CardTitle class="text-xl font-medium">Heures Travaillées Ce Mois</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="text-2xl font-bold">160h 45m</div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <!-- <p class="text-xl tracking-tight"> -->
-      <!--   Vous trouverez ici vos informations de pointage -->
-      <!-- </p> -->
-      <Tabs default-value="overview" class="space-y-4">
-        <TabsList>
-          <TabsTrigger value="today">
-            Today
-          </TabsTrigger>
-          <TabsTrigger value="overview">
-            Overview
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" class="space-y-4">
-          <!-- Première partie : les trois Cards en haut à gauche, occupant 70% de l'écran -->
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-10">
+      <Tabs default-value="overview" class="space-y-4 h-full w-full">
+        <TabsContent value="overview" class="space-y-4 h-full w-full">
+          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-10 h-full w-full mt-7">            
             <!-- Colonne principale (70%) -->
-            <div class="col-span-7 space-y-4">
-              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Heures Travaillées Aujourd'hui</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div class="text-2xl font-bold text-primary">8h 30m</div>
-                    <p class="text-xs text-muted-foreground">Heures travaillées aujourd'hui</p>
-                  </CardContent>
-                </Card>
+            <div class="col-span-1 lg:col-span-7 space-y-4 h-full w-full">
 
-                <Card>
-                  <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Heures Travaillées Cette Semaine</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div class="text-2xl font-bold">40h 15m</div>
-                    <p class="text-xs text-muted-foreground">Heures travaillées cette semaine</p>
-                  </CardContent>
-                </Card>
+              <TabsList class="flex items-center justify-center text-center">
+                <TabsTrigger value="today">
+                  Today
+                </TabsTrigger>
+                <TabsTrigger value="overview">
+                  Overview
+                </TabsTrigger>
+              </TabsList>
 
-                <Card>
-                  <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle class="text-sm font-medium">Heures Travaillées Ce Mois</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div class="text-2xl font-bold">160h 45m</div>
-                    <p class="text-xs text-muted-foreground">Heures travaillées ce mois</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <!-- Bloc Overview, en dessous des trois Cards -->
-              <Card class="mt-4">
+              <!-- Bloc Overview -->
+              <Card class="h-full w-full">
                 <CardHeader>
                   <CardTitle>Overview</CardTitle>
                 </CardHeader>
-                <CardContent class="pl-2">
-                  <Overview />
+                <CardContent class="bottom-p-0 h-full" v-if="user">
+                  <Overview :user="user" />
                 </CardContent>
               </Card>
             </div>
 
             <!-- Colonne droite (30%) avec WorkingTime -->
-            <div class="col-span-3">
-              <Card>
+            <div class="col-span-1 lg:col-span-3 h-full w-full">
+              <div class="flex items-center justify-center text-center">
+                <DateRangePicker />
+                <Button>Appliquer</Button>
+              </div>
+              <Card class="h-full w-full mt-3">
                 <CardHeader>
                   <CardTitle>Temps des pointages</CardTitle>
                   <CardDescription>Temps travaillés les X derniers jours.</CardDescription>
                 </CardHeader>
-                <CardContent class="bottom-p-0">
-                  <WorkingTime />
+                <CardContent class="bottom-p-0 h-full" v-if="user">
+                  <WorkingTime :user="user" />
                 </CardContent>
               </Card>
             </div>
           </div>
         </TabsContent>
-
       </Tabs>
     </div>
   </div>
 </template>
+
