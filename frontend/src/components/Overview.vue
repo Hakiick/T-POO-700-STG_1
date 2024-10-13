@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getWorkingTime } from '../api/apiWorkingTime';
+import { BarChart } from '../components/ui/chart-bar';
 
 const props = defineProps({
   user: {
@@ -8,14 +9,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-// Données fictives pour les heures prévues (générées aléatoirement)
-const generateFictiveData = () => {
-  return Array.from({ length: 10 }, (_, i) => ({
-    name: `Jour ${i + 1}`, // Placeholder pour les jours
-    planned: Math.floor(Math.random() * 4) + 6, // Heures prévues entre 6 et 10
-  }));
-};
 
 const workingtime = ref<any>(null);
 const workDays = ref<any[]>([]);
@@ -26,17 +19,20 @@ onMounted(async () => {
   console.log(workingtime.value);
 
   // Récupérer les données réelles et formater pour le graphique
-  workDays.value = workingtime.value.data.map((entry, i) => {
+  workDays.value = workingtime.value.data.map((entry) => {
     const { durationNumeric } = calculateDuration(entry.start, entry.end);
-    console.log(`Jour ${i + 1}: ${durationNumeric}`);
+    const formattedDate = formatDate(entry.start); // Formater la date en dd/MM
+
     return {
-      name: `Jour ${i + 1}`,
+      name: formattedDate,
       real: durationNumeric,
     };
   });
 
-  // Générer les données combinées pour le graphique
+  // Générer les données fictives
   const fictiveData = generateFictiveData();
+  
+  // Combiner les données réelles et plannifiées
   data.value = workDays.value.map((day, i) => ({
     name: day.name,
     planned: fictiveData[i]?.planned ?? 0, 
@@ -44,32 +40,41 @@ onMounted(async () => {
   }));
 });
 
-// Fonction pour calculer la durée en heures et minutes entre deux dates
+// Fonction pour formater les dates au format dd/MM
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+}
+
+// Fonction pour calculer la durée entre deux dates
 function calculateDuration(start: string, end: string) {
   const startDate = new Date(start);
   const endDate = new Date(end);
   const durationInMilliseconds = endDate.getTime() - startDate.getTime();
   const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
 
-  const hours = Math.floor(durationInMinutes / 60);
-  const minutes = durationInMinutes % 60;
-
   return {
     durationNumeric: durationInMinutes / 60, // Durée en heures numériques
-    durationFormatted: `${hours}h ${minutes}m`, // Formatée en texte
   };
+}
+
+// Données fictives pour les heures prévues
+function generateFictiveData() {
+  return Array.from({ length: 10 }, (_, i) => ({
+    name: `Jour ${i + 1}`,
+    planned: Math.floor(Math.random() * 4) + 6, // Heures prévues entre 6 et 10
+  }));
 }
 </script>
 
 <template>
   <BarChart
-  :data="[
-      { name: 'Jour 1', planned: 8, real: 7 },
-      { name: 'Jour 2', planned: 9, real: 8 },
-      { name: 'Jour 3', planned: 6, real: 5 },
-    ]"
+    :data="data"
     index="name"
     :categories="['planned', 'real']"
-    :y-formatter="(tick: number) => `${tick}h`"
+    :colors="['#3498db', '#2ecc71']" 
+    :y-formatter="(tick) => `${tick}h`" 
+    showGridLine
   />
 </template>
+
