@@ -21,16 +21,18 @@ import { createClock, getClockFromUser } from '../api/apiClock'
 import moment from 'moment'
 import { useUserStore } from './store/userStore';
 import { AxiosResponse } from 'axios';
+import { useClockStore } from './store/clockStore';
 
 type response_clock = AxiosResponse;
 
 const userStore = useUserStore()
+const clockStore = useClockStore()
 
 const user = computed(() => userStore.user);
-const clocks = ref(null);
-const last_clock = ref(null);
+// const clocks = computed(() => clockStore.clocks);
+// const last_clock = computed(() => clockStore.lastClock);
+const last_clock_value = computed(() => clockStore.lastClock?.status);
 
-const last_clock_value = ref(false);
 const clock_diable = ref(false);
 
 const current_time = ref("");
@@ -41,16 +43,12 @@ onMounted(async () => {
     // console.log("response", response);
     userStore.setUser(response);
   }
-  // console.log(user.value);
-  // const response_test = await deleteWorkingTime({ id: 1, start: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), end: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') });
-  // console.log(response_test);
 
   const response_clock: response_clock = await getClockFromUser(user.value.id);
-  console.log("clocks", response_clock);
+  // console.log("clocks", response_clock);
   if (response_clock.status === 200) {
-    clocks.value = response_clock.data;
-    last_clock.value = clocks.value.data[0];
-    last_clock_value.value = last_clock.value.status
+    clockStore.setClock(response_clock.data.data);
+    // console.log("clocks", last_clock.value);
   }
 
   current_time.value = moment().format('HH[h] mm[m]');
@@ -90,14 +88,13 @@ const handleChangeClock = async (checked: boolean) => {
     <!-- Dashboard -->
     <div class="flex-1 space-y-0 p-8 pt-6">
       <div class="flex items-center flex-wrap  space-y-2">
-        <h2 class="text-3xl font-bold tracking-tight">
+        <h2 class="text-5xl font-bold tracking-tight">
           Tableau de bord
         </h2>
 
         <Card class="h-28 ml-auto xl:ml-32 min-w-52">
           <CardHeader class="flex flex-row items-center space-y-0 pb-1 ml-auto px-6 pt-3">
             <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
-
             <p v-else class="text-xs text-muted-foreground">Clock in</p>
           </CardHeader>
           <CardContent class="flex flex-col items-center justify-center text-center">
@@ -113,9 +110,9 @@ const handleChangeClock = async (checked: boolean) => {
           </CardContent>
         </Card>
 
-        <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center">
-          Tableau de bord
-        </h1>
+        <!-- <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center"> -->
+        <!--   Tableau de bord -->
+        <!-- </h1> -->
 
         <!-- Cartes alignées en ligne, responsive sur différents écrans -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full mt-7">
@@ -193,6 +190,38 @@ const handleChangeClock = async (checked: boolean) => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="today" class="space-y-4 h-full w-full">
+          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-10 h-full w-full mt-7">
+            <!-- Colonne principale (70%) -->
+            <div class="col-span-1 lg:col-span-7 space-y-4 h-full w-full">
+
+              <TabsList class="flex items-center justify-center text-center">
+                <TabsTrigger value="today">
+                  Today
+                </TabsTrigger>
+                <TabsTrigger value="overview">
+                  Overview
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <div class="col-span-1 lg:col-span-3 h-full w-full">
+            <div class="flex items-center justify-center text-center">
+              <DateRangePicker />
+              <Button>Appliquer</Button>
+            </div>
+            <Card class="h-full w-full mt-3">
+              <CardHeader>
+                <CardTitle>Temps des pointages</CardTitle>
+                <CardDescription>Temps travaillés les X derniers jours.</CardDescription>
+              </CardHeader>
+              <CardContent class="bottom-p-0 h-full" v-if="user">
+                <WorkingTime :user="user" />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
