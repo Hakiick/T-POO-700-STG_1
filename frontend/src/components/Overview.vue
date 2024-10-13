@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 import { onMounted, ref } from 'vue';
 import { getWorkingTime } from '../api/apiWorkingTime';
 import { BarChart } from '../components/ui/chart-bar';
@@ -77,4 +78,3 @@ function generateFictiveData() {
     showGridLine
   />
 </template>
-

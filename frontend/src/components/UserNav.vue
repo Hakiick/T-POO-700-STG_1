@@ -40,10 +40,10 @@ const props = defineProps({
       <DropdownMenuLabel class="font-normal flex">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            {{ props.user.data.username || "Loading" }}
+            {{ props.user.username || "Loading" }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            {{ props.user.data.email }}
+            {{ props.user.email }}
           </p>
         </div>
       </DropdownMenuLabel>

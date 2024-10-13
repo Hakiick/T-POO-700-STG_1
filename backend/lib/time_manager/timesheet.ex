@@ -115,9 +115,32 @@ defmodule TimeManager.Timesheet do
       [%WorkingTime{}, ...]
 
   """
-  def list_workingtime_from_a_user(user_id) do
+  def list_workingtime_from_a_user!(params) do
+    get_working_time_by(params)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "start" => start_time, "end" => end_time}) do
+    Repo.all(
+      from w in WorkingTime,
+        where: w.user_id == ^user_id and w.start >= ^start_time and w.end <= ^end_time
+    )
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "start" => start_time}) do
+    Repo.all(from w in WorkingTime, where: w.user_id == ^user_id and w.start >= ^start_time)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "end" => end_time}) do
+    Repo.all(from w in WorkingTime, where: w.user_id == ^user_id and w.end <= ^end_time)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id}) do
     Repo.all(from w in WorkingTime, where: w.user_id == ^user_id)
   end
+
+  # defp get_working_time_by(_params) do
+  #   Repo.all(WorkingTime)
+  # end
 
   @doc """
   Gets a single working_time.

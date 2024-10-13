@@ -1,13 +1,20 @@
+import { AxiosResponse } from "axios";
 import { apiClient } from "./api";
 
 // Example: Fetch users from the API
-export const getClockFromUser = async (user_id: number) => {
+export const getClockFromUser = async (
+  user_id: number,
+): Promise<AxiosResponse> => {
   try {
     const response = await apiClient.get(`/clocks/${user_id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching clocks:", error);
-    throw error;
+    return response;
+  } catch (error: any) {
+    if (error.response.status !== 404) {
+      console.error("Error fetching clocks:", error);
+    }
+    // console.log("Error fetching clocks:", error);
+    return error;
+    // throw error;
   }
 };
 

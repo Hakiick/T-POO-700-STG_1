@@ -1,16 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
+import HomePage from "./components/Template.vue";
+import LoginPage from "./components/LoginPage.vue";
 
 export default createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: "/",
-      component: () => import("./components/Template.vue"),
+      name: "home",
+      component: () => HomePage,
+      // props: true,
     },
     {
       path: "/login",
-      component: () => import("./components/LoginPage.vue"),
+      name: "login",
+      component: () => LoginPage,
     },
   ],
 });
-

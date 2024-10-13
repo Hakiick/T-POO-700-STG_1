@@ -39,7 +39,7 @@ defmodule TimeManagerWeb.ClockController do
 
   def show(conn, %{"userID" => id}) do
     try do
-      user = Accounts.get_user!(id)
+      user = Accounts.get_user!(%{"id" => id})
 
       clocks = Timesheet.get_clock!(user.id)
 

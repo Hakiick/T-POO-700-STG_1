@@ -35,24 +35,28 @@ defmodule TimeManager.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(params) do
+    get_user_by(params)
+  end
 
-  @doc """
-  Gets a single user from credentials.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-
-      iex> get_user!(123)
-      %User{}
-
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_user_by_email_and_username(email, username) do
+  defp get_user_by(%{"email" => email, "username" => username}) do
     Repo.one(from u in User, where: u.email == ^email and u.username == ^username)
+  end
+
+  defp get_user_by(%{"email" => email}) do
+    Repo.one(from u in User, where: u.email == ^email)
+  end
+
+  defp get_user_by(%{"username" => username}) do
+    Repo.one(from u in User, where: u.username == ^username)
+  end
+
+  defp get_user_by(%{"id" => id}) do
+    Repo.get!(User, id)
+  end
+
+  defp get_user_by(_params) do
+    Repo.all(User)
   end
 
   @doc """
