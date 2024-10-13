@@ -8,7 +8,9 @@ export interface WorkingTime {
 }
 
 // Example: Fetch users from the API
-export const getWorkingTimes = async (user: User) => {
+export const getWorkingTimes = async (user: User | null) => {
+  console.log("user", user);
+  if (!user) return null;
   try {
     const response = await apiClient.get(`/workingtime/${user.id}`);
     return response.data.data;

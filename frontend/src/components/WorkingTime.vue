@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getWorkingTime } from '../api/apiWorkingTime';
-
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-});
+import { getWorkingTimes } from '../api/apiWorkingTime';
+import { useUserStore } from './store/userStore';
 
 const workingtime = ref<any>(null);
 const workDays = ref<any[]>([]);
 
-onMounted(async () => {
-  workingtime.value = await getWorkingTime(1);
+const userStore = useUserStore();
 
-  workDays.value = workingtime.value.data.map(entry => {
+onMounted(async () => {
+  workingtime.value = await getWorkingTimes(userStore.user);
+  // console.log(workingtime.value);
+
+  workDays.value = workingtime.value.map(entry => {
     const { durationFormatted } = calculateDuration(entry.start, entry.end);
     return {
       date: entry.name,

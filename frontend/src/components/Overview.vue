@@ -1,26 +1,23 @@
 <script setup lang="ts">
 
 import { onMounted, ref } from 'vue';
-import { getWorkingTime } from '../api/apiWorkingTime';
+import { getWorkingTimes } from '../api/apiWorkingTime';
 import { BarChart } from '../components/ui/chart-bar';
+import { useUserStore } from './store/userStore';
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-});
+const userStore = useUserStore();
 
 const workingtime = ref<any>(null);
 const workDays = ref<any[]>([]);
 const data = ref<any[]>([]);
 
 onMounted(async () => {
-  workingtime.value = await getWorkingTime(1);
-  console.log(workingtime.value);
+  // console.log(userStore.user);
+  workingtime.value = await getWorkingTimes(userStore.user);
+  // console.log("working time list", workingtime.value);
 
   // Récupérer les données réelles et formater pour le graphique
-  workDays.value = workingtime.value.data.map((entry) => {
+  workDays.value = workingtime.value.map((entry) => {
     const { durationNumeric } = calculateDuration(entry.start, entry.end);
     const formattedDate = formatDate(entry.start); // Formater la date en dd/MM
 
@@ -32,11 +29,11 @@ onMounted(async () => {
 
   // Générer les données fictives
   const fictiveData = generateFictiveData();
-  
+
   // Combiner les données réelles et plannifiées
   data.value = workDays.value.map((day, i) => ({
     name: day.name,
-    planned: fictiveData[i]?.planned ?? 0, 
+    planned: fictiveData[i]?.planned ?? 0,
     real: day.real,
   }));
 });
@@ -69,12 +66,6 @@ function generateFictiveData() {
 </script>
 
 <template>
-  <BarChart
-    :data="data"
-    index="name"
-    :categories="['planned', 'real']"
-    :colors="['#3498db', '#2ecc71']" 
-    :y-formatter="(tick) => `${tick}h`" 
-    showGridLine
-  />
+  <BarChart :data="data" index="name" :categories="['planned', 'real']" :colors="['#3498db', '#2ecc71']"
+    :y-formatter="(tick) => `${tick}h`" showGridLine />
 </template>

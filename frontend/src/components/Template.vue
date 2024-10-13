@@ -16,7 +16,7 @@ import { Button } from './ui/button'
 import { Switch } from './ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { createClock, getClockFromUser } from '../api/apiClock'
 import moment from 'moment'
 import { useUserStore } from './store/userStore';
@@ -26,7 +26,7 @@ type response_clock = AxiosResponse;
 
 const userStore = useUserStore()
 
-const user = ref(userStore.user);
+const user = computed(() => userStore.user);
 const clocks = ref(null);
 const last_clock = ref(null);
 
@@ -37,14 +37,16 @@ const current_time = ref("");
 
 onMounted(async () => {
   if (!user.value) {
-    user.value = await getUser(1);
+    const response = await getUser(1);
+    // console.log("response", response);
+    userStore.setUser(response);
   }
-  console.log(user.value);
+  // console.log(user.value);
   // const response_test = await deleteWorkingTime({ id: 1, start: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), end: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') });
   // console.log(response_test);
 
   const response_clock: response_clock = await getClockFromUser(user.value.id);
-  console.log(response_clock);
+  console.log("clocks", response_clock);
   if (response_clock.status === 200) {
     clocks.value = response_clock.data;
     last_clock.value = clocks.value.data[0];
@@ -58,7 +60,7 @@ onMounted(async () => {
 
 const handleChangeClock = async (checked: boolean) => {
   last_clock_value.value = checked;
-  console.log(last_clock_value.value);
+  console.log("last_clok status", last_clock_value.value);
   clock_diable.value = true;
 
   const response = await createClock(
@@ -151,7 +153,7 @@ const handleChangeClock = async (checked: boolean) => {
 
       <Tabs default-value="overview" class="space-y-4 h-full w-full">
         <TabsContent value="overview" class="space-y-4 h-full w-full">
-          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-10 h-full w-full mt-7">            
+          <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-10 h-full w-full mt-7">
             <!-- Colonne principale (70%) -->
             <div class="col-span-1 lg:col-span-7 space-y-4 h-full w-full">
 
@@ -197,4 +199,3 @@ const handleChangeClock = async (checked: boolean) => {
     </div>
   </div>
 </template>
-
