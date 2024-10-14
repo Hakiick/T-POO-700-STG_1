@@ -62,6 +62,7 @@ const handleChangeClock = async (checked: boolean) => {
   const response = await createClock(
     checked, user.value.id
   );
+  console.log(response);
   clockStore.setLastClock(response.data);
   console.log("last_clok status", last_clock_value.value);
   // console.log(response);
