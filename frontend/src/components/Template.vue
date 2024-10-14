@@ -85,33 +85,35 @@ const handleChangeClock = async (checked: boolean) => {
 
     <!-- Dashboard -->
     <div class="flex-1 space-y-0 p-8 pt-6">
-      <div class="flex items-center flex-wrap  space-y-2">
-        <h2 class="text-3xl font-bold tracking-tight">
-          Tableau de bord
-        </h2>
+      <!-- Dashboard -->
+      <div class="flex-1 p-8 pt-6">
+        <div class="flex items-center justify-between flex-wrap">
+          <!-- Card alignée à gauche -->
+          <Card class="h-28 min-w-52">
+            <CardHeader class="flex flex-row items-center space-y-0 pb-1 px-6 pt-3">
+              <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
+              <p v-else class="text-xs text-muted-foreground">Clock in</p>
+            </CardHeader>
+            <CardContent class="flex flex-col items-center justify-center text-center">
+              <div class="text-2xl font-bold text-primary flex items-center justify-center">
+                {{ current_time || "..." }}
 
-        <Card class="h-28 ml-auto xl:ml-32 min-w-52">
-          <CardHeader class="flex flex-row items-center space-y-0 pb-1 ml-auto px-6 pt-3">
-            <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
+                <Switch class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
+                  @update:checked="handleChangeClock" />
+              </div>
+              <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
+              <p v-else class="text-xs text-muted-foreground pt-1">Clock out</p>
+            </CardContent>
+          </Card>
 
-            <p v-else class="text-xs text-muted-foreground">Clock in</p>
-          </CardHeader>
-          <CardContent class="flex flex-col items-center justify-center text-center">
-            <div class="text-2xl font-bold text-primary flex items-center justify-center">
-              {{ current_time || "..." }}
+          <!-- Titre centré -->
+          <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center flex-1">
+            Tableau de bord
+          </h1>
+        </div>
+      </div>
 
-              <Switch vsl class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
-                @update:checked="handleChangeClock" />
-            </div>
-            <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
-            <p v-else class="text-xs text-muted-foreground pt-1">Clock out</p>
-
-          </CardContent>
-        </Card>
-
-        <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center">
-          Tableau de bord
-        </h1>
+      <div class="flex flex-col items-center justify-center w-full">
 
         <!-- Cartes alignées en ligne, responsive sur différents écrans -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full mt-7">
