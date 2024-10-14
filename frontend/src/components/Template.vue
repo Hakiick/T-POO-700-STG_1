@@ -57,14 +57,14 @@ onMounted(async () => {
 });
 
 const handleChangeClock = async (checked: boolean) => {
-  last_clock_value.value = checked;
-  console.log("last_clok status", last_clock_value.value);
-  clock_diable.value = true;
+  // clock_diable.value = true;
 
   const response = await createClock(
     checked, user.value.id
   );
-  console.log(response);
+  clockStore.setLastClock(response.data);
+  console.log("last_clok status", last_clock_value.value);
+  // console.log(response);
 }
 
 </script>
