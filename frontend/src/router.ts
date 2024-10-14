@@ -8,13 +8,13 @@ export default createRouter({
     {
       path: "/",
       name: "home",
-      component: () => HomePage,
+      component: HomePage,
       // props: true,
     },
     {
       path: "/login",
       name: "login",
-      component: () => LoginPage,
+      component: LoginPage,
     },
   ],
 });
