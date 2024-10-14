@@ -36,7 +36,7 @@ defmodule TimeManager.Timesheet do
 
   """
   def get_clock!(user_id) do
-    Repo.all(from c in Clock, where: c.user_id == ^user_id)
+    Repo.all(from c in Clock, where: c.user_id == ^user_id, order_by: [desc: c.inserted_at])
   end
 
   @doc """
@@ -115,9 +115,32 @@ defmodule TimeManager.Timesheet do
       [%WorkingTime{}, ...]
 
   """
-  def list_workingtime_from_a_user(user_id) do
+  def list_workingtime_from_a_user!(params) do
+    get_working_time_by(params)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "start" => start_time, "end" => end_time}) do
+    Repo.all(
+      from w in WorkingTime,
+        where: w.user_id == ^user_id and w.start >= ^start_time and w.end <= ^end_time
+    )
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "start" => start_time}) do
+    Repo.all(from w in WorkingTime, where: w.user_id == ^user_id and w.start >= ^start_time)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id, "end" => end_time}) do
+    Repo.all(from w in WorkingTime, where: w.user_id == ^user_id and w.end <= ^end_time)
+  end
+
+  defp get_working_time_by(%{"userID" => user_id}) do
     Repo.all(from w in WorkingTime, where: w.user_id == ^user_id)
   end
+
+  # defp get_working_time_by(_params) do
+  #   Repo.all(WorkingTime)
+  # end
 
   @doc """
   Gets a single working_time.
@@ -137,6 +160,17 @@ defmodule TimeManager.Timesheet do
 
   def get_working_time_by_user!(user_id, id),
     do: Repo.get_by!(WorkingTime, user_id: user_id, id: id)
+
+  def get_last_clock_in(user_id) do
+    Clock
+    # Combine conditions with `and`
+    |> where([c], c.user_id == ^user_id and c.status == true)
+    # Order by inserted_at in descending order
+    |> order_by(desc: :inserted_at)
+    # Limit to 1 record
+    |> limit(1)
+    |> Repo.one()
+  end
 
   @doc """
   Creates a working_time.

@@ -12,12 +12,23 @@ defmodule TimeManagerWeb.ClockController do
     render(conn, :index, clocks: clocks)
   end
 
-  def create(conn, %{"clock" => clock_params, "userID" => user_id}) do
+  def create(conn, %{"clock_status" => clock_status, "userID" => user_id}) do
     # Merge the user_id into clock_params
-    clock_params = Map.put(clock_params, "user_id", user_id)
+    # clock_params = Map.put(clock_params, "user_id", user_id)
+    clock_params = %{"user_id" => user_id, "time" => DateTime.utc_now(), "status" => clock_status}
 
     # Insert the clock into the database
     with {:ok, %Clock{} = clock} <- Timesheet.create_clock(clock_params) do
+      if clock.status == false do
+        last_clock_in = Timesheet.get_last_clock_in(user_id)
+
+        Timesheet.create_working_time(%{
+          start: last_clock_in.time,
+          end: clock.time,
+          user_id: user_id
+        })
+      end
+
       conn
       |> put_status(:created)
       |> json(%{data: "created"})
@@ -29,7 +40,7 @@ defmodule TimeManagerWeb.ClockController do
 
   def show(conn, %{"userID" => id}) do
     try do
-      user = Accounts.get_user!(id)
+      user = Accounts.get_user!(%{"id" => id})
 
       clocks = Timesheet.get_clock!(user.id)
 
