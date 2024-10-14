@@ -24,7 +24,20 @@ import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
 import Button from './ui/button/Button.vue'
-import { Cross1Icon, Pencil2Icon } from '@radix-icons/vue'
+import { Cross1Icon, Pencil2Icon, PlusIcon } from '@radix-icons/vue'
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 </script>
 
 <script lang="ts">
@@ -133,13 +146,38 @@ export default defineComponent({
     { id: 98, username: 'blablou98', email: 'blablou98@gmail.com' },
     { id: 99, username: 'blablou99', email: 'blablou99@gmail.com' },
     { id: 100, username: 'blablou100', email: 'blablou100@gmail.com' }
-    ]
+    ],
     }
 
   },
   methods: {
     deleteElement(id: number) {
       this.$data.users = this.$data.users.filter(e => e.id != id);
+    },
+    getElement(id: number) {
+      return this.$data.users.filter(e => e.id == id)[0];
+    },
+    addElement(user: User) {
+      let users:  User[] = [];
+      users.push(user);
+      this.users.forEach(e => users.push(e));
+      this.users = users;
+    },
+    replaceElement(user: User) {
+      let users : User[] = [];
+      let index = this.users.findIndex(e => e.id == user.id);
+      this.users.slice(0, index).forEach(e => users.push(e));
+      users.push(user);
+      this.users.slice(index+1).forEach(e => users.push(e));
+      this.users = users;
+      
+    },
+    createElement() {
+      this.addElement({
+              id: this.users.length,
+              username: document.querySelector('#username').value,
+              email: document.querySelector('#email').value
+            });
     }
   },
   computed: {
@@ -152,23 +190,48 @@ export default defineComponent({
       const columns = [
         columnHelper.accessor('username', {
           header: 'Username',
-          cell: ({ row }) => h('div', { class: 'capitalize'}, row.getValue('username'))
+          cell: ({ row }) => h('div', { class: 'capitalize usernames', 'data-id': row.getValue('id')}, row.getValue('username'))
         }),
         columnHelper.accessor('email', {
           header: 'Email',
-          cell: ({ row }) => h('div', { class: 'lowercase' }, row.getValue('email')),
+          cell: ({ row }) => h('div', { class: 'lowercase emails', 'data-id': row.getValue('id')}, row.getValue('email')),
         }),
         columnHelper.accessor('id', {
-          header: () => h('div', {class: 'text-right'}, 'Username'),
+          header: () => h('div', {class: 'text-right'}, 'Actions'),
           cell: ({ row }) => h('div', { class: 'text-right'}, [
-            h(Button, {  }, Pencil2Icon),
-            h(Button, { variant: 'destructive', onClick: () => this.deleteElement(row.getValue('id'))}, Cross1Icon)
+            h(Dialog, { 'variant': 'outline' }, [ 
+              h(DialogTrigger, { asChild:true}, h(Button, {}, Pencil2Icon)),
+              h(DialogContent, {} , [
+                h(DialogHeader, {}, [
+                  h(DialogTitle, {}, 'Edit profile'),
+                  h(DialogDescription, {}, 'Modifier les informations du client ici')
+                ]),
+                h('div', { class: 'grid gap-4 py-4'}, [
+                  h('div', { class: 'grid grid-cols-4 items-center gap-4'}, [
+                    h(Label, {class: 'text-right'}, 'Email'),
+                    h(Input, { type:"email", placehorder:'Email', class:'input-email col-span-3','data-id': row.getValue('id') ,  modelValue:this.getElement(row.getValue('id')).email,  }),
+                  ]),
+                  h('div', { class: 'grid grid-cols-4 items-center gap-4'}, [
+                    h(Label, {class: 'text-right'}, 'Username'),
+                    h(Input, {type:'text', placeholder:'Username', class:'input-name col-span-3','data-id': row.getValue('id') , modelValue:this.getElement(row.getValue('id')).username})
+                  ])
+                ]),
+                h(DialogFooter, {}, h(DialogClose, { asChild:true}, h(Button, { onClick: () => {
+                  this.replaceElement({
+                    id: row.getValue('id'), 
+                    username: document.querySelector(`.input-name[data-id='${row.getValue('id')}']`).value, 
+                    email: document.querySelector(`.input-email[data-id='${row.getValue('id')}']`).value
+                  })
+                }}, 'Save changes')))
+              ])
+            ]),
+            h(Button, { 'variant': 'destructive', onClick: () => this.deleteElement(row.getValue('id'))}, Cross1Icon)
           ])
         })
       ]
 
       return useVueTable({
-        data: this.$data.users,
+        data: this.users,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -186,7 +249,7 @@ export interface User {
 }
 
 export interface Data {
-  users: User[]
+  users: User[],
 }
 
 
@@ -208,7 +271,44 @@ export interface Data {
       </div>
     </div>
     <div class="rounded-md border">
-      <Table>
+      <div>
+        <div class="flex justify-between m-2 text-center align-center">
+          <h1 class="text-3xl bold uppercase">Admin panel</h1>
+          <Dialog>
+    <DialogTrigger as-child>
+      <Button variant="outline"><PlusIcon/></Button>
+    </DialogTrigger>
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Add profile</DialogTitle>
+      </DialogHeader>
+      <div class="grid gap-4 py-4">
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label for="username" class="text-right">
+            Username
+          </Label>
+          <Input id="username" class="col-span-3"  />
+        </div>
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label for="email" class="text-right">
+            Email
+          </Label>
+          <Input id="email"  class="col-span-3" type="email" />
+        </div>
+      </div>
+      <DialogFooter>
+        <DialogClose>
+
+          <Button :onClick="createElement">
+            Save changes
+          </Button>
+        </DialogClose>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+        </div>
+
+        <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
             <TableHead
@@ -245,7 +345,8 @@ export interface Data {
             </TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
 
     <div class="flex items-center justify-end space-x-2 py-4">
