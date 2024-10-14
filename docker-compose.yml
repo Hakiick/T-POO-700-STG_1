@@ -24,14 +24,14 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
 
     ports:
-      - "4000:4000"
+      - 127.0.0.1:4000:4000
 
   frontend:
     build:
       context: ./frontend
       dockerfile: dockerfile
     ports:
-      - "4173:4173"
+      - 127.0.0.1:4173:4173
     # volumes:
     #   - ./frontend/:/app/frontend
     #   - /app/node_modules
