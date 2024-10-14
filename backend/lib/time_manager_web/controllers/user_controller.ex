@@ -19,6 +19,11 @@ defmodule TimeManagerWeb.UserController do
     end
   end
 
+  def index(conn, _param) do
+    users = Accounts.list_users();
+    render(conn, :index, users: users)
+  end
+
   def create(conn, user_params) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
       conn
