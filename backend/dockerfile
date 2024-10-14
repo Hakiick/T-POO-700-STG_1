@@ -2,8 +2,10 @@ FROM bitwalker/alpine-elixir-phoenix:latest
 
 WORKDIR /app/backend
 
+copy . .
+
 RUN mix deps.get --only prod
-ENV MIX_ENV prod mix compile
+ENV MIX_ENV prod
 
 RUN mix deps.compile
 

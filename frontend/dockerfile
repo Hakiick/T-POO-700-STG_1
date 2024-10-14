@@ -3,8 +3,8 @@ FROM oven/bun:1 AS build
 WORKDIR /app/frontend
 
 # Install dependencies
-COPY bun.lockb package.json ./
-RUN bun install
+COPY package.json tsconfig.json ./
+RUN bun install 
 
 # Copy the project files and build the app
 COPY . .
@@ -13,4 +13,4 @@ RUN bun run build
 # Serve the app with Bun's built-in server
 # EXPOSE 3000
 
-CMD ["bun", "run", "dev", "--", "--host"]
+CMD ["bun", "run", "prod", "--", "--host"]

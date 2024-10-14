@@ -18,10 +18,11 @@ services:
       dockerfile: dockerfile
     depends_on:
       - db
-    # environment:
-    # MIX_ENV: dev
-    # env_file:
-    # - .env
+    environment:
+      MIX_ENV: prod
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+
     ports:
       - "4000:4000"
 
@@ -30,10 +31,10 @@ services:
       context: ./frontend
       dockerfile: dockerfile
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend/:/app/frontend
-      - /app/node_modules
+      - "4173:4173"
+    # volumes:
+    #   - ./frontend/:/app/frontend
+    #   - /app/node_modules
     stdin_open: true
     tty: true
     depends_on:
