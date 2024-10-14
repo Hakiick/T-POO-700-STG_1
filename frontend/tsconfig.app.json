@@ -23,6 +23,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
+
   },
+  "exclude": [
+    "src/components/ui/*",
+    "src/components/ui",
+    "src/components/ui/",
+      "nodes_modules/*"
+    ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

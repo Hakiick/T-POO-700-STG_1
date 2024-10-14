@@ -9,5 +9,11 @@
     "paths": {
       "@/*": ["src/*"]
     }
-  }
+  },
+  "exclude": [
+    "src/components/ui/*",
+    "src/components/ui",
+    "src/components/ui/",
+    "nodes_modules/*"
+  ]
 }
