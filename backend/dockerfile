@@ -2,10 +2,9 @@ FROM bitwalker/alpine-elixir-phoenix:latest
 
 WORKDIR /app/backend
 
-COPY mix.exs .
-#COPY mix.lock .
-
 RUN mix deps.get --only prod
+ENV MIX_ENV prod mix compile
+
 RUN mix deps.compile
 
 CMD mix setup && mix phx.server

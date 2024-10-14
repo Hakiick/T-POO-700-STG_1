@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export interface Clocks {
-  Clocks: Clock[];
-}
+export interface Clocks extends Array<Clock> {}
 
 export interface Clock {
   id: number;
@@ -22,10 +20,6 @@ export const useClockStore = defineStore("clock", () => {
     clocks.value = clocks_info;
     // console.log("clocks_info", clocks.value);
     lastClock.value = clocks_info[0];
-  };
-
-  const setLastClock = (userInfo: Clock) => {
-    clock.value = userInfo;
   };
 
   const clearClock = () => {
