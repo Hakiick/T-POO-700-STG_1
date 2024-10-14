@@ -22,9 +22,13 @@ export const useClockStore = defineStore("clock", () => {
     lastClock.value = clocks_info[0];
   };
 
+  const setLastClock = (clocks_info: Clock) => {
+    lastClock.value = clocks_info;
+  };
+
   const clearClock = () => {
     clock.value = null;
   };
 
-  return { clocks, lastClock, clock, setClock, clearClock };
+  return { clocks, lastClock, clock, setClock, setLastClock, clearClock };
 });
