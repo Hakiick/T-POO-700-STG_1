@@ -12,6 +12,16 @@ export const getUser = async (user_id: number) => {
   }
 };
 
+export const getAllUser = async () => {
+  try {
+    const response = await apiClient.get(`/users/all`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
 // Example: Create a new user
 export const createUser = async (username: string, email: string) => {
   try {
