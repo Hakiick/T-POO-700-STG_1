@@ -12,9 +12,7 @@ services:
       - "database:/var/lib/postgresql/data/"
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: dockerfile
+    image: "ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1"
     depends_on:
       - db
     environment:
@@ -23,17 +21,13 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
 
     ports:
-      - 127.0.0.1:4000:4000
+      - 4000:4000
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: dockerfile
+    image: "ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1"
     ports:
-      - 127.0.0.1:4173:4173
-    # volumes:
-    #   - ./frontend/:/app/frontend
-    #   - /app/node_modules
+      - 4173:4173
+      # - 127.0.0.1:4173:4173
     stdin_open: true
     tty: true
     depends_on:

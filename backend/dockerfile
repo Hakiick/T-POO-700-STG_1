@@ -5,7 +5,7 @@ WORKDIR /app/backend
 copy . .
 
 RUN mix deps.get --only prod
-ENV MIX_ENV prod
+ENV MIX_ENV=prod
 
 RUN mix deps.compile
 
