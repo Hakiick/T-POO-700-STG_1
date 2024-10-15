@@ -21,13 +21,14 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
 
     ports:
-      - 4000:4000
+      # - 4000:4000
+      - 127.0.0.1:4000:4000
 
   frontend:
     image: "ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1"
     ports:
-      - 4173:4173
-      # - 127.0.0.1:4173:4173
+      # - 4173:4173
+      - 127.0.0.1:4173:4173
     stdin_open: true
     tty: true
     depends_on:
