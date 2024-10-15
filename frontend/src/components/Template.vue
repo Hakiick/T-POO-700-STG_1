@@ -33,7 +33,7 @@ const user = computed(() => userStore.user);
 // const last_clock = computed(() => clockStore.lastClock);
 const last_clock_value = computed(() => clockStore.lastClock?.status);
 
-const clock_diable = ref(false);
+const clock_disable = ref(false);
 
 const current_time = ref("");
 
@@ -57,7 +57,7 @@ onMounted(async () => {
 });
 
 const handleChangeClock = async (checked: boolean) => {
-  // clock_diable.value = true;
+  clock_disable.value = true;
 
   const response = await createClock(
     checked, user.value.id
@@ -102,7 +102,7 @@ const handleChangeClock = async (checked: boolean) => {
             <div class="text-2xl font-bold text-primary flex items-center justify-center">
               {{ current_time || "..." }}
 
-              <Switch vsl class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
+              <Switch vsl class="mt-2 ml-auto" :disabled="clock_disable" :checked="last_clock_value"
                 @update:checked="handleChangeClock" />
             </div>
             <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
