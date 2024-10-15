@@ -8,4 +8,5 @@ COPY mix.exs .
 RUN mix deps.get --only prod
 RUN mix deps.compile
 
+
 CMD mix setup && mix phx.server

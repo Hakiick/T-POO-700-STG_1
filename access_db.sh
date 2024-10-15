@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo docker exec -it time-manager-db-1 bash -c "psql -U postgres -d time_manager"
+sudo docker exec -it time-manager_db_1 bash -c "psql -U postgres -d time_manager"
