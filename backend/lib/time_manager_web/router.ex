@@ -8,6 +8,10 @@ defmodule TimeManagerWeb.Router do
   scope "/api", TimeManagerWeb do
     pipe_through :api
 
+    resources "/rhs", RhController, except: [:new, :edit]
+    resources "/teams", TeamsController, except: [:new, :edit]
+    resources "/roles", RolesController, except: [:new, :edit]
+
     # USER Routes
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
