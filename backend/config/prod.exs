@@ -6,7 +6,14 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :time_manager, TimeManagerWeb.Endpoint,
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  # cache_static_manifest: "priv/static/cache_manifest.json",
+  secret_key_base: System.get_env("SECRET_KEY_BASE"),
+  http: [port: String.to_integer(System.get_env("PORT") || "4000")]
+
+# Configure your database using the DATABASE_URL environment variable
+config :time_manager, TimeManager.Repo,
+  url: System.get_env("DATABASE_URL"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: TimeManager.Finch

@@ -31,10 +31,10 @@ defmodule TimeManagerWeb.ClockController do
 
       conn
       |> put_status(:created)
-      |> json(%{data: "created"})
+      # |> json(%{data: "created"})
 
       # |> put_resp_header("location", ~p"/api/clocks/#{clock}")
-      # |> render(:show, clock: clock)
+      |> render(:show, clock: clock)
     end
   end
 
