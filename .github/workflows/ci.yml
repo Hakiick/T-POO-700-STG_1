@@ -58,8 +58,7 @@ jobs:
         working-directory: ./frontend
 
       - name: Push Docker image to GitHub Container Registry
-        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest
-        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest
+        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest
 
   deploy:
     runs-on: ubuntu-latest
