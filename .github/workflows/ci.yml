@@ -20,7 +20,9 @@ jobs:
 
       # Install dependencies
       - run: rm -rf nodes_modules
+        working-directory: ./frontend
       - run: rm -f package-lock.json
+        working-directory: ./frontend
       - run: npm i
         working-directory: ./frontend
 
@@ -30,20 +32,24 @@ jobs:
 
       # Set up Elixir if you have a backend
       - name: Set up Elixir
-        uses: actions/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
-          elixir-version: "1.13.3" # Specify your Elixir version
-          otp-version: "24.0" # Specify OTP version
+          elixir-version: "1.17.3" # Specify your Elixir version
+          otp-version: "27" # Specify OTP version
 
       # Install Elixir dependencies
       - run: mix deps.get
+        working-directory: ./backend
       - run: mix setup
         working-directory: ./backend
 
       # Run backend tests
       - run: mix ecto.reset
+        working-directory: ./backend
       - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
+        working-directory: ./backend
       - run: mix test test/time_manager_web/controllers/user_controller_test.exs
+        working-directory: ./backend
       - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
         working-directory: ./backend
 
