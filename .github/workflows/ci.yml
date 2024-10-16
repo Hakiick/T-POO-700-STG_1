@@ -116,5 +116,4 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key_path: .github/workflows/ssh/test
-          script: |
-            reload
+          script: pwd && reload
