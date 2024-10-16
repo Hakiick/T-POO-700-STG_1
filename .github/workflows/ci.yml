@@ -89,12 +89,13 @@ jobs:
       - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
         working-directory: ./backend
 
+  login:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
     steps:
-      -
-        name: Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -103,7 +104,7 @@ jobs:
 
       # Push docker images
       # - name: Log in to GitHub Container Registry
-        # run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      # run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker image backend
         run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest .
