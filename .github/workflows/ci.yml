@@ -24,7 +24,7 @@ jobs:
     #       --health-timeout 5s
     #       --health-retries 5
 
-      steps:
+    steps:
       - uses: actions/checkout@v3
 
       # Set up Node.js if you have a frontend
@@ -33,20 +33,19 @@ jobs:
         with:
           node-version: "21"
 
-      steps:
       - name: Start PostgreSQL on Ubuntu
         run: |
           sudo systemctl start postgresql.service
           pg_isready
-      
+
       - name: Create additional user
         run: |
-          sudo -u postgres psql --command="CREATE USER test_user PASSWORD 'test_password'" --command="\du"
-      
+          sudo -u postgres psql --command="CREATE USER test_user WITH PASSWORD 'test_password'" --command="\du"
+
       - name: Create additional database
         run: |
           sudo -u postgres createdb test_database --owner=test_user 
-          PGPASSWORD=test_password 
+          PGPASSWORD=test_password
 
       # Install dependencies
       - run: rm -rf nodes_modules
@@ -87,7 +86,7 @@ jobs:
       - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
         working-directory: ./backend
 
-      # push docker images
+      # Push docker images
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.RAT_TOKEN }}" | docker login ghcr.io -u ratataque --password-stdin
 
@@ -95,7 +94,7 @@ jobs:
         run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest .
         working-directory: ./backend
 
-      - name: Build Docker image backend
+      - name: Build Docker image frontend
         run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest .
         working-directory: ./frontend
 
