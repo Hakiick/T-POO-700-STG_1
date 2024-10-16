@@ -70,7 +70,7 @@ jobs:
       - run: mix deps.get
         working-directory: ./backend
 
-      - run: echo "DATABASE_URL=ecto://test_user:test_password@db:5432/test_database" >> .env
+      - run: echo "DATABASE_URL=ecto://test_user:test_password@localhost:5432/test_database" >> $GITHUB_ENV
         working-directory: ./backend
 
       - run: mix setup
