@@ -110,15 +110,15 @@ jobs:
       # run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker image backend
-        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest .
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 .
         working-directory: ./backend
 
       - name: Build Docker image frontend
-        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest .
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1 .
         working-directory: ./frontend
 
       - name: Push Docker image to GitHub Container Registry
-        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest
+        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1
 
   deploy:
     runs-on: ubuntu-latest
