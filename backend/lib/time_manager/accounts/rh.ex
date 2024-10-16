@@ -2,6 +2,9 @@ defmodule TimeManager.Accounts.Rh do
   use Ecto.Schema
   import Ecto.Changeset
 
+
+
+
   schema "rh" do
     field :name, :string
     field :user_id, :id

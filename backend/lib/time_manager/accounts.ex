@@ -1,6 +1,8 @@
 defmodule TimeManager.Accounts do
+  alias TimeManager.Accounts.User
   use Ecto.Schema
   import Ecto.Changeset
+  import Bcrypt
 
   schema "user" do
     field :email, :string
@@ -18,5 +20,9 @@ defmodule TimeManager.Accounts do
     accounts
     |> cast(attrs, [:username, :email, :password, :role_id, :is_active, :team_id])
     |> validate_required([:username, :email, :password, :role_id, :is_active, :team_id])
+  end
+
+  def check_password(%User{} = user, password) do
+    Bcrypt.checkpw(password, user.password)
   end
 end

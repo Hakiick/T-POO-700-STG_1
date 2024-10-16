@@ -32,6 +32,10 @@ defmodule TimeManager.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 2.2"},
+      {:comeonin, "~> 5.1"},
+      {:argon2_elixir, "~> 2.3"},
+      {:guardian, "~> 2.3.2"},
       {:phoenix, "~> 1.7.14"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},

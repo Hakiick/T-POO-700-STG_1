@@ -18,8 +18,8 @@ defmodule TimeManagerWeb.RhJSON do
   defp data(%Rh{} = rh) do
     %{
       id: rh.id,
-      employee_id: rh.employee_id,
-      department: rh.department
+      team_id: rh.team_id,
+      user_id: rh.user_id
     }
   end
 

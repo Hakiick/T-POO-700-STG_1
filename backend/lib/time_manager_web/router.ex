@@ -8,6 +8,8 @@ defmodule TimeManagerWeb.Router do
   scope "/api", TimeManagerWeb do
     pipe_through :api
 
+    post "/sessions", SessionController, :create
+
     resources "/rh", RhController, except: [:new, :edit]
     resources "/teams", TeamsController, except: [:new, :edit]
     resources "/roles", RolesController, except: [:new, :edit]
