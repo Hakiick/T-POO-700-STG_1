@@ -81,7 +81,7 @@ jobs:
 
       # Run backend tests
       # - run: mix ecto.reset
-      #   working-directory: ./backend
+      # working-directory: ./backend
       - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
         working-directory: ./backend
       - run: mix test test/time_manager_web/controllers/user_controller_test.exs
@@ -89,36 +89,20 @@ jobs:
       - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
         working-directory: ./backend
 
-  login:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-    steps:
-      - name: Login to GitHub Container registry
-        uses: docker/login-action@v1
-        env:
-          GITHUB_USER: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          registry: ghcr.io
-          username: $GITHUB_USER
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       # Push docker images
-      # - name: Log in to GitHub Container Registry
-      # run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker image backend
-        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 .
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest .
         working-directory: ./backend
 
       - name: Build Docker image frontend
-        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1 .
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest .
         working-directory: ./frontend
 
       - name: Push Docker image to GitHub Container Registry
-        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1
+        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest
 
   deploy:
     runs-on: ubuntu-latest
