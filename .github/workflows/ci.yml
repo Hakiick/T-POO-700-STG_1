@@ -8,22 +8,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    services:
-      db:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: test_database
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        ports:
-          - 5432:5432
-        # Optional: To ensure the service is ready before running tests
-        options: >-
-          --health-cmd "pg_isready -U test_user"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # services:
+    #   db:
+    #     image: postgres:latest
+    #     env:
+    #       POSTGRES_DB: test_database
+    #       POSTGRES_USER: test_user
+    #       POSTGRES_PASSWORD: test_password
+    #     ports:
+    #       - 5432:5432
+    #     # Optional: To ensure the service is ready before running tests
+    #     options: >-
+    #       --health-cmd "pg_isready -U test_user"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -33,6 +32,21 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "21"
+
+      steps:
+      - name: Start PostgreSQL on Ubuntu
+        run: |
+          sudo systemctl start postgresql.service
+          pg_isready
+      
+      - name: Create additional user
+        run: |
+          sudo -u postgres psql --command="CREATE USER test_user PASSWORD 'test_password'" --command="\du"
+      
+      - name: Create additional database
+        run: |
+          sudo -u postgres createdb test_database --owner=test_user 
+          PGPASSWORD=test_password 
 
       # Install dependencies
       - run: rm -rf nodes_modules
