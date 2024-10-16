@@ -10,13 +10,15 @@ defmodule TimeManagerWeb.RolesController do
   end
 
   def show(conn, %{"id" => id}) do
-    role = Accounts.get_role!(id)
-    render(conn, "show.json", role: role)
-  rescue
-    Ecto.NoResultsError ->
-      conn
-      |> put_status(:not_found)
-      |> json(%{error: "Role not found"})
+    try do
+      role = Accounts.get_role!(id)
+      render(conn, "show.json", role: role)
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Role not found"})
+    end
   end
 
   def create(conn, %{"role" => role_params}) do
@@ -27,5 +29,19 @@ defmodule TimeManagerWeb.RolesController do
     end
   end
 
-  # Ajoutez les actions update et delete selon vos besoins
+  def update(conn, %{"id" => id, "role" => role_params}) do
+    with {:ok, %Role{} = role} <- Accounts.update_role(id, role_params) do
+      conn
+      |> put_status(:ok)
+      |> render("show.json", role: role)
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    with {:ok, %Role{} = role} <- Accounts.delete_role(id) do
+      conn
+      |> put_status(:no_content)
+      |> json(%{})
+    end
+  end
 end

@@ -10,13 +10,15 @@ defmodule TimeManagerWeb.TeamsController do
   end
 
   def show(conn, %{"id" => id}) do
-    team = Accounts.get_team!(id)
-    render(conn, "show.json", team: team)
-  rescue
-    Ecto.NoResultsError ->
-      conn
-      |> put_status(:not_found)
-      |> json(%{error: "Team not found"})
+    try do
+      team = Accounts.get_team!(id)
+      render(conn, "show.json", team: team)
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Team not found"})
+    end
   end
 
   def create(conn, %{"team" => team_params}) do
@@ -27,5 +29,19 @@ defmodule TimeManagerWeb.TeamsController do
     end
   end
 
-  # Ajoutez les actions update et delete selon vos besoins
+  def update(conn, %{"id" => id, "team" => team_params}) do
+    with {:ok, %Team{} = team} <- Accounts.update_team(id, team_params) do
+      conn
+      |> put_status(:ok)
+      |> render("show.json", team: team)
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    with {:ok, %Team{} = team} <- Accounts.delete_team(id) do
+      conn
+      |> put_status(:no_content)
+      |> json(%{})
+    end
+  end
 end
