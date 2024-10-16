@@ -19,8 +19,8 @@ onMounted(async () => {
     const { durationFormatted } = calculateDuration(entry.start, entry.end);
     return {
       date: entry.name,
-      start: entry.start.split('T')[1].slice(0, 5), // Heure de début (HH:MM)
-      end: entry.end.split('T')[1].slice(0, 5), // Heure de fin (HH:MM)
+      start: entry.start.split('T')[1].slice(0, 5),
+      end: entry.end.split('T')[1].slice(0, 5),
       durationFormatted,
     };
   });

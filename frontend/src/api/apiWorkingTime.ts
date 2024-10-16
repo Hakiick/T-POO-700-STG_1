@@ -7,7 +7,7 @@ export const getWorkingTime = async (
 ): Promise<AxiosResponse> => {
   try {
     const response = await apiClient.get(`/workingtime/${user_id}`);
-    return response.data;
+    return response;
   } catch (error : any) {
     if (error.response.status !== 404) {
       console.error("Error fetching workingtime:", error);

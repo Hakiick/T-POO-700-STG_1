@@ -1,39 +1,30 @@
 import { ref } from 'vue';
 import { BarChart } from '../components/ui/chart-bar';
-import { DonutChart } from '../components/ui/chart-donut';
-import { AreaChart } from '../components/ui/chart-area';
-import { LineChart } from '../components/ui/line-area';
+import { DonutChart } from '../components/ui/chart-donut/index.ts';
+import { AreaChart } from '../components/ui/chart-area/index.ts';
+import { LineChart } from '../components/ui/chart-line/index.ts';
 
 const chartTypes = ['BarChart', 'DonutChart', 'AreaChart', 'LineChart'] as const;
 
 type ChartType = typeof chartTypes[number];
 
-// Stocker le type de graphique
 const currentChartType = ref<ChartType>('BarChart');
 
-// Fonction pour changer le type de graphique
-const setChartType = (type: ChartType) => {
-  if (chartTypes.includes(type)) {
-    currentChartType.value = type;
-  } else {
-    console.error(`Type de graphique non supporté: ${type}`);
-  }
-};
+const getChartComponent = (type: ChartType, data: any, index: string, categories: string[], colors?: string[]) => {
+  const props = { data, index, categories, colors };
 
-// Fonction pour récupérer le composant en fonction du type choisi
-const getChartComponent = () => {
-  switch (currentChartType.value) {
+  switch (type) {
     case 'BarChart':
-      return BarChart;
+      return { component: BarChart, props };
     case 'DonutChart':
-      return DonutChart;
+      return { component: DonutChart, props: { ...props, category: categories[0], valueFormatter: props.valueFormatter } };
     case 'AreaChart':
-      return AreaChart;
-      case 'LineChart':
-        return LineChart;
+      return { component: AreaChart, props };
+    case 'LineChart':
+      return { component: LineChart, props };
     default:
       throw new Error('Type de graphique non reconnu');
   }
 };
 
-export { chartTypes, currentChartType, setChartType, getChartComponent };
+export { chartTypes, currentChartType, getChartComponent };
