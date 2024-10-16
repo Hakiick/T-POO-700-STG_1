@@ -8,112 +8,68 @@ on:
     branches:
       - prod
 
-  # build:
-  #   runs-on: ubuntu-latest
-  #   # services:
-  #   #   db:
-  #   #     image: postgres:latest
-  #   #     env:
-  #   #       POSTGRES_DB: test_database
-  #   #       POSTGRES_USER: test_user
-  #   #       POSTGRES_PASSWORD: test_password
-  #   #     ports:
-  #   #       - 5432:5432
-  #   #     # Optional: To ensure the service is ready before running tests
-  #   #     options: >-
-  #   #       --health-cmd "pg_isready -U test_user"
-  #   #       --health-interval 10s
-  #   #       --health-timeout 5s
-  #   #       --health-retries 5
-  #
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #
-  #     # Set up Node.js if you have a frontend
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "21"
-  #
-  #     - name: Start PostgreSQL on Ubuntu
-  #       run: |
-  #         sudo systemctl start postgresql.service
-  #         pg_isready
-  #
-  #     - name: Create additional user
-  #       run: |
-  #         sudo -u postgres psql --command="CREATE USER test_user WITH PASSWORD 'test_password'" --command="\du"
-  #
-  #     - name: Create additional database
-  #       run: |
-  #         sudo -u postgres createdb test_database --owner=test_user
-  #         PGPASSWORD=test_password
-  #
-  #     # Install dependencies
-  #     - run: rm -rf nodes_modules
-  #       working-directory: ./frontend
-  #     - run: rm -f package-lock.json
-  #       working-directory: ./frontend
-  #     - run: npm i
-  #       working-directory: ./frontend
-  #
-  #     # Run frontend build
-  #     - run: npm run build
-  #       working-directory: ./frontend
-  #
-  #     # Set up Elixir if you have a backend
-  #     - name: Set up Elixir
-  #       uses: erlef/setup-beam@v1
-  #       with:
-  #         elixir-version: "1.17.3" # Specify your Elixir version
-  #         otp-version: "27" # Specify OTP version
-  #
-  #     # Install Elixir dependencies
-  #     - run: mix deps.get
-  #       working-directory: ./backend
-  #
-  #     - run: echo "DATABASE_URL=ecto://test_user:test_password@localhost:5432/test_database" >> $GITHUB_ENV
-  #       working-directory: ./backend
-  #
-  #     - run: mix setup
-  #       working-directory: ./backend
-  #
-  #     # Run backend tests
-  #     # - run: mix ecto.reset
-  #     # working-directory: ./backend
-  #     - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
-  #       working-directory: ./backend
-  #     - run: mix test test/time_manager_web/controllers/user_controller_test.exs
-  #       working-directory: ./backend
-  #     - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
-  #       working-directory: ./backend
-  #
-  #     # Push docker images
-  #     - name: Log in to GitHub Container Registry
-  #       run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-  #
-  #     - name: Build Docker image backend
-  #       run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest .
-  #       working-directory: ./backend
-  #
-  #     - name: Build Docker image frontend
-  #       run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest .
-  #       working-directory: ./frontend
-  #
-  #     - name: Push Docker image to GitHub Container Registry
-  #       run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:latest && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:latest
-
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    # needs: build
 
     steps:
-      - name: Deploy to production
-        uses: appleboy/ssh-action@v0.1.3
+      - uses: actions/checkout@v3
+
+      # Set up Node.js if you have a frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key_path: .github/workflows/ssh/test_deploy
-          script: |
-            reload
+          node-version: "21"
+
+      - name: Start PostgreSQL on Ubuntu
+        run: |
+          sudo systemctl start postgresql.service
+          pg_isready
+
+      - name: Create additional user
+        run: |
+          sudo -u postgres psql --command="CREATE USER test_user WITH PASSWORD 'test_password'" --command="\du"
+
+      - name: Create additional database
+        run: |
+          sudo -u postgres createdb test_database --owner=test_user
+          PGPASSWORD=test_password
+
+      # Install dependencies
+      - run: rm -rf nodes_modules
+        working-directory: ./frontend
+      - run: rm -f package-lock.json
+        working-directory: ./frontend
+      - run: npm i
+        working-directory: ./frontend
+
+      # Run frontend build
+      - run: npm run build
+        working-directory: ./frontend
+
+      # Set up Elixir if you have a backend
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.17.3" # Specify your Elixir version
+          otp-version: "27" # Specify OTP version
+
+      # Install Elixir dependencies
+      - run: mix deps.get
+        working-directory: ./backend
+
+      - run: echo "DATABASE_URL=ecto://test_user:test_password@localhost:5432/test_database" >> $GITHUB_ENV
+        working-directory: ./backend
+
+      - run: mix setup
+        working-directory: ./backend
+
+      # Run backend tests
+      # - run: mix ecto.reset
+      # working-directory: ./backend
+      - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
+        working-directory: ./backend
+      - run: mix test test/time_manager_web/controllers/user_controller_test.exs
+        working-directory: ./backend
+      - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
+        working-directory: ./backend
