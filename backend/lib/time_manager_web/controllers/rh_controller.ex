@@ -4,9 +4,22 @@ defmodule TimeManagerWeb.RhController do
   alias TimeManager.Accounts.Rh
   action_fallback TimeManagerWeb.FallbackController
 
-  def index(conn, _params) do
-    rhs = Accounts.list_rhs()
-    render(conn, "index.json", rhs: rhs)
+  def index(conn, params) do
+    try do
+      employees = RH.list_employees!(params)
+      if employees == [] or employees == nil do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No employees found"})
+      else
+        render(conn, :show, employees: employees)
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Employee not found"})
+    end
   end
 
   def show(conn, %{"id" => id}) do

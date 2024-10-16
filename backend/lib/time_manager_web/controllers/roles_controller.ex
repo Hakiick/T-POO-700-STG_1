@@ -4,9 +4,22 @@ defmodule TimeManagerWeb.RolesController do
   alias TimeManager.Accounts.Role
   action_fallback TimeManagerWeb.FallbackController
 
-  def index(conn, _params) do
-    roles = Accounts.list_roles()
-    render(conn, "index.json", roles: roles)
+  def index(conn, params) do
+    try do
+      roles = Roles.list_roles!(params)
+      if roles == [] or roles == nil do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No roles found"})
+      else
+        render(conn, :show, roles: roles)
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Role not found"})
+    end
   end
 
   def show(conn, %{"id" => id}) do

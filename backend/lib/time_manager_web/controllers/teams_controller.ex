@@ -4,9 +4,22 @@ defmodule TimeManagerWeb.TeamsController do
   alias TimeManager.Accounts.Team
   action_fallback TimeManagerWeb.FallbackController
 
-  def index(conn, _params) do
-    teams = Accounts.list_teams()
-    render(conn, "index.json", teams: teams)
+  def index(conn, params) do
+    try do
+      teams = Teams.list_teams!(params)
+      if teams == [] or teams == nil do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No teams found"})
+      else
+        render(conn, :show, teams: teams)
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Team not found"})
+    end
   end
 
   def show(conn, %{"id" => id}) do

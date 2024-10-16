@@ -4,6 +4,24 @@ defmodule TimeManagerWeb.ManageController do
   alias TimeManager.Accounts.Manage
   action_fallback TimeManagerWeb.FallbackController
 
+  def index(conn, params) do
+    try do
+      tasks = Manage.list_tasks!(params)
+      if tasks == [] or tasks == nil do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No tasks found"})
+      else
+        render(conn, :show, tasks: tasks)
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Project not found"})
+    end
+  end
+
   def create(conn, %{"manage" => manage_params}) do
     with {:ok, %Manage{} = manage} <- Accounts.create_manage(manage_params) do
       conn
