@@ -3,6 +3,7 @@ defmodule TimeManagerWeb.UserController do
 
   alias TimeManager.Accounts
   alias TimeManager.Accounts.User
+  alias TimeManager.Repo
 
   action_fallback TimeManagerWeb.FallbackController
 
@@ -19,7 +20,7 @@ defmodule TimeManagerWeb.UserController do
     end
   end
 
-  def create(conn, user_params) do
+  def create(conn, %{"email" => email, "password" => password} = user_params) do
     with {:ok, %User{} = user} <- Accounts.create_user(user_params) do
       conn
       |> put_status(:created)

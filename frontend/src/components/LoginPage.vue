@@ -6,6 +6,30 @@ import { Label } from './ui/label'
 import { createUser } from '../api/apiUser';
 import router from '../router';
 import { useUserStore } from './store/userStore';
+import { useRouter } from 'vue-router';
+import { loginUser } from '../api/apiUser';
+
+
+const email = ref('');
+const password = ref('');
+const router2 = useRouter();
+
+const handleLogin = async () => {
+  isLoadingSignIn.value = true;
+  try {
+    const isSuccess = await loginUser(email.value, password.value);
+    if (isSuccess) {
+      router2.push('/');
+    } else {
+      alert('Login failed. Please check your credentials.');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('An error occurred. Please try again later.');
+  } finally {
+    isLoadingSignIn.value = false;
+  }
+};
 
 // Variables pour le formulaire de connexion
 const isLoadingSignIn = ref(false)
@@ -23,6 +47,8 @@ const userStore = useUserStore()
 
 // Variable pour suivre quelle div est actuellement active
 const activeDiv = ref<'signin' | 'signup' | null>(null)
+
+
 
 async function onSubmitSignIn(event: Event) {
   event.preventDefault()
@@ -99,7 +125,7 @@ async function onSubmitSignUp(event: Event) {
         </div>
 
         <!-- Formulaire -->
-        <form @submit="onSubmitSignIn" class="space-y-6">
+        <form @submit.prevent="handleLogin" class="space-y-6">
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email">Email</Label>

@@ -3,6 +3,7 @@ defmodule TimeManager.Accounts do
   use Ecto.Schema
   import Ecto.Changeset
   import Bcrypt
+  alias TimeManager.Repo
 
   schema "user" do
     field :email, :string
@@ -18,11 +19,22 @@ defmodule TimeManager.Accounts do
   @doc false
   def changeset(accounts, attrs) do
     accounts
-    |> cast(attrs, [:username, :email, :password, :role_id, :is_active, :team_id])
-    |> validate_required([:username, :email, :password, :role_id, :is_active, :team_id])
+    |> cast(attrs, [:email, :password, :username, :role_id, :is_active, :team_id])
+    |> validate_required([ :email, :password, :username,:role_id, :is_active, :team_id])
   end
 
   def check_password(%User{} = user, password) do
     Bcrypt.checkpw(password, user.password)
+  end
+
+  def create_user(%{"email" => email, "password" => password}) do
+
+    %User{}
+    |> User.changeset(%{email: email, password: password})
+    |> Repo.insert()
+  end
+
+  def get_user_by_email(email) do
+    Repo.get_by(User, email: email)
   end
 end

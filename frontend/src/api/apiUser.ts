@@ -1,5 +1,20 @@
 import { User } from "../components/store/userStore";
 import { apiClient } from "./api";
+//import axios from 'axios';
+
+export const loginUser = async (password: string, email: string) => {
+  try {
+    const response = await apiClient.get("/users", { params: { password, email } });
+    if (response.status !== 201) {
+      throw new Error("Error creating user");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    // throw error;
+    return error;
+  }
+};
 
 // Example: Fetch users from the API
 export const getUser = async (user_id: number) => {
@@ -13,9 +28,9 @@ export const getUser = async (user_id: number) => {
 };
 
 // Example: Create a new user
-export const createUser = async (username: string, email: string) => {
+export const createUser = async (password: string, email: string) => {
   try {
-    const response = await apiClient.post("/users", { username, email });
+    const response = await apiClient.post("/users", { password, email });
     if (response.status !== 201) {
       throw new Error("Error creating user");
     }
