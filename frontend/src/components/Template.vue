@@ -90,7 +90,7 @@ const handleChangeClock = async (checked: boolean) => {
     <div class="flex-1 space-y-0 p-8 pt-6">
       <div class="flex items-center flex-wrap  space-y-2">
         <h2 class="text-5xl font-bold tracking-tight">
-          Tableau de bord
+          Tableau de test
         </h2>
 
         <Card class="h-28 ml-auto xl:ml-32 min-w-52">
