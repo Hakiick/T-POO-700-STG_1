@@ -1,0 +1,40 @@
+name: deploy Pipeline
+
+on:
+  push:
+    branches:
+      - prod
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Push docker images
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ secrets.RAT_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image backend
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 .
+        working-directory: ./backend
+
+      - name: Build Docker image frontend
+        run: docker build -t ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1 .
+        working-directory: ./frontend
+
+      - name: Push Docker image to GitHub Container Registry
+        run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key_path: .github/workflows/ssh/test
+          script: reload
