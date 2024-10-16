@@ -1,10 +1,19 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite";
-import { fileURLToPath, URL } from "url";
+// import { fileURLToPath, URL } from "url";
+import { resolve } from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    minify: "esbuild",
+  },
   server: {
     proxy: {
       // Proxy API requests to the backend container
@@ -23,11 +32,8 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: [
-      {
-        find: "@",
-        replacement: fileURLToPath(new URL("src", import.meta.url)),
-      },
-    ],
+    alias: {
+      "@": resolve(__dirname, "./src"),
+    },
   },
 });

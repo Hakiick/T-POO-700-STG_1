@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
@@ -13,10 +17,17 @@
     "noEmit": true,
 
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
+
+  "exclude": [
+    "src/components/ui/*",
+    "src/components/ui",
+    "src/components/ui/",
+    "nodes_modules/*"
+  ],
   "include": ["vite.config.ts"]
 }

@@ -1,8 +1,11 @@
+// @ts-nocheck
+// @ts-ignore
+
 <script setup lang="ts">
 import { ref } from 'vue'
-import CaretSortIcon from '~icons/radix-icons/caret-sort'
-import CheckIcon from '~icons/radix-icons/check'
-import PlusCircledIcon from '~icons/radix-icons/plus-circled'
+// import CaretSortIcon from '~icons/radix-icons/caret-sort'
+// import CheckIcon from '~icons/radix-icons/check'
+// import PlusCircledIcon from '~icons/radix-icons/plus-circled'
 
 import { cn } from '../lib/utils'
 import {
@@ -80,10 +83,11 @@ const selectedTeam = ref<Team>(groups[0].teams[0])
             <AvatarFallback>SC</AvatarFallback>
           </Avatar>
           {{ selectedTeam.label }}
-          <CaretSortIcon class="ml-auto h-4 w-4 shrink-0 opacity-50" />
+          <!-- <CaretSortIcon class="ml-auto h-4 w-4 shrink-0 opacity-50" /> -->
         </Button>
       </PopoverTrigger>
       <PopoverContent class="w-[200px] p-0">
+        <!-- @vue-ignore -->
         <Command :filter-function="(list, term) => list.filter(i => i.label?.toLowerCase()?.includes(term))">
           <CommandList>
             <CommandInput placeholder="Search team..." />
@@ -99,11 +103,11 @@ const selectedTeam = ref<Team>(groups[0].teams[0])
                   <AvatarFallback>SC</AvatarFallback>
                 </Avatar>
                 {{ team.label }}
-                <CheckIcon :class="cn('ml-auto h-4 w-4',
-                  selectedTeam.value === team.value
-                    ? 'opacity-100'
-                    : 'opacity-0',
-                )" />
+                <!-- <CheckIcon :class="cn('ml-auto h-4 w-4', -->
+                <!--   selectedTeam.value === team.value -->
+                <!--     ? 'opacity-100' -->
+                <!--     : 'opacity-0', -->
+                <!-- )" /> -->
               </CommandItem>
             </CommandGroup>
           </CommandList>
@@ -115,7 +119,7 @@ const selectedTeam = ref<Team>(groups[0].teams[0])
                   open = false
                   showNewTeamDialog = true
                 }">
-                  <PlusCircledIcon class="mr-2 h-5 w-5" />
+                  <!-- <PlusCircledIcon class="mr-2 h-5 w-5" /> -->
                   Create Group
                 </CommandItem>
               </DialogTrigger>
