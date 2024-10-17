@@ -42,6 +42,7 @@ const isCheckedSignUp = ref(false)
 const errorMessageSignUp = ref('')
 const emailSignup = ref('')
 const passwordSignup = ref('')
+const usernameSignup = ref('')
 
 const userStore = useUserStore()
 
@@ -87,7 +88,7 @@ async function onSubmitSignUp(event: Event) {
   isLoadingSignUp.value = true
 
   // console.log({ email: emailSignup.value, username: passwordSignup.value })
-  const response = await createUser(passwordSignup.value, emailSignup.value)
+  const response = await createUser(passwordSignup.value, emailSignup.value, usernameSignup.value)
   console.log(response.data)
   if (response.data.id) {
     //navitage to home page 
@@ -199,6 +200,14 @@ async function onSubmitSignUp(event: Event) {
                 class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
               />
             </div>
+            <div>
+              <Label class="sr-only" for="username-signup">Username</Label>
+              <Input v-model="usernameSignup" id="username-signup" placeholder="Enter your username" type="text"
+                auto-capitalize="none" auto-complete="username" auto-correct="off" :disabled="isLoadingSignUp"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
+              />
+            </div>
+
             <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
               auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
               class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"

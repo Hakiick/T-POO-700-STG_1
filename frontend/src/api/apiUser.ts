@@ -28,9 +28,9 @@ export const getUser = async (user_id: number) => {
 };
 
 // Example: Create a new user
-export const createUser = async (password: string, email: string) => {
+export const createUser = async (password: string, email: string, username: string) => {
   try {
-    const response = await apiClient.post("/users", { password, email });
+    const response = await apiClient.post("/users", { password, email, username });
     if (response.status !== 201) {
       throw new Error("Error creating user");
     }

@@ -27,10 +27,10 @@ defmodule TimeManager.Accounts do
     Bcrypt.checkpw(password, user.password)
   end
 
-  def create_user(%{"email" => email, "password" => password}) do
+  def create_user(%{"email" => email, "password" => password, "username" => username}) do
 
     %User{}
-    |> User.changeset(%{email: email, password: password})
+    |> User.changeset(%{email: email, password: password, username: username})
     |> Repo.insert()
   end
 

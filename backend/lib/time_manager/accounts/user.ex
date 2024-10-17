@@ -15,7 +15,7 @@ defmodule TimeManager.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :password, :email, :role_id, :is_active, :team_id])
-    |> validate_required([:password, :email])
+    |> validate_required([:password, :email, :username])
     |> validate_length(:username, min: 3, max: 30)
     |> validate_length(:email, max: 255)
         # |> validate_format(:email, ~r/^[\w.!#$%&’*+\/=?`{|}~^-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
