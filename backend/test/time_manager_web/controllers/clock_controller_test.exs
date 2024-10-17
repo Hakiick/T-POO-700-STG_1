@@ -9,14 +9,13 @@ defmodule TimeManagerWeb.ClockControllerTest do
   alias TimeManager.Timesheet.Clock
 
   @create_attrs %{
-    status: true,
-    time: ~N[2024-10-07 12:18:00]
+    clock_status: true
   }
   @update_attrs %{
     status: false,
     time: ~N[2024-10-08 12:18:00]
   }
-  @invalid_attrs %{status: nil, time: nil, user_id: nil}
+  @invalid_attrs %{clock_status: nil}
 
   # Define your valid attributes for creating a user
   @valid_user_attrs %{
@@ -42,20 +41,23 @@ defmodule TimeManagerWeb.ClockControllerTest do
 
   describe "create clock" do
     test "renders clock when data is valid", %{conn: conn, user_id: user_id} do
-      conn = post(conn, ~p"/api/clocks/#{user_id}", clock: @create_attrs)
+      conn = post(conn, ~p"/api/clocks/#{user_id}", @create_attrs)
       assert json_response(conn, 201)
 
       conn = get(conn, ~p"/api/clocks/#{user_id}")
+      time = DateTime.utc_now()
 
-      assert [%{
-               "id" => 2,
-               "status" => true,
-               "time" => "2024-10-07T12:18:00Z"
-             }] = json_response(conn, 200)["data"]
+      assert [
+               %{
+                 "id" => 2,
+                 "status" => true,
+                 "time" => time
+               }
+             ] = json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/clocks/234", clock: @invalid_attrs)
+      conn = post(conn, ~p"/api/clocks/234", @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
