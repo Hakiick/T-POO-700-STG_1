@@ -51,7 +51,7 @@ defmodule TimeManagerWeb.WorkingTimeControllerTest do
 
     test "get a 404", %{conn: conn} do
       conn = get(conn, ~p"/api/workingtime/999")
-      assert json_response(conn, 404) == %{"error" => "User not found"}
+      assert json_response(conn, 404) == %{"error" => "No workingtimes found"}
     end
   end
 
