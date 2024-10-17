@@ -43,7 +43,7 @@ import { AxiosResponse } from 'axios';
 // ============================
 import { getUser } from '../api/apiUser';
 import { getWorkingTime } from '../api/apiWorkingTime';
-import { createClock, getClockFromUser } from '../api/apiClock';
+import { createClock, getClockFromUser, getClocksFromUser } from '../api/apiClock';
 
 // ============================
 // Import du store
@@ -101,6 +101,105 @@ onMounted(async () => {
   // Mise à jour de l'heure actuelle
   current_time.value = moment().format('HH[h] mm[m]');
 });
+
+// ============================
+// Fonction DayCard: Recuperation du temps journalier travaille (clock)
+// ============================
+const dateNow = Date.now();
+const formattedDate = moment(dateNow).format('DD-MM-YYYY');
+clockData.value = await getClocksFromUser(user.value.id, formattedDate, formattedDate);
+const clockDays = calculateWork(clockData.value.data.data);
+
+// ============================
+// Fonction WeekCard: Recuperation du temps a la semaine travaille (clock)
+// ============================
+
+
+
+// ============================
+// Fonction MonthCard: Recuperation du temps au mois travaille (clock)
+// ============================
+
+
+// ============================
+// // Fonction pour formater une date au format dd/MM
+// ============================
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+
+  return `${day}/${month}`;
+}
+
+
+// ============================
+// Fonction pour calculer la durée en heures et minutes entre deux dates
+// ============================
+function calculateDuration(start: string, end: string) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
+  const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
+
+  const hours = Math.floor(durationInMinutes / 60);
+  const minutes = durationInMinutes % 60;
+
+  return {
+    durationNumeric: durationInMinutes / 60,
+    durationFormatted: `${hours}h ${minutes}m`,
+  };
+}
+
+
+// ============================
+// 
+// ============================
+function calculateWork(clockEntries: any[], targetDate: string) {
+  const workByDate: Record<string, { real: number }> = {};
+  let startTime: string | null = null;
+
+  // Heure actuelle pour utiliser en cas de journée en cours
+  const now = new Date().toISOString();
+
+  clockEntries.forEach(entry => {
+    const formattedDate = formatDate(entry.time);
+
+    // Filtrer pour la date cible
+    if (formattedDate === targetDate) {
+      // Si c'est une entrée 'true', on enregistre le début
+      if (entry.status) {
+        startTime = entry.time;
+      } 
+      // Si c'est une entrée 'false', on calcule la durée entre start et end
+      else if (startTime) {
+        const { durationNumeric } = calculateDuration(startTime, entry.time);
+        
+        // Ajout de la durée à la date correspondante
+        if (!workByDate[formattedDate]) {
+          workByDate[formattedDate] = { real: 0 };
+        }
+
+        workByDate[formattedDate].real += durationNumeric;
+        startTime = null; // Réinitialiser pour le prochain cycle
+      }
+    }
+  });
+
+  // Si on a un 'true' sans 'false', on continue avec l'heure actuelle
+  if (startTime) {
+    const { durationNumeric } = calculateDuration(startTime, now);
+    if (!workByDate[targetDate]) {
+      workByDate[targetDate] = { real: 0 };
+    }
+    workByDate[targetDate].real += durationNumeric;
+  }
+
+  return Object.keys(workByDate).map(date => ({
+    name: date,
+    real: workByDate[date].real,
+  }));
+}
 
 // ============================
 // Fonction handleChangeClock: Gestion du changement de pointage (clock)

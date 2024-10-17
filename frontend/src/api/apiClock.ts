@@ -22,7 +22,7 @@ export const getClocksFromUser = async (
   user_id: number,
 ): Promise<AxiosResponse> => {
   try {
-    const response = await apiClient.get(`/clocks/${user_id}`);
+    const response = await apiClient.get(`/clocks/${user_id}/`);
     return response;
   } catch (error: any) {
     if (error.response.status !== 404) {
