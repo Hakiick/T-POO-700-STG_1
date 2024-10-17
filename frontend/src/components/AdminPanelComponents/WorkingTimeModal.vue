@@ -33,7 +33,7 @@ async function fetchWorkingTime() {
   workingTimes.value = [];
   try {
     let res: WorkingTime[] = await getWorkingTimes(props.user);
-    res = res.filter((i: WorkingTime) => new Date(i.end) - Date.now() > 0);
+    res = res.filter((i: WorkingTime) => new Date(i.end) - new Date() > 0);
     workingTimes.value = res;
   } catch (error) {
     // ignored
@@ -44,51 +44,22 @@ const formattedDates = computed(() => {
   return workingTimes.value.map((e: WorkingTime) => {
     return {
       id: e.id,
-      formattedDate: {
+      formattedStartTime: {
         set: async function (val) {
-          let startDate = new Date(e.start);
-          let endDate = new Date(e.end);
-          let dates = val.split("-");
-
-          startDate.setFullYear(dates[0]);
-          startDate.setMonth(dates[1] - 1);
-          startDate.setDate(dates[2]);
-          endDate.setFullYear(dates[0]);
-          endDate.setMonth(dates[1] - 1);
-          endDate.setDate(dates[2]);
-
-          e.start = startDate.toISOString();
-          e.end = endDate.toISOString();
+          e.start = new Date(val).toISOString();
           await updateWorkingTime(e);
         },
         get: function () {
           return formatDate(e.start);
         },
       },
-      formattedStartTime: {
-        set: async function (val) {
-          let date = new Date(e.start);
-          let times = val.split(":");
-          date.setHours(times[0]);
-          date.setMinutes(times[1]);
-          e.start = date.toISOString();
-          await updateWorkingTime(e);
-        },
-        get: function () {
-          return getFormatTime(e.start);
-        },
-      },
       formattedEndTime: {
         set: async function (val) {
-          let date = new Date(e.end);
-          let times = val.split(":");
-          date.setHours(times[0]);
-          date.setMinutes(times[1]);
-          e.end = date.toISOString();
+          e.end = new Date(val).toISOString();
           await updateWorkingTime(e);
         },
         get: function () {
-          return getFormatTime(e.end);
+          return formatDate(e.end);
         },
       },
     };
@@ -97,15 +68,10 @@ const formattedDates = computed(() => {
 
 function formatDate(dateString) {
   let date = new Date(dateString);
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-}
-
-function getFormatTime(dateString) {
-  let date = new Date(dateString);
-  return `${date.getHours().toString().padStart(2, "0")}:${date
-    .getMinutes()
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date
+    .getHours()
     .toString()
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
 
 async function newWorkingTime() {
@@ -162,25 +128,14 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
             v-if="workingTimes.length != 0"
             v-for="formattedDate in formattedDates"
           >
-            <div class="flex border p-2">
+            <div class="flex border p-2 mb-2">
               <div class="grow">
-                <div class="flex justify-between w-5/6">
-                  <label>Date </label>
-                  <Input
-                    type="date"
-                    :value="formattedDate.formattedDate.get()"
-                    @input="
-                      formattedDate.formattedDate.set($event.target.value)
-                    "
-                    :min="formatDate(Date.now())"
-                  />
-                </div>
-
                 <div class="flex justify-between w-5/6">
                   <label>Start time </label>
                   <Input
-                    type="time"
+                    type="datetime-local"
                     :value="formattedDate.formattedStartTime.get()"
+                    :min="formatDate(Date.now())"
                     @input="
                       formattedDate.formattedStartTime.set($event.target.value)
                     "
@@ -190,8 +145,9 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
                 <div class="flex justify-between w-5/6">
                   <label>End time</label>
                   <Input
-                    type="time"
+                    type="datetime-local"
                     :value="formattedDate.formattedEndTime.get()"
+                    :min="formatDate(Date.now())"
                     @input="
                       formattedDate.formattedEndTime.set($event.target.value)
                     "
