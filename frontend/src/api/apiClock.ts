@@ -6,6 +6,22 @@ export const getClockFromUser = async (
   user_id: number,
 ): Promise<AxiosResponse> => {
   try {
+    const response = await apiClient.get(`/clock/${user_id}`);
+    return response;
+  } catch (error: any) {
+    if (error.response.status !== 404) {
+      console.error("Error fetching clocks:", error);
+    }
+    // console.log("Error fetching clocks:", error);
+    return error;
+    // throw error;
+  }
+};
+
+export const getClocksFromUser = async (
+  user_id: number,
+): Promise<AxiosResponse> => {
+  try {
     const response = await apiClient.get(`/clocks/${user_id}`);
     return response;
   } catch (error: any) {
