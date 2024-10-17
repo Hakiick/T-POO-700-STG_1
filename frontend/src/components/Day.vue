@@ -1,34 +1,34 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { defineProps } from 'vue';
 import { useUserStore } from './store/userStore';
 import { getUser } from '../api/apiUser';
-import { getWorkingTime } from '../api/apiWorkingTime';
-import { getClockFromUser } from '../api/apiClock';
 import { getChartComponent, currentChartType, chartTypes } from '../manager/chartManager';
+
+// Définir la prop pour recevoir la valeur
+const props = defineProps<{
+  oneDateValue: Object | null;
+  workingtime: Object | null,
+  clockData: Object | null
+}>();
+
+console.log(props.workingtime, props.clockData);
 
 const userStore = useUserStore();
 const user = ref(userStore.user);
 
-const workingtime = ref<any>(null);
-const clockData = ref<any>(null);
 const workDays = ref<any[]>([]);
 const data = ref<any[]>([]);
 
 onMounted(async () => {
+
   if (!user.value) {
     user.value = await getUser(1);
   }
 
-  // Récupération des données de working time et clock
-  workingtime.value = await getWorkingTime(user.value.id);
-  clockData.value = await getClockFromUser(user.value.id);
-
-  // Date pour filtrer (27/09)
-  const targetDate = '27/09';
-
-  // Transformation et fusion des données de working time et de clock
-  const workingDays = aggregateWorkingTime(workingtime.value.data.data, targetDate);
-  const clockDays = calculateWork(clockData.value.data.data, targetDate);
+  // Transformation et fusion des données de working time et clock
+  const workingDays = aggregateWorkingTime(workingtime.value.data.data);
+  const clockDays = calculateWork(clockData.value.data.data);
 
   // Fusion des jours travaillés avec les données des heures planifiées et réelles
   workDays.value = workingDays.map(workDay => {
@@ -139,7 +139,8 @@ function formatDate(dateString: string) {
 
 <template>
   <div>
-    <h2>Heures de travail pour le {{ targetDate }}</h2>
+    <h2>Graphique du {{ oneDateValue }}</h2>
+    <!--<h2>Heures de travail pour le {{ targetDate }}</h2>-->
     <div>
       <p>Heures planifiées: {{ data[0]?.planned }} heures</p>
       <p>Heures réelles: {{ data[0]?.real }} heures</p>
