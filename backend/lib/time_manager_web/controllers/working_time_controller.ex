@@ -30,14 +30,15 @@ defmodule TimeManagerWeb.WorkingTimeController do
     # Merge the user_id into clock_params
     working_time_params = Map.put(working_time_params, "user_id", user_id)
 
-    with {:ok, %WorkingTime{}} <-
+    with {:ok, %WorkingTime{} = working_time} <-
            Timesheet.create_working_time(working_time_params) do
       conn
       |> put_status(:created)
-      |> json(%{data: "created"})
+      |> render(:show, working_time: working_time)
+
+      # |> json(%{data: "created"})
 
       # |> put_resp_header("location", ~p"/api/workingtime/#{working_time}")
-      # |> render(:show, working_time: working_time)
     end
   end
 
