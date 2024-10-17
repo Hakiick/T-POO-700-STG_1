@@ -7,9 +7,25 @@ defmodule TimeManagerWeb.ClockController do
 
   action_fallback(TimeManagerWeb.FallbackController)
 
-  def index(conn, _params) do
-    clocks = Timesheet.list_clocks()
-    render(conn, :index, clocks: clocks)
+  def index(conn, params) do
+    try do
+      # user = Accounts.get_user!(%{"id" => id})
+
+      clocks = Timesheet.list_clock_from_a_user!(params)
+
+      if clocks == [] do
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No clocks found"})
+      else
+        render(conn, :show, clock: clocks)
+      end
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "User not found"})
+    end
   end
 
   def create(conn, %{"clock" => clock_params, "userID" => user_id}) do
