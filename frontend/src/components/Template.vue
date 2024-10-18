@@ -35,7 +35,7 @@ import { CalendarIcon } from '@radix-icons/vue';
 import { cn } from '../lib/utils';
 import { CalendarDate, DateFormatter, DateValue, getLocalTimeZone } from '@internationalized/date';
 import moment from 'moment';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { AxiosResponse } from 'axios';
 
 // ============================
@@ -66,12 +66,19 @@ const last_clock_value = ref(false);
 const clock_diable = ref(false);
 const current_time = ref("");
 const workingtime = ref<any>(null);
-const clockData = ref<any>(null);
-
+const clockDataDay = ref<any>(null);
+const clockDataWeek = ref<any>(null);
+const clockDataMonth = ref<any>(null);
+const workedHoursToday = ref<string | null>(null);
+const workedHoursThisWeek = ref<string | null>(null);
+const workedHoursThisMonth = ref<string | null>(null);
+const arrivalTime = ref<string | null>(null);
+const departureTime = ref<string | null>(null);
 // ============================
 // Variables liées à la date sélectionnée
 // ============================
-const oneDateValue = ref<DateValue>();
+const oneDateValue = ref(null);
+const oneDayChart = ref<any>(null);
 
 const df = (date: Date) => moment(date).format('DD-MM-YYYY');
 
@@ -79,144 +86,199 @@ const df = (date: Date) => moment(date).format('DD-MM-YYYY');
 // onMounted: Initialisation des données au montage du composant
 // ============================
 onMounted(async () => {
-  // Récupération de l'utilisateur s'il n'est pas déjà présent
   if (!user.value) {
     user.value = await getUser(1);
   }
+  // console.log(user.value);
 
-  // Récupération des heures de travail et des pointages
-  workingtime.value = await getWorkingTime(user.value.id);
-  clockData.value = await getClockFromUser(user.value.id);
+  // ============================
+  // Fonction DayCard: Recuperation du temps journalier travaille (clock) oneDateValue
+  // ============================
+  // Pour le jour en cours
+  const { startOfDay, endOfDay } = getCurrentDay();
+  const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
+  workedHoursToday.value = formatHours(hoursToday);
 
-  console.log(workingtime.value.data.data, clockData.value.data.data);
+  // Pour la semaine en cours
+  const { startOfWeek, endOfWeek } = getCurrentWeek();
+  const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
+  workedHoursThisWeek.value = formatHours(hoursThisWeek);
+  //
+  clockDataWeek.value = hoursThisWeek;
+
+  // Pour le mois en cours
+  const { startOfMonth, endOfMonth } = getCurrentMonth();
+  const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
+  workedHoursThisMonth.value = formatHours(hoursThisMonth);
+  //
+  clockDataMonth.value = hoursThisMonth;
 
   // Récupération des pointages de l'utilisateur
   const response_clock: response_clock = await getClockFromUser(user.value.id);
+  // console.log(response_clock);
   if (response_clock.status === 200) {
-    clocks.value = response_clock.data; // Stocke les données des pointages
-    last_clock.value = clocks.value.data; // Dernier pointage
-    last_clock_value.value = last_clock.value.status; // Statut du dernier pointage
+    clocks.value = response_clock.data;
+    last_clock.value = clocks.value.data[0];
+    last_clock_value.value = last_clock.value.status
   }
 
-  // Mise à jour de l'heure actuelle
+    // Mise à jour de l'heure actuelle
   current_time.value = moment().format('HH[h] mm[m]');
+  // console.log(moment().format('HH:mm:ss'));
+  // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
 });
 
-// ============================
-// Fonction DayCard: Recuperation du temps journalier travaille (clock)
-// ============================
-const dateNow = Date.now();
-const formattedDate = moment(dateNow).format('DD-MM-YYYY');
-clockData.value = await getClocksFromUser(user.value.id, formattedDate, formattedDate);
-const clockDays = calculateWork(clockData.value.data.data);
+const formatHours = (hours) => {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return `${h}h ${m}m`;
+};
 
-// ============================
-// Fonction WeekCard: Recuperation du temps a la semaine travaille (clock)
-// ============================
-
-
-
-// ============================
-// Fonction MonthCard: Recuperation du temps au mois travaille (clock)
-// ============================
-
-
-// ============================
-// // Fonction pour formater une date au format dd/MM
-// ============================
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-
-  return `${day}/${month}`;
+function getCurrentDay() {
+  const startOfDay = moment().startOf('day').toISOString();
+  const endOfDay = moment().endOf('day').toISOString();
+  return { startOfDay, endOfDay };
 }
 
-
-// ============================
-// Fonction pour calculer la durée en heures et minutes entre deux dates
-// ============================
-function calculateDuration(start: string, end: string) {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
-  const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
-
-  const hours = Math.floor(durationInMinutes / 60);
-  const minutes = durationInMinutes % 60;
-
-  return {
-    durationNumeric: durationInMinutes / 60,
-    durationFormatted: `${hours}h ${minutes}m`,
-  };
+function getCurrentWeek() {
+  const startOfWeek = moment().startOf('isoWeek').toISOString();
+  const endOfWeek = moment().endOf('isoWeek').toISOString();
+  return { startOfWeek, endOfWeek };
 }
 
+function getCurrentMonth() {
+  const startOfMonth = moment().startOf('month').toISOString();
+  const endOfMonth = moment().endOf('month').toISOString();
+  return { startOfMonth, endOfMonth };
+}
 
 // ============================
-// 
+// Fonction calculateWorkedHours: Recuperation du temps de travail. (clock)
 // ============================
-function calculateWork(clockEntries: any[], targetDate: string) {
-  const workByDate: Record<string, { real: number }> = {};
-  let startTime: string | null = null;
+async function calculateWorkedHours(userId, startDate, endDate) {
+  const utcStartDate = moment.utc(startDate).toISOString();
+  const utcEndDate = moment.utc(endDate).toISOString();
+  // console.log(utcStartDate, utcEndDate);
 
-  // Heure actuelle pour utiliser en cas de journée en cours
-  const now = new Date().toISOString();
+  const cardDay = await getClocksFromUser(userId, utcStartDate, utcEndDate);
+  //console.log(cardDay);
 
-  clockEntries.forEach(entry => {
-    const formattedDate = formatDate(entry.time);
+  if (cardDay.status === 404) {
+    return 0;
+  } else {
+    const clockEntries = cardDay.data.data;
+    let totalWorkedHours = 0;
+    let clockInTime = null;
 
-    // Filtrer pour la date cible
-    if (formattedDate === targetDate) {
-      // Si c'est une entrée 'true', on enregistre le début
+    if (Array.isArray(clockEntries)) {
+    clockEntries.forEach(entry => {
       if (entry.status) {
-        startTime = entry.time;
-      } 
-      // Si c'est une entrée 'false', on calcule la durée entre start et end
-      else if (startTime) {
-        const { durationNumeric } = calculateDuration(startTime, entry.time);
-        
-        // Ajout de la durée à la date correspondante
-        if (!workByDate[formattedDate]) {
-          workByDate[formattedDate] = { real: 0 };
-        }
-
-        workByDate[formattedDate].real += durationNumeric;
-        startTime = null; // Réinitialiser pour le prochain cycle
+        // Clock-in
+        clockInTime = moment(entry.time);
+      } else if (clockInTime) {
+        // Clock-out
+        const clockOutTime = moment(entry.time);
+        const duration = moment.duration(clockOutTime.diff(clockInTime));
+        totalWorkedHours += duration.asHours();
+        clockInTime = null; // Reset clock-in time
       }
-    }
-  });
-
-  // Si on a un 'true' sans 'false', on continue avec l'heure actuelle
-  if (startTime) {
-    const { durationNumeric } = calculateDuration(startTime, now);
-    if (!workByDate[targetDate]) {
-      workByDate[targetDate] = { real: 0 };
-    }
-    workByDate[targetDate].real += durationNumeric;
+    });
   }
+     
+    // L'heure actuelle pour calculer la durée.
+    if (clockInTime) {
+      const currentTime = moment.utc();
+      const duration = moment.duration(currentTime.diff(clockInTime));
+      totalWorkedHours += duration.asHours();
+    }
 
-  return Object.keys(workByDate).map(date => ({
-    name: date,
-    real: workByDate[date].real,
-  }));
+    return totalWorkedHours;
+  }
 }
 
 // ============================
 // Fonction handleChangeClock: Gestion du changement de pointage (clock)
 // ============================
 const handleChangeClock = async (checked: boolean) => {
-  last_clock_value.value = checked; // Met à jour le statut du dernier pointage
-  clock_diable.value = true; // Désactive les boutons pendant l'opération
-
-  // Création d'un nouveau pointage
-  await createClock(
-    {
-      time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), // Format UTC
-      status: last_clock_value.value, // Statut du pointage
-    },
-    user.value.id
+  last_clock_value.value = checked;
+  //console.log(last_clock_value.value);
+  clock_diable.value = true;
+  const response = await createClock(
+    { time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), status: last_clock_value.value }, user.value.id
   );
-};
+}
+
+
+
+
+
+
+
+
+watch(oneDateValue, (newValue) => {
+  if (newValue) {
+    // Extraire les détails de la date
+    const year = newValue.year;
+    const month = String(newValue.month).padStart(2, '0');
+    const day = String(newValue.day).padStart(2, '0');
+
+    const userData = user.value.id;
+
+    // Formater la date pour obtenir un format spécifique
+    const formattedDate = `${year}-${month}-${day}`;
+    console.log('Formatted Date:', formattedDate);
+
+    // Exemple: Supposons que vous avez une fonction qui récupère les heures
+    oneDayChart.value = getHoursForDate(formattedDate, userData);
+
+    // Formater les heures et mettre à jour oneDayChart
+    console.log('Date sélectionnée:', oneDayChart.value);
+  }
+});
+
+async function getHoursForDate (date, userData) {
+
+  const startOfDay = moment(date).startOf('day').toISOString();
+  const endOfDay = moment(date).endOf('day').toISOString();
+
+  const workDay = await getClocksFromUser(userData, startOfDay, endOfDay);
+  console.log(workDay.data);
+  return workDay.data.data;
+}
+
+
+// ============================
+// Jeu d'essai: Calcul des heures travaillées pour des dates en août
+// ============================
+async function testCalculateWorkedHours() {
+  const userId = 1; // ID de l'utilisateur pour le test
+
+  // Test pour une journée en août
+  const startDateDay = moment('2024-09-14').startOf('day').toISOString();
+  const endDateDay = moment('2024-09-14').endOf('day').toISOString();
+  const workedHoursDay = await calculateWorkedHours(userId, startDateDay, endDateDay);
+  //console.log(`Worked hours on 2024-09-15: ${workedHoursDay}`);
+
+  // Test pour une semaine en août
+  const startDateWeek = moment('2024-09-12').startOf('isoWeek').toISOString();
+  const endDateWeek = moment('2024-09-18').endOf('isoWeek').toISOString();
+  const workedHoursWeek = await calculateWorkedHours(userId, startDateWeek, endDateWeek);
+  //console.log(`Worked hours from 2024-09-12 to 2024-09-18: ${workedHoursWeek}`);
+
+  // Test pour le mois d'août
+  const startDateMonth = moment('2024-09-01').startOf('month').toISOString();
+  const endDateMonth = moment('2024-09-30').endOf('month').toISOString();
+  const workedHoursMonth = await calculateWorkedHours(userId, startDateMonth, endDateMonth);
+  //console.log(`Worked hours in September 2024: ${workedHoursMonth}`);
+}
+
+// Décommenter pour exécuter le jeu d'essai
+// testCalculateWorkedHours();
+
+
+
+
+
 </script>
 
 
@@ -236,21 +298,37 @@ const handleChangeClock = async (checked: boolean) => {
 
     <div class="flex-1 space-y-0 p-8 pt-6">
       <div class="flex items-center justify-between flex-wrap">
-        <Card class="h-28 min-w-52">
-          <CardHeader class="flex flex-row items-center space-y-0 pb-1 px-6 pt-3">
-            <CardTitle v-if="!last_clock_value" class="text-xl font-bold">Clock in</CardTitle>
-            <p v-else class="text-xs text-muted-foreground">Clock in</p>
+
+        <Card class="h-29 min-w-72"> <!-- Agrandir la carte en largeur -->
+          <CardHeader class="flex flex-row items-center justify-center space-y-0 pb-1 px-6 pt-3">
+            <CardTitle :class="last_clock_value ? 'text-red-500' : 'text-green-500'" class="text-xl font-bold">
+              {{ last_clock_value ? 'Fin de journée' : 'Début de journée' }}
+            </CardTitle>
           </CardHeader>
+
           <CardContent class="flex flex-col items-center justify-center text-center">
-            <div class="text-2xl font-bold text-primary flex items-center justify-center">
-              {{ current_time || "..." }}
-              <Switch class="mt-2 ml-auto" :disabled="clock_diable" :checked="last_clock_value"
+            <div class="flex items-center justify-between w-full px-6">
+              <div class="flex flex-col items-center font-bold">
+                <p class="text-xs text-muted-foreground">Arrivée</p>
+                <div class="text-sm text-muted-foreground">
+                  {{ arrivalTime || '08:00' }}
+                </div>
+              </div>
+              <Switch class="mt-2" :disabled="clock_diable" :checked="last_clock_value"
                 @update:checked="handleChangeClock" />
+              <div class="flex flex-col items-center font-bold">
+                <p class="text-xs text-muted-foreground">Départ</p>
+                <div class="text-sm text-muted-foreground">
+                  {{ departureTime || '17:00' }}
+                </div>
+              </div>
             </div>
-            <CardTitle v-if="last_clock_value" class="text-xl font-bold pt-1">Clock out</CardTitle>
-            <p v-else class="text-xs text-muted-foreground pt-1">Clock out</p>
+            <div class="text-2xl font-bold text-primary mt-2">
+              {{ "Il est " + current_time || "..." }}
+            </div>
           </CardContent>
         </Card>
+
 
         <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center flex-1">
           Tableau de bord
@@ -264,7 +342,7 @@ const handleChangeClock = async (checked: boolean) => {
               <CardTitle class="text-xl font-medium">Heures Travaillées Aujourd'hui</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold text-primary">8h 30m</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</div>
             </CardContent>
           </Card>
 
@@ -273,7 +351,7 @@ const handleChangeClock = async (checked: boolean) => {
               <CardTitle class="text-xl font-medium">Heures Travaillées Cette Semaine</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold">40h 15m</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</div>
             </CardContent>
           </Card>
 
@@ -282,7 +360,7 @@ const handleChangeClock = async (checked: boolean) => {
               <CardTitle class="text-xl font-medium">Heures Travaillées Ce Mois</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold">160h 45m</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</div>
             </CardContent>
           </Card>
         </div>
@@ -310,7 +388,7 @@ const handleChangeClock = async (checked: boolean) => {
               <Card class="h-full w-full">
                 <CardContent class="bottom-p-0 h-full">
                   <!-- Passer la date sélectionnée à Day -->
-                  <Day :oneDateValue="oneDateValue" :workingtime="workingtime" :clockData="clockData"/>
+                  <Day :oneDayChart="oneDayChart"/>
                 </CardContent>
                 </Card>
                 </div>
@@ -325,17 +403,15 @@ const handleChangeClock = async (checked: boolean) => {
                           !oneDateValue && 'text-muted-foreground',
                         )">
                           <CalendarIcon class="mr-2 h-4 w-4" />
-                          {{ oneDateValue ? df.format(oneDateValue.toDate(getLocalTimeZone())) : "Pick a date" }}
+                          {{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : "CHoisir une date" }}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent class="w-auto p-0">
                         <!-- Utiliser v-model pour récupérer la date sélectionnée -->
                         <Calendar v-model="oneDateValue"/>
                       </PopoverContent>
-                      <p>{{ oneDateValue }}</p>
+                      <p>{{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : '' }}</p>
                     </Popover>
-
-
               </div>
 
               <!-- Emploi du temps avec la date sélectionnée -->

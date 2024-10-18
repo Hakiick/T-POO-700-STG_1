@@ -105,7 +105,35 @@ clock_attrs = [
   %{time: ~N[2024-09-27 07:00:00], status: true, user_id: 1},   # Friday - Pointage d'entrée
   %{time: ~N[2024-09-27 19:00:00], status: false, user_id: 1},  # Friday - Pointage de sortie
   %{time: ~N[2024-09-28 10:00:00], status: true, user_id: 1},   # Saturday - Pointage d'entrée
-  %{time: ~N[2024-09-28 19:00:00], status: false, user_id: 1}   # Saturday - Pointage de sortie
+  %{time: ~N[2024-09-28 19:00:00], status: false, user_id: 1},   # Saturday - Pointage de sortie
+
+  # Week 6
+  %{time: ~N[2024-10-03 07:00:00], status: true, user_id: 1},   # Monday - Pointage d'entrée
+  %{time: ~N[2024-10-03 19:00:00], status: false, user_id: 1},  # Monday - Pointage de sortie
+  %{time: ~N[2024-10-04 07:00:00], status: true, user_id: 1},   # Tuesday - Pointage d'entrée
+  %{time: ~N[2024-10-04 19:00:00], status: false, user_id: 1},  # Tuesday - Pointage de sortie
+  %{time: ~N[2024-10-05 07:00:00], status: true, user_id: 1},   # Wednesday - Pointage d'entrée
+  %{time: ~N[2024-10-05 19:00:00], status: false, user_id: 1},  # Wednesday - Pointage de sortie
+  %{time: ~N[2024-10-06 07:00:00], status: true, user_id: 1},   # Thursday - Pointage d'entrée
+  %{time: ~N[2024-10-06 19:00:00], status: false, user_id: 1},  # Thursday - Pointage de sortie
+  %{time: ~N[2024-10-07 07:00:00], status: true, user_id: 1},   # Friday - Pointage d'entrée
+  %{time: ~N[2024-10-07 19:00:00], status: false, user_id: 1},  # Friday - Pointage de sortie
+  %{time: ~N[2024-10-08 10:00:00], status: true, user_id: 1},   # Saturday - Pointage d'entrée
+  %{time: ~N[2024-10-08 19:00:00], status: false, user_id: 1},  # Saturday - Pointage de sortie
+
+  # Week 7
+  %{time: ~N[2024-10-13 07:00:00], status: true, user_id: 1},   # Monday - Pointage d'entrée
+  %{time: ~N[2024-10-13 19:00:00], status: false, user_id: 1},  # Monday - Pointage de sortie
+  %{time: ~N[2024-10-14 07:00:00], status: true, user_id: 1},   # Tuesday - Pointage d'entrée
+  %{time: ~N[2024-10-14 19:00:00], status: false, user_id: 1},  # Tuesday - Pointage de sortie
+  %{time: ~N[2024-10-15 07:00:00], status: true, user_id: 1},   # Wednesday - Pointage d'entrée
+  %{time: ~N[2024-10-15 19:00:00], status: false, user_id: 1},  # Wednesday - Pointage de sortie
+  %{time: ~N[2024-10-16 07:00:00], status: true, user_id: 1},   # Thursday - Pointage d'entrée
+  %{time: ~N[2024-10-16 19:00:00], status: false, user_id: 1},  # Thursday - Pointage de sortie
+  %{time: ~N[2024-10-17 07:00:00], status: true, user_id: 1},   # Friday - Pointage d'entrée
+  %{time: ~N[2024-10-17 19:00:00], status: false, user_id: 1},  # Friday - Pointage de sortie
+  %{time: ~N[2024-10-18 10:00:00], status: true, user_id: 1},   # Saturday - Pointage d'entrée
+  %{time: ~N[2024-10-18 19:00:00], status: false, user_id: 1}   # Saturday - Pointage de sortie
 ]
 
 # Loop through each clock attribute
@@ -179,7 +207,15 @@ working_time_attrs = [
   %{start: ~N[2024-10-09 07:00:00], end: ~N[2024-10-09 16:00:00], user_id: 1}, # Wednesday
   %{start: ~N[2024-10-10 07:00:00], end: ~N[2024-10-10 16:00:00], user_id: 1}, # Thursday
   %{start: ~N[2024-10-11 07:00:00], end: ~N[2024-10-11 16:00:00], user_id: 1}, # Friday
-  %{start: ~N[2024-10-12 09:00:00], end: ~N[2024-10-12 18:00:00], user_id: 1}  # Saturday
+  %{start: ~N[2024-10-12 09:00:00], end: ~N[2024-10-12 18:00:00], user_id: 1},  # Saturday
+
+  # Week 8
+  %{start: ~N[2024-10-13 07:00:00], end: ~N[2024-10-13 16:00:00], user_id: 1}, # Monday
+  %{start: ~N[2024-10-14 07:00:00], end: ~N[2024-10-14 16:00:00], user_id: 1}, # Tuesday
+  %{start: ~N[2024-10-15 07:00:00], end: ~N[2024-10-15 16:00:00], user_id: 1}, # Wednesday
+  %{start: ~N[2024-10-16 07:00:00], end: ~N[2024-10-16 16:00:00], user_id: 1}, # Thursday
+  %{start: ~N[2024-10-17 07:00:00], end: ~N[2024-10-17 16:00:00], user_id: 1}, # Friday
+  %{start: ~N[2024-10-18 09:00:00], end: ~N[2024-10-18 18:00:00], user_id: 1}  # Saturday
 ]
 
 # Insert each working time entry if it doesn't already exist
