@@ -122,7 +122,7 @@ onMounted(async () => {
     last_clock_value.value = last_clock.value.status
   }
 
-    // Mise à jour de l'heure actuelle
+  // Mise à jour de l'heure actuelle
   current_time.value = moment().format('HH[h] mm[m]');
   // console.log(moment().format('HH:mm:ss'));
   // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
@@ -171,20 +171,20 @@ async function calculateWorkedHours(userId, startDate, endDate) {
     let clockInTime = null;
 
     if (Array.isArray(clockEntries)) {
-    clockEntries.forEach(entry => {
-      if (entry.status) {
-        // Clock-in
-        clockInTime = moment(entry.time);
-      } else if (clockInTime) {
-        // Clock-out
-        const clockOutTime = moment(entry.time);
-        const duration = moment.duration(clockOutTime.diff(clockInTime));
-        totalWorkedHours += duration.asHours();
-        clockInTime = null; // Reset clock-in time
-      }
-    });
-  }
-     
+      clockEntries.forEach(entry => {
+        if (entry.status) {
+          // Clock-in
+          clockInTime = moment(entry.time);
+        } else if (clockInTime) {
+          // Clock-out
+          const clockOutTime = moment(entry.time);
+          const duration = moment.duration(clockOutTime.diff(clockInTime));
+          totalWorkedHours += duration.asHours();
+          clockInTime = null; // Reset clock-in time
+        }
+      });
+    }
+
     // L'heure actuelle pour calculer la durée.
     if (clockInTime) {
       const currentTime = moment.utc();
@@ -211,10 +211,6 @@ const handleChangeClock = async (checked: boolean) => {
 
 
 
-
-
-
-
 watch(oneDateValue, (newValue) => {
   if (newValue) {
     // Extraire les détails de la date
@@ -229,14 +225,18 @@ watch(oneDateValue, (newValue) => {
     console.log('Formatted Date:', formattedDate);
 
     // Exemple: Supposons que vous avez une fonction qui récupère les heures
-    oneDayChart.value = getHoursForDate(formattedDate, userData);
+    // oneDayChart.value =  getHoursForDate(formattedDate, userData);
+    getHoursForDate(formattedDate, userData).then((data) => {
+      oneDayChart.value = data;
+      // console.log("asdf", oneDayChart.value[0]);
+      // console.log("asdf", data);
+    });
 
     // Formater les heures et mettre à jour oneDayChart
-    console.log('Date sélectionnée:', oneDayChart.value);
   }
 });
 
-async function getHoursForDate (date, userData) {
+async function getHoursForDate(date, userData) {
 
   const startOfDay = moment(date).startOf('day').toISOString();
   const endOfDay = moment(date).endOf('day').toISOString();
@@ -342,7 +342,8 @@ async function testCalculateWorkedHours() {
               <CardTitle class="text-xl font-medium">Heures Travaillées Aujourd'hui</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}
+              </div>
             </CardContent>
           </Card>
 
@@ -351,7 +352,8 @@ async function testCalculateWorkedHours() {
               <CardTitle class="text-xl font-medium">Heures Travaillées Cette Semaine</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h'
+                }}</div>
             </CardContent>
           </Card>
 
@@ -360,7 +362,8 @@ async function testCalculateWorkedHours() {
               <CardTitle class="text-xl font-medium">Heures Travaillées Ce Mois</CardTitle>
             </CardHeader>
             <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</div>
+              <div class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth :
+                '0h' }}</div>
             </CardContent>
           </Card>
         </div>
@@ -388,30 +391,30 @@ async function testCalculateWorkedHours() {
               <Card class="h-full w-full">
                 <CardContent class="bottom-p-0 h-full">
                   <!-- Passer la date sélectionnée à Day -->
-                  <Day :oneDayChart="oneDayChart"/>
+                  <Day :oneDayChart="oneDayChart" />
                 </CardContent>
-                </Card>
-                </div>
+              </Card>
+            </div>
 
-                <!-- Sélecteur de date et emploi du temps -->
-                <div class="col-span-1 lg:col-span-3 h-full w-full">
-                  <div class="flex items-center justify-center text-center">
-                    <Popover>
-                      <PopoverTrigger as-child>
-                        <Button variant="outline" :class="cn(
-                          'w-[280px] justify-start text-left font-normal',
-                          !oneDateValue && 'text-muted-foreground',
-                        )">
-                          <CalendarIcon class="mr-2 h-4 w-4" />
-                          {{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : "CHoisir une date" }}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent class="w-auto p-0">
-                        <!-- Utiliser v-model pour récupérer la date sélectionnée -->
-                        <Calendar v-model="oneDateValue"/>
-                      </PopoverContent>
-                      <p>{{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : '' }}</p>
-                    </Popover>
+            <!-- Sélecteur de date et emploi du temps -->
+            <div class="col-span-1 lg:col-span-3 h-full w-full">
+              <div class="flex items-center justify-center text-center">
+                <Popover>
+                  <PopoverTrigger as-child>
+                    <Button variant="outline" :class="cn(
+                      'w-[280px] justify-start text-left font-normal',
+                      !oneDateValue && 'text-muted-foreground',
+                    )">
+                      <CalendarIcon class="mr-2 h-4 w-4" />
+                      {{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : "CHoisir une date" }}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="w-auto p-0">
+                    <!-- Utiliser v-model pour récupérer la date sélectionnée -->
+                    <Calendar v-model="oneDateValue" />
+                  </PopoverContent>
+                  <p>{{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : '' }}</p>
+                </Popover>
               </div>
 
               <!-- Emploi du temps avec la date sélectionnée -->
