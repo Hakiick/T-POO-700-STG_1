@@ -39,6 +39,29 @@ defmodule TimeManager.Timesheet do
     Repo.all(from c in Clock, where: c.user_id == ^user_id, order_by: [desc: c.inserted_at])
   end
 
+  def list_clock_from_a_user!(params) do
+    get_clock_by(params)
+  end
+
+  defp get_clock_by(%{"userID" => user_id, "start" => start_time, "end" => end_time}) do
+    Repo.all(
+      from w in Clock,
+        where: w.user_id == ^user_id and w.time >= ^start_time and w.time <= ^end_time
+    )
+  end
+
+  defp get_clock_by(%{"userID" => user_id, "start" => start_time}) do
+    Repo.all(from w in Clock, where: w.user_id == ^user_id and w.time >= ^start_time)
+  end
+
+  defp get_clock_by(%{"userID" => user_id, "end" => end_time}) do
+    Repo.all(from w in Clock, where: w.user_id == ^user_id and w.time <= ^end_time)
+  end
+
+  defp get_clock_by(%{"userID" => user_id}) do
+    Repo.all(from w in Clock, where: w.user_id == ^user_id)
+  end
+
   @doc """
   Creates a clock.
 

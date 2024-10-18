@@ -14,6 +14,7 @@ defmodule TimeManagerWeb.Router do
 
     # USER Routes
     get "/users", UserController, :show_from_mail_and_username
+    get "/users/all", UserController, :index
     get "/users/:userID", UserController, :show
     post "/users", UserController, :create
     put "/users/:userID", UserController, :update
@@ -27,7 +28,8 @@ defmodule TimeManagerWeb.Router do
     delete "/workingtime/:id", WorkingTimeController, :delete
 
     # CLOCKING Routes
-    get "/clocks/:userID", ClockController, :show
+    get "/clock/:userID", ClockController, :show
+    get "/clocks/:userID", ClockController, :index
     post "/clocks/:userID", ClockController, :create
   end
 

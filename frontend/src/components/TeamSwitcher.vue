@@ -3,9 +3,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-// import CaretSortIcon from '~icons/radix-icons/caret-sort'
-// import CheckIcon from '~icons/radix-icons/check'
-// import PlusCircledIcon from '~icons/radix-icons/plus-circled'
 
 import { cn } from '../lib/utils'
 import {
