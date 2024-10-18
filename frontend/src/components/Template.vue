@@ -371,7 +371,7 @@ async function testCalculateWorkedHours() {
 
       <Tabs default-value="day" class="space-y-4 h-full w-full">
 
-        <TabsList class="flex items-center justify-center text-center">
+        <TabsList class="flex items-center justify-center text-center lg:w-[66vw]">
           <TabsTrigger value="day">
             Jour
           </TabsTrigger>
@@ -397,16 +397,16 @@ async function testCalculateWorkedHours() {
             </div>
 
             <!-- Sélecteur de date et emploi du temps -->
-            <div class="col-span-1 lg:col-span-3 h-full w-full">
+            <div class="col-span-1 lg:col-span-3 h-full w-full lg:top-[-64px] lg:relative">
               <div class="flex items-center justify-center text-center">
                 <Popover>
                   <PopoverTrigger as-child>
                     <Button variant="outline" :class="cn(
-                      'w-[280px] justify-start text-left font-normal',
+                      'w-[280px] justify-start text-left font-normal lg:mb-4',
                       !oneDateValue && 'text-muted-foreground',
                     )">
                       <CalendarIcon class="mr-2 h-4 w-4" />
-                      {{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : "CHoisir une date" }}
+                      {{ oneDateValue ? df(oneDateValue.toDate(getLocalTimeZone())) : "Choisir une date" }}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent class="w-auto p-0">
