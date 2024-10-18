@@ -1,19 +1,56 @@
 defmodule TimeManagerWeb.Router do
   use TimeManagerWeb, :router
 
-  import TimeManagerWeb.UserAuth
-
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug :accepts, ["json"]
+    # Apply JWT middleware to protect routes
+    plug Guardian.Plug.Pipeline,
+      module: TimeManager.Guardian,
+      error_handler: TimeManagerWeb.AuthErrorHandler
+  end
+
+  pipeline :api_protected do
+    plug :accepts, ["json"]
+    # Apply JWT middleware to protect routes
+    plug Guardian.Plug.EnsureAuthenticated,
+      module: TimeManager.Guardian,
+      error_handler: TimeManagerWeb.AuthErrorHandler
+  end
+
   scope "/api", TimeManagerWeb do
-    pipe_through :api
+    pipe_through :api_auth
 
     # USER Routes
+    # get "/users", UserController, :show_from_mail_and_username
+    # get "/users/:userID", UserController, :show
+    # post "/users", UserController, :create
+    # put "/users/:userID", UserController, :update
+    # delete "/users/:userID", UserController, :delete
+
+    post "/users/register", UserRegistrationController, :create
+    post "/users/confirm/:token", UserConfirmationController, :new
+    post "/users/log_in", UserSessionController, :create
+    get "/users/reset_password", UserResetPasswordController, :new
+    post "/users/reset_password", UserResetPasswordController, :create
+    get "/users/reset_password/:token", UserResetPasswordController, :edit
+    put "/users/reset_password/:token", UserResetPasswordController, :update
+  end
+
+  scope "/api", TimeManagerWeb do
+    # Protected routes require valid JWT
+    pipe_through :api_protected
+
+    # USER Routes (protected)
+    get "/users/settings", UserSettingsController, :edit
+    put "/users/settings", UserSettingsController, :update
+    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
-    post "/users", UserController, :create
     put "/users/:userID", UserController, :update
     delete "/users/:userID", UserController, :delete
 
@@ -45,38 +82,5 @@ defmodule TimeManagerWeb.Router do
       live_dashboard "/dashboard", metrics: TimeManagerWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
-  end
-
-  ## Authentication routes
-
-  scope "/", TimeManagerWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    get "/users/register", UserRegistrationController, :new
-    post "/users/register", UserRegistrationController, :create
-    get "/users/log_in", UserSessionController, :new
-    post "/users/log_in", UserSessionController, :create
-    get "/users/reset_password", UserResetPasswordController, :new
-    post "/users/reset_password", UserResetPasswordController, :create
-    get "/users/reset_password/:token", UserResetPasswordController, :edit
-    put "/users/reset_password/:token", UserResetPasswordController, :update
-  end
-
-  scope "/", TimeManagerWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/users/settings", UserSettingsController, :edit
-    put "/users/settings", UserSettingsController, :update
-    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
-  end
-
-  scope "/", TimeManagerWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-    get "/users/confirm", UserConfirmationController, :new
-    post "/users/confirm", UserConfirmationController, :create
-    get "/users/confirm/:token", UserConfirmationController, :edit
-    post "/users/confirm/:token", UserConfirmationController, :update
   end
 end

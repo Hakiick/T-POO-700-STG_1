@@ -5,11 +5,6 @@ defmodule TimeManagerWeb.UserRegistrationController do
   alias TimeManager.Accounts.User
   alias TimeManagerWeb.UserAuth
 
-  def new(conn, _params) do
-    changeset = Accounts.change_user_registration(%User{})
-    render(conn, :new, changeset: changeset)
-  end
-
   def create(conn, %{"user" => user_params}) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
@@ -20,11 +15,12 @@ defmodule TimeManagerWeb.UserRegistrationController do
           )
 
         conn
-        |> put_flash(:info, "User created successfully.")
+        |> put_status(:created)
+        |> json(%{ok: "user created"})
         |> UserAuth.log_in_user(user)
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new, changeset: changeset)
+        render(conn, :show, changeset: changeset)
     end
   end
 end

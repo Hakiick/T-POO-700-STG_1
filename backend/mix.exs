@@ -60,7 +60,7 @@ defmodule TimeManager.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:hackney, "~> 1.9"},
-      {:joken, "~> 2.6"},
+      {:guardian, "~> 2.0"},
       {:jason, "~> 1.4"},
       {:cors_plug, "~> 3.0"}
     ]

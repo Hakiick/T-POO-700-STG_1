@@ -11,6 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias TimeManager.Repo
+import TimeManager.Accounts
 alias TimeManager.Accounts.User
 alias TimeManager.Timesheet.Clock
 alias TimeManager.Timesheet.WorkingTime
@@ -18,14 +19,15 @@ alias TimeManager.Timesheet.WorkingTime
 # Create a new user with the desired attributes
 user_attrs = %{
   username: "Karl_le_pd",
-  email: "Karl_le_pd@pd.com"
+  email: "Karl_le_pd@pd.com",
+  password: "pd1234567890"
 }
 
 # Check if the user already exists to avoid duplication
 case Repo.get_by(User, email: user_attrs.email) do
   nil ->
     %User{}
-    |> User.changeset(user_attrs)
+    |> User.registration_changeset(user_attrs)
     # Use insert! to raise an error if the insert fails
     |> Repo.insert!()
 
