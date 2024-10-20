@@ -8,7 +8,7 @@ defmodule TimeManager.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"TimeManager", "contact@example.com"})
+      |> from({"TimeManager", "time-manager@kwer.fr"})
       |> subject(subject)
       |> text_body(body)
 
@@ -25,7 +25,7 @@ defmodule TimeManager.Accounts.UserNotifier do
 
     ==============================
 
-    Hi #{user.email},
+    Hi #{user.username},
 
     You can confirm your account by visiting the URL below:
 

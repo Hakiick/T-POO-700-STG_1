@@ -2,7 +2,6 @@ defmodule TimeManagerWeb.UserRegistrationController do
   use TimeManagerWeb, :controller
 
   alias TimeManager.Accounts
-  alias TimeManager.Accounts.User
   alias TimeManagerWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
@@ -11,7 +10,7 @@ defmodule TimeManagerWeb.UserRegistrationController do
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(
             user,
-            &url(~p"/users/confirm/#{&1}")
+            &url(~p"/api/users/confirm/#{&1}")
           )
 
         conn
@@ -21,6 +20,20 @@ defmodule TimeManagerWeb.UserRegistrationController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :show, changeset: changeset)
+    end
+  end
+
+  def confirm(conn, %{"token" => token}) do
+    case Accounts.confirm_user(token) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "token not found"})
+
+      _ ->
+        conn
+        |> put_status(:ok)
+        |> json(%{ok: "user confirmed"})
     end
   end
 end

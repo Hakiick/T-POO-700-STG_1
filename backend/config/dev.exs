@@ -83,3 +83,19 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Your app name here
+config :time_manager, TimeManager.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "ssl0.ovh.net",
+  username: System.get_env("OVH_SMTP_USERNAME"),
+  password: System.get_env("OVH_SMTP_PASSWORD"),
+  port: 587,
+  tls: :always,
+  auth: :always,
+  # Disable SSL
+  ssl: false,
+  retries: 1,
+  no_mx_lookups: false,
+  # Disable peer verification
+  tls_options: [verify: :verify_none]

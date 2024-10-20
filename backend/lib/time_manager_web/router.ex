@@ -15,10 +15,8 @@ defmodule TimeManagerWeb.Router do
 
   pipeline :api_protected do
     plug :accepts, ["json"]
-    # Apply JWT middleware to protect routes
-    plug Guardian.Plug.EnsureAuthenticated,
-      module: TimeManager.Guardian,
-      error_handler: TimeManagerWeb.AuthErrorHandler
+
+    plug TimeManager.Accounts.Middleware
   end
 
   scope "/api", TimeManagerWeb do
@@ -32,8 +30,8 @@ defmodule TimeManagerWeb.Router do
     # delete "/users/:userID", UserController, :delete
 
     post "/users/register", UserRegistrationController, :create
-    post "/users/confirm/:token", UserConfirmationController, :new
-    post "/users/log_in", UserSessionController, :create
+    get "/users/confirm/:token", UserRegistrationController, :confirm
+    post "/users/login", UserSessionController, :create
     get "/users/reset_password", UserResetPasswordController, :new
     post "/users/reset_password", UserResetPasswordController, :create
     get "/users/reset_password/:token", UserResetPasswordController, :edit
@@ -48,6 +46,8 @@ defmodule TimeManagerWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
+    post "/users/refresh", UserSessionController, :refresh
 
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
