@@ -13,6 +13,12 @@ defmodule TimeManagerWeb.Router do
       error_handler: TimeManagerWeb.AuthErrorHandler
   end
 
+  pipeline :api_refresh do
+    plug :accepts, ["json"]
+
+    plug TimeManager.Accounts.MiddlewareRefresh
+  end
+
   pipeline :api_protected do
     plug :accepts, ["json"]
 
@@ -40,6 +46,12 @@ defmodule TimeManagerWeb.Router do
 
   scope "/api", TimeManagerWeb do
     # Protected routes require valid JWT
+    pipe_through :api_refresh
+    get "/users/refresh", UserSessionController, :refresh
+  end
+
+  scope "/api", TimeManagerWeb do
+    # Protected routes require valid JWT
     pipe_through :api_protected
 
     # USER Routes (protected)
@@ -47,7 +59,7 @@ defmodule TimeManagerWeb.Router do
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
-    post "/users/refresh", UserSessionController, :refresh
+    # post "/users/refresh", UserSessionController, :refresh
 
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
