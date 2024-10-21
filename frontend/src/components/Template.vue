@@ -6,23 +6,17 @@ defineOptions({
   name: "HomePage",
   displayName: "Home Page",
 });
-import Overview from './Overview.vue'
-import DateRangePicker from './DateRangePicker.vue'
 import MainNav from './MainNav.vue'
 import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
-import { getUser } from '../api/apiUser'
-import WorkingTime from './WorkingTime.vue'
+import ChartRange from './ChartRange.vue';
 
-import { Button } from './ui/button'
 import { Switch } from './ui/switch'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { onMounted, ref } from 'vue'
-import { createClock, getClockFromUser } from '../api/apiClock'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Tabs, TabsContent } from './ui/tabs'
+import { onMounted, ref, computed } from 'vue'
 import moment from 'moment'
-import { useUserStore } from './store/userStore';
 import { AxiosResponse } from 'axios';
 
 // ============================
@@ -45,7 +39,8 @@ type response_clock = AxiosResponse;
 // Variables liées à l'utilisateur et aux données de pointage
 // ============================
 const userStore = useUserStore();
-const user = ref(userStore.user);
+const user = computed(() => userStore.user);
+
 const clocks = ref(null);
 const last_clock = ref(null);
 const last_clock_value = ref(false);
@@ -201,8 +196,6 @@ const handleChangeClock = async (checked: boolean) => {
 }
 </script>
 
-
-
 <template>
   <div class="flex-col flex">
     <div class="border-b">
@@ -259,9 +252,7 @@ const handleChangeClock = async (checked: boolean) => {
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full mt-7">
           <Card class="flex flex-col items-center justify-center text-center w-full">
             <CardHeader>
-              <CardTitle class="text-xl font-medium"
-                >Heures Travaillées Aujourd'hui</CardTitle
-              >
+              <CardTitle class="text-xl font-medium">Heures Travaillées Aujourd'hui</CardTitle>
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}
@@ -271,9 +262,7 @@ const handleChangeClock = async (checked: boolean) => {
 
           <Card class="flex flex-col items-center justify-center text-center w-full">
             <CardHeader>
-              <CardTitle class="text-xl font-medium"
-                >Heures Travaillées Cette Semaine</CardTitle
-              >
+              <CardTitle class="text-xl font-medium">Heures Travaillées Cette Semaine</CardTitle>
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h'
@@ -283,9 +272,7 @@ const handleChangeClock = async (checked: boolean) => {
 
           <Card class="flex flex-col items-center justify-center text-center w-full">
             <CardHeader>
-              <CardTitle class="text-xl font-medium"
-                >Heures Travaillées Ce Mois</CardTitle
-              >
+              <CardTitle class="text-xl font-medium">Heures Travaillées Ce Mois</CardTitle>
             </CardHeader>
             <CardContent>
               <div class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth :
@@ -302,37 +289,6 @@ const handleChangeClock = async (checked: boolean) => {
           <CardContent class="bottom-p-0 h-full" v-if="user">
             <ChartRange :user="user" />
           </CardContent>
-        </TabsContent>
-
-        <TabsContent value="today" class="space-y-4 h-full w-full">
-          <div
-            class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-10 h-full w-full mt-7"
-          >
-            <!-- Colonne principale (70%) -->
-            <div class="col-span-1 lg:col-span-7 space-y-4 h-full w-full">
-              <TabsList class="flex items-center justify-center text-center">
-                <TabsTrigger value="today"> Today </TabsTrigger>
-                <TabsTrigger value="overview"> Overview </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
-          <div class="col-span-1 lg:col-span-3 h-full w-full">
-            <div class="flex items-center justify-center text-center">
-              <DateRangePicker />
-              <Button>Appliquer</Button>
-            </div>
-            <Card class="h-full w-full mt-3">
-              <CardHeader>
-                <CardTitle>Temps des pointages</CardTitle>
-                <CardDescription
-                  >Temps travaillés les X derniers jours.</CardDescription
-                >
-              </CardHeader>
-              <CardContent class="bottom-p-0 h-full" v-if="user">
-                <WorkingTime :user="user" />
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </div>

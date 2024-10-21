@@ -16,7 +16,7 @@ import {
   getWorkingTimes,
   updateWorkingTime,
   WorkingTime,
-} from "@/api/apiWorkingTime.ts";
+} from "../../api/apiWorkingTime.ts";
 
 import { PlusIcon, TrashIcon } from "@radix-icons/vue";
 

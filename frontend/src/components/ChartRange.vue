@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { type Ref, onMounted, ref } from 'vue';
+import { type Ref, onMounted, ref, computed } from 'vue';
 import { useUserStore } from './store/userStore';
 import { getUser } from '../api/apiUser';
-import { getWorkingTime } from '../api/apiWorkingTime';
+import { getWorkingTimeByDate } from '../api/apiWorkingTime';
 import { getClocksFromUser } from '../api/apiClock';
 import { getChartComponent, currentChartType, chartTypes } from '../manager/chartManager';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -24,7 +24,7 @@ const df = new DateFormatter('fr-FR', {
 });
 
 const userStore = useUserStore();
-const user = ref(userStore.user);
+const user = computed(() => userStore.user);
 const workingtime = ref<any>(null);
 const clockData = ref<any>(null);
 const workDays = ref<any[]>([]);
@@ -83,7 +83,7 @@ async function fetchData() {
   );
 
   try {
-    const workingTimeResponse = await getWorkingTime(user.value.id, startDate.toISOString(), endDate.toISOString());
+    const workingTimeResponse = await getWorkingTimeByDate(user.value.id, startDate.toISOString(), endDate.toISOString());
     const clockDataResponse = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
 
     // Vérification des données récupérées, si absentes, définir des valeurs par défaut

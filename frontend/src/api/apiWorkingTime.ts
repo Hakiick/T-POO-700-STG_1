@@ -2,7 +2,13 @@ import { User } from "../components/store/userStore";
 import { apiClient } from "./api";
 import { AxiosResponse, AxiosError } from "axios";
 
-export const getWorkingTime = async (
+export interface WorkingTime {
+  id: number;
+  start: string;
+  end: string;
+}
+
+export const getWorkingTimeByDate = async (
   user_id: number,
   start: string,
   end: string,
@@ -71,5 +77,17 @@ export const deleteWorkingTime = async (working_time: WorkingTime) => {
     console.error("Error deleting working_time:", error);
     // throw error;
     return error;
+  }
+};
+
+export const getWorkingTimes = async (user: User | null) => {
+  console.log("user", user);
+  if (!user) return null;
+  try {
+    const response = await apiClient.get(`/workingtime/${user.id}`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching getWorkingTimes:", error);
+    throw error;
   }
 };
