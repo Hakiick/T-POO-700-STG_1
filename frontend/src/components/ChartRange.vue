@@ -8,13 +8,16 @@ import { getChartComponent, currentChartType, chartTypes } from '../manager/char
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { RangeCalendar } from './ui/range-calendar';
 import { cn } from '../lib/utils';
-import { CalendarDate, DateFormatter, DateValue, getLocalTimeZone } from '@internationalized/date';
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import { CalendarIcon } from '@radix-icons/vue';
-
+import { Tabs, TabsContent } from './ui/tabs';
 import { getMonday, getSunday } from '../manager/DateUtils';
-
 import type { DateRange } from 'radix-vue';
 import { Button } from './ui/button';
+
+// ============================
+// Initialisation et variables globales
+// ============================
 
 const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium',
@@ -22,7 +25,6 @@ const df = new DateFormatter('fr-FR', {
 
 const userStore = useUserStore();
 const user = ref(userStore.user);
-
 const workingtime = ref<any>(null);
 const clockData = ref<any>(null);
 const workDays = ref<any[]>([]);
@@ -42,6 +44,10 @@ const value = ref({
   ),
 }) as Ref<DateRange>;
 
+// ============================
+// Fonction exécutée au montage
+// ============================
+
 onMounted(async () => {
   if (!user.value) {
     user.value = await getUser(1);
@@ -51,12 +57,18 @@ onMounted(async () => {
   await fetchData();
 });
 
+// ============================
 // Fonction pour appliquer la nouvelle plage de dates
+// ============================
+
 async function applyDateRange() {
   await fetchData();
 }
 
-// Fonction pour récupérer les données de workingtime et clockData
+// ============================
+// Fonction pour récupérer les données
+// ============================
+
 async function fetchData() {
   const startDate = new Date(
     value.value.start.year,
@@ -64,65 +76,83 @@ async function fetchData() {
     value.value.start.day
   );
   
-  // Ajoute 1 jour à la date de fin pour inclure toute la journée
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
-    value.value.end.day + 1  // On ajoute 1 jour ici
+    value.value.end.day + 1  // Ajout d'un jour ici
   );
 
-  workingtime.value = await getWorkingTime(user.value.id, startDate.toISOString(), endDate.toISOString());
-  clockData.value = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
+  try {
+    const workingTimeResponse = await getWorkingTime(user.value.id, startDate.toISOString(), endDate.toISOString());
+    const clockDataResponse = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
 
-  console.log(workingtime.value.data.data, clockData.value.data.data);
+    // Vérification des données récupérées, si absentes, définir des valeurs par défaut
+    const workingTimeData = workingTimeResponse?.data?.data ?? [];
+    const clockDataEntries = clockDataResponse?.data?.data ?? [];
 
-  const workingDays = aggregateWorkingTime(workingtime.value.data.data);
-  const clockDays = calculateWork(clockData.value.data.data);
+    workingtime.value = workingTimeData;
+    clockData.value = clockDataEntries;
 
-  workDays.value = workingDays.map(workDay => {
-    const clockDay = clockDays.find(day => day.name === workDay.name);
-    const realTime = clockDay ? clockDay.real : 0;
+    // Si aucune donnée n'est présente, afficher des valeurs par défaut
+    const workingDays = workingTimeData.length ? aggregateWorkingTime(workingTimeData) : [{ name: 'Aucune donnée', planned: 0 }];
+    const clockDays = clockDataEntries.length ? calculateWork(clockDataEntries) : [{ name: 'Aucune donnée', real: 0 }];
 
-    return {
-      name: workDay.name,
-      planned: workDay.planned,
-      real: realTime,
-    };
-  });
+    workDays.value = workingDays.map(workDay => {
+      const clockDay = clockDays.find(day => day.name === workDay.name);
+      const realTime = clockDay ? clockDay.real : 0;
 
-  data.value = workDays.value.map(day => ({
-    name: day.name,
-    planned: day.planned,
-    real: day.real,
-  }));
+      return {
+        name: workDay.name,
+        planned: workDay.planned,
+        real: realTime,
+      };
+    });
 
-  workingDataTable.value = createDataTable(workingtime.value.data.data, clockData.value.data.data);
+    data.value = workDays.value.length ? workDays.value : [{ name: 'Aucune donnée', planned: 0, real: 0 }];
+    workingDataTable.value = createDataTable(workingTimeData, clockDataEntries);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données : ", error);
+  }
 }
 
-function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
-  console.log(workingTimeEntries, clockEntries);
+// ============================
+// Fonction pour créer un tableau de données
+// ============================
 
-  // Créer un tableau vide pour stocker les résultats
+function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
+
   let dataTable = [];
 
-  // Parcourir les entrées du temps de travail
   workingTimeEntries.forEach((workingTime) => {
-    // Rechercher les entrées de pointage correspondant à la date de travail (start et end)
     const clockStart = clockEntries.find((clock) => clock.status === true && new Date(clock.time).toDateString() === new Date(workingTime.start).toDateString());
     const clockEnd = clockEntries.find((clock) => clock.status === false && new Date(clock.time).toDateString() === new Date(workingTime.end).toDateString());
 
-    // Ajouter une ligne avec les données correspondantes
     dataTable.push({
-      date: new Date(workingTime.start).toLocaleDateString(), // Format de la date
-      startTime: new Date(workingTime.start).toLocaleTimeString(), // Heure de début
-      endTime: new Date(workingTime.end).toLocaleTimeString(), // Heure de fin
-      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A', // Pointage début
-      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A' // Pointage fin
+      date: new Date(workingTime.start).toLocaleDateString(),
+      startTime: new Date(workingTime.start).toLocaleTimeString(),
+      endTime: new Date(workingTime.end).toLocaleTimeString(),
+      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A',  // Valeur par défaut N/A
+      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A'        // Valeur par défaut N/A
     });
   });
 
+  // Si aucune donnée n'est présente
+  if (!dataTable.length) {
+    dataTable.push({
+      date: 'Aucune donnée',
+      startTime: 'N/A',
+      endTime: 'N/A',
+      clockStart: 'N/A',
+      clockEnd: 'N/A',
+    });
+  }
+
   return dataTable;
 }
+
+// ============================
+// Fonctions utilitaires pour l'agrégation des temps de travail et les calculs
+// ============================
 
 function aggregateWorkingTime(workingTimeEntries: any[]) {
   const aggregated: Record<string, { planned: number }> = {};

@@ -8,7 +8,7 @@
 export function getMonday(d: Date): Date {
     const date = new Date(d)
     const day = date.getDay()
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1) // Adjust for Sunday (day 0)
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1)
     return new Date(date.setDate(diff))
   }
   
@@ -19,6 +19,6 @@ export function getMonday(d: Date): Date {
    */
   export function getSunday(d: Date): Date {
     const monday = getMonday(d)
-    return new Date(monday.getTime() + 6 * 24 * 60 * 60 * 1000) // Add 6 days to Monday
+    return new Date(monday.getTime() + 6 * 24 * 60 * 60 * 1000)
   }
   

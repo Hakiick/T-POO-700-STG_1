@@ -62,7 +62,7 @@ const workedHoursToday = ref<string | null>(null);
 const workedHoursThisWeek = ref<string | null>(null);
 const workedHoursThisMonth = ref<string | null>(null);
 const arrivalTime = ref<string | null>(null);
-const departureTime = ref<string | null>(null);
+const workTime = ref<string | null>(null);
 // ============================
 // Variables liées à la date sélectionnée
 // ============================
@@ -76,12 +76,10 @@ onMounted(async () => {
   if (!user.value) {
     user.value = await getUser(1);
   }
-  // console.log(user.value);
 
   // ============================
-  // Fonction DayCard: Recuperation du temps journalier travaille (clock) oneDateValue
+  // Fonction DayCard: Recuperation du temps journalier travaille (clock)
   // ============================
-  // Pour le jour en cours
   const { startOfDay, endOfDay } = getCurrentDay();
   const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
   workedHoursToday.value = formatHours(hoursToday);
@@ -90,30 +88,40 @@ onMounted(async () => {
   const { startOfWeek, endOfWeek } = getCurrentWeek();
   const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
   workedHoursThisWeek.value = formatHours(hoursThisWeek);
-  //
-  clockDataWeek.value = hoursThisWeek;
 
   // Pour le mois en cours
   const { startOfMonth, endOfMonth } = getCurrentMonth();
   const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
   workedHoursThisMonth.value = formatHours(hoursThisMonth);
-  //
-  clockDataMonth.value = hoursThisMonth;
 
-  // Récupération des pointages de l'utilisateur
+  // Récupérer les horodatages de l'utilisateur
   const response_clock: response_clock = await getClockFromUser(user.value.id);
-  // console.log(response_clock);
+
   if (response_clock.status === 200) {
     clocks.value = response_clock.data;
     last_clock.value = clocks.value.data[0];
-    last_clock_value.value = last_clock.value.status
+    last_clock_value.value = last_clock.value.status;
+
+    // Récupérer l'heure d'arrivée (plus récent statut `true`)
+    const lastTrueClock = clocks.value.data.find((entry) => entry.status === true);
+    if (lastTrueClock) {
+      arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
+    } else {
+      arrivalTime.value = null; // Pas d'heure de pointage trouvée
+    }
   }
 
-  // Mise à jour de l'heure actuelle
+  // Mise à jour de l'heure actuelle et calcul du temps travaillé si `arrivalTime` est défini
   current_time.value = moment().format('HH[h] mm[m]');
-  // console.log(moment().format('HH:mm:ss'));
-  // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
+  if (arrivalTime.value) {
+    const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+    const duration = moment.duration(moment().diff(arrivalMoment));
+    workTime.value = formatHours(duration.asHours());
+  } else {
+    workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
+  }
 });
+
 
 const formatHours = (hours) => {
   const h = Math.floor(hours);
@@ -214,7 +222,7 @@ const handleChangeClock = async (checked: boolean) => {
     <div class="flex-1 space-y-0 p-8 pt-6">
       <div class="flex items-center justify-between flex-wrap">
 
-        <Card class="h-29 min-w-72"> <!-- Agrandir la carte en largeur -->
+        <Card class="h-29 w-full md:w-auto sm:min-w-72">
           <CardHeader class="flex flex-row items-center justify-center space-y-0 pb-1 px-6 pt-3">
             <CardTitle :class="last_clock_value ? 'text-red-500' : 'text-green-500'" class="text-xl font-bold">
               {{ last_clock_value ? 'Fin de journée' : 'Début de journée' }}
@@ -226,20 +234,20 @@ const handleChangeClock = async (checked: boolean) => {
               <div class="flex flex-col items-center font-bold">
                 <p class="text-xs text-muted-foreground">Arrivée</p>
                 <div class="text-sm text-muted-foreground">
-                  {{ arrivalTime || '08:00' }}
+                  {{ arrivalTime || '...' }}
                 </div>
               </div>
               <Switch class="mt-2" :disabled="clock_diable" :checked="last_clock_value"
                 @update:checked="handleChangeClock" />
               <div class="flex flex-col items-center font-bold">
-                <p class="text-xs text-muted-foreground">Départ</p>
+                <p class="text-xs text-muted-foreground">Heure actuelle</p>
                 <div class="text-sm text-muted-foreground">
-                  {{ departureTime || '17:00' }}
+                  {{ current_time || '...' }}
                 </div>
               </div>
             </div>
             <div class="text-2xl font-bold text-primary mt-2">
-              {{ "Il est " + current_time || "..." }}
+              {{ "Vous avez pointé il y a : " + workTime || "..." }}
             </div>
           </CardContent>
         </Card>
