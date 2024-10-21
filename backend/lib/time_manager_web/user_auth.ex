@@ -23,7 +23,7 @@ defmodule TimeManagerWeb.UserAuth do
       Guardian.encode_and_sign(user, %{}, token_type: "refresh")
 
     {:ok, acces_token, _full_claims} =
-      Guardian.encode_and_sign(user, %{}, token_type: "acces_token")
+      Guardian.encode_and_sign(user, %{}, token_type: "access")
 
     conn
     # |> put_resp_cookie("auth_token", jwt, http_only: true)
@@ -46,7 +46,7 @@ defmodule TimeManagerWeb.UserAuth do
           Guardian.encode_and_sign(user, %{}, ttl: {1, :hours})
 
         conn
-        |> json(%{refresh_token: new_token, message: "token refreshed successfully."})
+        |> json(%{access_token: new_token, message: "token refreshed successfully."})
     end
   end
 end

@@ -15,11 +15,16 @@ defmodule TimeManagerWeb.UserRegistrationController do
 
         conn
         |> put_status(:created)
-        |> json(%{ok: "user created"})
+        # |> json(%{ok: "user created"})
         |> UserAuth.log_in_user(user)
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        # conn
+        # |> put_status(:bad_request)
+
         render(conn, :show, changeset: changeset)
+        # |> put_status(:bad_request)
+        # |> json(%{error: changeset.errors.full_messages})
     end
   end
 

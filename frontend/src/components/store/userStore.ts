@@ -8,6 +8,9 @@ export interface User {
   email: string;
 }
 
+const accessToken = ref<string | null>(null);
+const refreshToken = ref<string | null>(null);
+
 const user = ref<User | null>(null);
 
 export const useUserStore = defineStore("user", () => {
@@ -17,9 +20,13 @@ export const useUserStore = defineStore("user", () => {
     user.value = userInfo;
   };
 
-  const clearUser = () => {
+  const logout = () => {
     user.value = null;
+    accessToken.value = null;
+    refreshToken.value = null;
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
   };
 
-  return { user, setUser, clearUser };
+  return { user, accessToken, refreshToken, setUser, logout };
 });

@@ -61,8 +61,8 @@ async function onSubmitSignUp(event: Event) {
   isLoadingSignUp.value = true
 
   // console.log({ email: emailSignup.value, username: passwordSignup.value })
-  const response = await createUser(passwordSignup.value, emailSignup.value)
-  console.log(response.data)
+  const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
+  console.log(response)
   if (response.data.id) {
     //navitage to home page 
     console.log("created")
@@ -70,8 +70,9 @@ async function onSubmitSignUp(event: Event) {
     router.push({ name: 'home' })
   }
   //catch error 
-  if (response.status === 400) {
-    errorMessageSignUp.value = "error has occured"
+  if (response.data.errors) {
+    // console.log(response)
+    errorMessageSignUp.value = response.data.errors
     return
   }
 
@@ -82,11 +83,8 @@ async function onSubmitSignUp(event: Event) {
 <template>
   <div class="flex flex-col md:flex-row min-h-screen">
     <!-- Première div (Sign In) -->
-    <div
-      class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signin'"
-      @mouseleave="activeDiv = null"
-    >
+    <div class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
+      @mouseenter="activeDiv = 'signin'" @mouseleave="activeDiv = null">
       <div v-if="activeDiv === 'signup'">
         <!-- Image de Batman pour l'autre div -->
         <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
@@ -103,15 +101,13 @@ async function onSubmitSignUp(event: Event) {
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email">Email</Label>
-              <Input id="email" placeholder="name@example.com" type="email"
-                auto-capitalize="none" auto-complete="email" auto-correct="off" :disabled="isLoadingSignIn"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-              />
+              <Input id="email" placeholder="name@example.com" type="email" auto-capitalize="none" auto-complete="email"
+                auto-correct="off" :disabled="isLoadingSignIn"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             </div>
             <Input id="password" placeholder="Enter your password" type="password" auto-capitalize="none"
               auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-            />
+              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignIn">
               Sign In with Email
             </Button>
@@ -132,8 +128,7 @@ async function onSubmitSignUp(event: Event) {
         <p class="text-xs text-center text-gray-500">
           <input type="checkbox" id="agree-signin" v-model="isCheckedSignIn"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignIn"
-          />
+            :disabled="isLoadingSignIn" />
           By clicking continue, you agree to our
           <a href="#" class="underline">Terms of Service</a> and
           <a href="#" class="underline">Privacy Policy</a>.
@@ -147,11 +142,8 @@ async function onSubmitSignUp(event: Event) {
     </div>
 
     <!-- Deuxième div (Create an account) -->
-    <div
-      class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signup'"
-      @mouseleave="activeDiv = null"
-    >
+    <div class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
+      @mouseenter="activeDiv = 'signup'" @mouseleave="activeDiv = null">
       <div v-if="activeDiv === 'signin'">
         <!-- Image pour l'autre div -->
         <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
@@ -170,13 +162,11 @@ async function onSubmitSignUp(event: Event) {
               <Label class="sr-only" for="email-signup">Email</Label>
               <Input v-model="emailSignup" id="email-signup" placeholder="name@example.com" type="email"
                 auto-capitalize="none" auto-complete="email" auto-correct="off" :disabled="isLoadingSignUp"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-              />
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             </div>
             <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
               auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800"
-            />
+              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignUp">
               Sign Up
             </Button>
@@ -197,8 +187,7 @@ async function onSubmitSignUp(event: Event) {
         <p class="text-xs text-center text-gray-500">
           <input type="checkbox" id="agree-signup" v-model="isCheckedSignUp"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignUp"
-          />
+            :disabled="isLoadingSignUp" />
           By clicking continue, you agree to our
           <a href="#" class="underline">Terms of Service</a> and
           <a href="#" class="underline">Privacy Policy</a>.
@@ -212,4 +201,3 @@ async function onSubmitSignUp(event: Event) {
     </div>
   </div>
 </template>
-
