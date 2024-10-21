@@ -28,9 +28,10 @@ defmodule TimeManagerWeb.ClockController do
     end
   end
 
-  def create(conn, %{"clock" => clock_params, "userID" => user_id}) do
+  def create(conn, %{"clock_status" => clock_status, "userID" => user_id}) do
     # Merge the user_id into clock_params
-    clock_params = Map.put(clock_params, "user_id", user_id)
+    # clock_params = Map.put(clock_params, "user_id", user_id)
+    clock_params = %{"user_id" => user_id, "time" => DateTime.utc_now(), "status" => clock_status}
 
     # Insert the clock into the database
     with {:ok, %Clock{} = clock} <- Timesheet.create_clock(clock_params) do
@@ -46,10 +47,10 @@ defmodule TimeManagerWeb.ClockController do
 
       conn
       |> put_status(:created)
-      |> json(%{data: "created"})
+      # |> json(%{data: "created"})
 
       # |> put_resp_header("location", ~p"/api/clocks/#{clock}")
-      # |> render(:show, clock: clock)
+      |> render(:show, clock: clock)
     end
   end
 
