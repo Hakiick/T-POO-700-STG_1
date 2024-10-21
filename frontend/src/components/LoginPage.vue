@@ -22,7 +22,7 @@ const passwordSignup = ref('')
 const userStore = useUserStore()
 
 // Variable pour suivre quelle div est actuellement active
-const activeDiv = ref<'signin' | 'signup' | null>(null)
+const activeDiv = ref<'signin' | 'signup' | 'batman'>('batman')
 
 async function onSubmitSignIn(event: Event) {
   event.preventDefault()
@@ -61,7 +61,7 @@ async function onSubmitSignUp(event: Event) {
   isLoadingSignUp.value = true
 
   // console.log({ email: emailSignup.value, username: passwordSignup.value })
-  const response = await createUser(passwordSignup.value, emailSignup.value)
+  const response = await createUser(passwordSignup, emailSignup.value)
   console.log(response.data)
   if (response.data.id) {
     //navitage to home page 
@@ -80,25 +80,20 @@ async function onSubmitSignUp(event: Event) {
 </script>
 
 <template>
-  <div class="flex flex-col md:flex-row min-h-screen">
-    <!-- Première div (Sign In) -->
-    <div
-      class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signin'"
-      @mouseleave="activeDiv = null"
-    >
-      <div v-if="activeDiv === 'signup'">
-        <!-- Image de Batman pour l'autre div -->
+  <div class="flex flex-col min-h-screen bg-gray-900 text-white">
+    <!-- Contenu principal -->
+    <div class="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+      <!-- Image de Batman -->
+      <div v-if="activeDiv === 'batman'">
         <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
       </div>
-      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signin' || activeDiv === null">
-        <!-- Titre -->
+
+      <!-- Formulaire Sign In -->
+      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signin'">
         <div class="text-center">
           <h2 class="text-2xl md:text-3xl font-bold">Sign In</h2>
           <p class="mt-2 text-sm md:text-base text-gray-400">Enter your email below to sign in</p>
         </div>
-
-        <!-- Formulaire -->
         <form @submit="onSubmitSignIn" class="space-y-6">
           <div class="space-y-4">
             <div>
@@ -116,8 +111,6 @@ async function onSubmitSignUp(event: Event) {
               Sign In with Email
             </Button>
           </div>
-
-          <!-- Séparateur -->
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
               <span class="w-full border-t border-gray-600"></span>
@@ -127,8 +120,6 @@ async function onSubmitSignUp(event: Event) {
             </div>
           </div>
         </form>
-
-        <!-- Conditions générales -->
         <p class="text-xs text-center text-gray-500">
           <input type="checkbox" id="agree-signin" v-model="isCheckedSignIn"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -138,32 +129,17 @@ async function onSubmitSignUp(event: Event) {
           <a href="#" class="underline">Terms of Service</a> and
           <a href="#" class="underline">Privacy Policy</a>.
         </p>
-
-        <!-- Message d'erreur -->
         <p v-if="errorMessageSignIn" class="text-red-500 text-sm text-center">
           {{ errorMessageSignIn }}
         </p>
       </div>
-    </div>
 
-    <!-- Deuxième div (Create an account) -->
-    <div
-      class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signup'"
-      @mouseleave="activeDiv = null"
-    >
-      <div v-if="activeDiv === 'signin'">
-        <!-- Image pour l'autre div -->
-        <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
-      </div>
-      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signup' || activeDiv === null">
-        <!-- Titre -->
+      <!-- Formulaire Sign Up -->
+      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signup'">
         <div class="text-center">
           <h2 class="text-2xl md:text-3xl font-bold">Create an account</h2>
           <p class="mt-2 text-sm md:text-base text-gray-400">Enter your email below to create your account</p>
         </div>
-
-        <!-- Formulaire -->
         <form @submit="onSubmitSignUp" class="space-y-6">
           <div class="space-y-4">
             <div>
@@ -181,8 +157,6 @@ async function onSubmitSignUp(event: Event) {
               Sign Up
             </Button>
           </div>
-
-          <!-- Séparateur -->
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
               <span class="w-full border-t border-gray-600"></span>
@@ -192,8 +166,6 @@ async function onSubmitSignUp(event: Event) {
             </div>
           </div>
         </form>
-
-        <!-- Conditions générales -->
         <p class="text-xs text-center text-gray-500">
           <input type="checkbox" id="agree-signup" v-model="isCheckedSignUp"
             class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -203,13 +175,16 @@ async function onSubmitSignUp(event: Event) {
           <a href="#" class="underline">Terms of Service</a> and
           <a href="#" class="underline">Privacy Policy</a>.
         </p>
-
-        <!-- Message d'erreur -->
         <p v-if="errorMessageSignUp" class="text-red-500 text-sm text-center">
           {{ errorMessageSignUp }}
         </p>
       </div>
+
+      <!-- Boutons en dessous des formulaires -->
+      <div class="flex justify-center space-x-4 p-4">
+        <Button @click="activeDiv = 'signup'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">Create</Button>
+        <Button @click="activeDiv = 'signin'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">Login</Button>
+      </div>
     </div>
   </div>
 </template>
-
