@@ -60,3 +60,14 @@ export const deleteUser = async (user: User) : Promise<Boolean> => {
     return error;
   }
 };
+
+// Example: Confirm a user
+export const confirmUser = async (token: string): Promise<boolean> => {
+  try {
+    const response = await apiClient.get(`/users/confirm/${token}`);
+    return response.data.success;
+  } catch (error) {
+    console.error("Error confirming user:", error);
+    return false;
+  }
+}
