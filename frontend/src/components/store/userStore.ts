@@ -1,5 +1,5 @@
 // stores/useUserStore.js
-import { getCurrentUser, loginUser } from "@/api/apiUser";
+import { getCurrentUser } from "@/api/apiUser";
 import router from "@/router";
 import { defineStore } from "pinia";
 import { ref } from "vue";
