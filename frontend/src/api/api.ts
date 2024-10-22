@@ -18,13 +18,14 @@ export const apiClientProtected: AxiosInstance = axios.create({
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+    "Cache-Control": "max-age=60",
   },
 });
 
-// Request interceptor to attach access token
-// apiClient.interceptors.request.use(
+// // Request interceptor to attach access token
+// axios.interceptors.request.use(
 //   (config) => {
-//     const accessToken = userStore.accessToken;
+//     const accessToken = sessionStorage.getItem("access_token");
 //     if (accessToken) {
 //       config.headers["Authorization"] = `Bearer ${accessToken}`;
 //     }
@@ -34,7 +35,7 @@ export const apiClientProtected: AxiosInstance = axios.create({
 //     return Promise.reject(error);
 //   },
 // );
-
+//
 // Response interceptor to handle token expiration and refresh token logic
 // apiClient.interceptors.response.use(
 //   (response) => {

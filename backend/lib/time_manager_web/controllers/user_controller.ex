@@ -9,7 +9,10 @@ defmodule TimeManagerWeb.UserController do
   def get_from_jwt(conn, _params) do
     try do
       user = Guardian.Plug.current_resource(conn)
-      render(conn, :show, user: user)
+
+      conn
+      |> put_resp_header("cache-control", "private, max-age=3600")
+      |> render(:show, user: user)
     rescue
       Ecto.NoResultsError ->
         conn

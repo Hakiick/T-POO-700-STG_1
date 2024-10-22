@@ -137,22 +137,6 @@ const handleChangeClock = async (checked: boolean) => {
 
 watch(() => user.value, async (newUser) => {
   if (newUser) {
-    // ============================
-    // Fonction DayCard: Recuperation du temps journalier travaille (clock)
-    // ============================
-    const { startOfDay, endOfDay } = getCurrentDay();
-    const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
-    workedHoursToday.value = formatHours(hoursToday);
-
-    // Pour la semaine en cours
-    const { startOfWeek, endOfWeek } = getCurrentWeek();
-    const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
-    workedHoursThisWeek.value = formatHours(hoursThisWeek);
-
-    // Pour le mois en cours
-    const { startOfMonth, endOfMonth } = getCurrentMonth();
-    const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
-    workedHoursThisMonth.value = formatHours(hoursThisMonth);
 
     // ============================
     // fetch clock avec le nouvel utilisateur
@@ -178,7 +162,25 @@ watch(() => user.value, async (newUser) => {
       } else {
         workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
       }
+
+      // ============================
+      // Fonction DayCard: Recuperation du temps journalier travaille (clock)
+      // ============================
+      const { startOfDay, endOfDay } = getCurrentDay();
+      const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
+      workedHoursToday.value = formatHours(hoursToday);
+
+      // Pour la semaine en cours
+      const { startOfWeek, endOfWeek } = getCurrentWeek();
+      const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
+      workedHoursThisWeek.value = formatHours(hoursThisWeek);
+
+      // Pour le mois en cours
+      const { startOfMonth, endOfMonth } = getCurrentMonth();
+      const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
+      workedHoursThisMonth.value = formatHours(hoursThisMonth);
     }
+
   }
 });
 </script>
