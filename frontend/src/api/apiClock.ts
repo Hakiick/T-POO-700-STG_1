@@ -20,6 +20,8 @@ export const getClockFromUser = async (
 
 export const getClocksFromUser = async (
   user_id: number,
+  start: string,
+  end: string,
 ): Promise<AxiosResponse> => {
   try {
     const response = await apiClientProtected.get(`/clocks/${user_id}`);

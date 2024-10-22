@@ -1,3 +1,4 @@
+import { AxiosError, AxiosResponse } from "axios";
 import { User } from "../components/store/userStore";
 import { apiClientProtected } from "./api";
 
@@ -7,16 +8,25 @@ export interface WorkingTime {
   end: string;
 }
 
-// Example: Fetch users from the API
-export const getWorkingTimes = async (user: User | null) => {
-  console.log("user", user);
-  if (!user) return null;
+export const getWorkingTimeByDate = async (
+  user_id: number,
+  start: string,
+  end: string,
+): Promise<AxiosResponse | null> => {
   try {
-    const response = await apiClientProtected.get(`/workingtime/${user.id}`);
-    return response.data.data;
-  } catch (error) {
-    console.error("Error fetching getWorkingTimes:", error);
-    throw error;
+    const response = await apiClientProtected.get(
+      `/workingtime/${user_id}?start=${start}&end=${end}`,
+    );
+    return response;
+  } catch (error: AxiosError | any) {
+    if (error.response?.status !== 404) {
+      console.error("Error fetching working time:", error);
+    } else {
+      console.warn(
+        "No working time found for this user within the date range.",
+      );
+    }
+    return null;
   }
 };
 
@@ -74,3 +84,14 @@ export const deleteWorkingTime = async (working_time: WorkingTime) => {
     return error;
   }
 };
+
+export const getWorkingTimes = async (user: User | null) => {
+  console.log("user", user);
+  if (!user) return null;
+  try {
+    const response = await apiClientProtected.get(`/workingtime/${user.id}`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching getWorkingTimes:", error);
+    throw error;
+  }

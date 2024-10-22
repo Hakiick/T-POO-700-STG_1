@@ -63,6 +63,7 @@ defmodule TimeManagerWeb.Router do
 
     get "/user", UserController, :get_from_jwt
     get "/users", UserController, :show_from_mail_and_username
+    get "/users/all", UserController, :index
     get "/users/:userID", UserController, :show
     put "/users/:userID", UserController, :update
     delete "/users/:userID", UserController, :delete
