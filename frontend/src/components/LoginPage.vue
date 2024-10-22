@@ -19,7 +19,7 @@ const passwordSignup = ref('')
 
 const userStore = useUserStore()
 
-const activeDiv = ref<'signin' | 'signup' | 'batman'>('batman')
+const activeDiv = ref<'signin' | 'signup' | 'gotham'>('gotham')
 
 async function onSubmitSignIn(event: Event) {
   event.preventDefault()
@@ -70,12 +70,12 @@ async function onSubmitSignUp(event: Event) {
 <template>
   <div class="flex flex-col min-h-screen bg-gray-900 text-white">
     <!-- Gradient Background with reduced margin -->
-    <div class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 mx-4 md:mx-8 my-4 md:my-8 bg-gradient-to-r from-purple-600/80 via-indigo-800/70 to-navy-900/60 rounded-xl">
+      
       <!-- Main content -->
       <div class="flex flex-col items-center justify-center p-6 bg-gray-900 rounded-lg shadow-lg w-full max-w-lg">
-        <!-- Batman Image -->
-        <div v-if="activeDiv === 'batman'">
-          <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
+        <!-- gotham Image -->
+        <div v-if="activeDiv === 'gotham'">
+          <img src="./ui/images/gotham.jpg" alt="gotham coding" class="w-full max-w-xs md:max-w-md" />
         </div>
 
         <!-- Sign In Form -->
@@ -156,8 +156,12 @@ async function onSubmitSignUp(event: Event) {
 
         <!-- Buttons below the forms -->
         <div class="flex justify-center space-x-4 p-4">
-          <Button @click="activeDiv = 'signup'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">Create</Button>
-          <Button @click="activeDiv = 'signin'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">Login</Button>
+            <Button v-if="activeDiv !== 'signup'" @click="activeDiv = 'signup'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">
+    Create
+  </Button>
+            <Button v-if="activeDiv !== 'signin'" @click="activeDiv = 'signin'" class="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-md">
+    Login
+  </Button>
         </div>
       </div>
     </div>
