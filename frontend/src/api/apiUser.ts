@@ -8,6 +8,26 @@ async function hashPassword(password: string) {
   return bufferToHex(hash);
 }
 
+// Fonction pour valider l'email avec une expression régulière
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Fonction pour valider le mot de passe (longueur, caractère spéciaux, etc.)
+function isValidPassword(password: string): boolean {
+  // Vérifie si le mot de passe fait au moins 8 caractères et contient un nombre et une lettre
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  return passwordRegex.test(password);
+}
+
+// Vérification pour les noms d'utilisateur (pas de caractères spéciaux)
+function isValidUsername(username: string): boolean {
+  // Autorise uniquement les lettres, les chiffres, les underscores
+  const usernameRegex = /^[A-Za-z0-9_]+$/;
+  return usernameRegex.test(username);
+}
+
 function bufferToHex(buffer: ArrayBuffer) {
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -25,28 +45,38 @@ export const getUser = async (user_id: number) => {
   }
 };
 
-// Example: Create a new user
+// Fonction de création d'un utilisateur
 export const createUser = async (
   username: string,
   email: string,
   password: string,
 ) => {
+
+  if (!isValidEmail(email)) {
+    console.error("Invalid email format");
+  }
+
+  if (!isValidPassword(password)) {
+    console.error("Password must be at least 8 characters long, contain at least one letter and one number");
+  }
+
+  if (!isValidUsername(username)) {
+    console.error("Username can only contain letters, numbers, and underscores");
+  }
+
   try {
-    const hashedpassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(password);
     const response = await apiClient.post("/users/register", {
       user: {
         username,
         email,
-        password: hashedpassword,
+        password: hashedPassword,
       },
     });
-    // if (response.status !== 201) {
-    //   return response.data.errors;
-    // }
+
     return response;
   } catch (error) {
     console.error("Error creating user:", error);
-    // throw error;
     return error;
   }
 };
