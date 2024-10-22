@@ -10,24 +10,16 @@ import MainNav from './MainNav.vue'
 import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
-import { getUser } from '../api/apiUser'
-import WorkingTime from './WorkingTime.vue'
 import ChartRange from './ChartRange.vue';
 
 import { Switch } from './ui/switch'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { computed, onMounted, ref } from 'vue'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Tabs, TabsContent } from './ui/tabs'
+import { computed, onMounted, ref, watch } from 'vue'
 import { createClock, getClockFromUser, getClocksFromUser } from '../api/apiClock';
 import moment from 'moment'
 import { useUserStore } from './store/userStore';
-import { AxiosResponse } from 'axios';
 import { useClockStore } from './store/clockStore';
-import { AxiosResponse } from 'axios';
-
-type response_clock = AxiosResponse;
 
 const userStore = useUserStore()
 const clockStore = useClockStore()
@@ -37,100 +29,33 @@ const clockStore = useClockStore()
 // ============================
 const user = computed(() => userStore.user);
 
-const clocks = ref(null);
-const last_clock = ref(null);
-const last_clock_value = ref(false);
+const clocks = computed(() => clockStore.clocks);
+// const last_clock = computed(() => clockStore.lastClock);
+const last_clock_value = computed(() => clockStore.lastClock?.status);
 const clock_disable = ref(false);
 const current_time = ref("");
-const clockDataWeek = ref<any>(null);
-const clockDataMonth = ref<any>(null);
+
+// const clockDataWeek = ref<any>(null);
+// const clockDataMonth = ref<any>(null);
 const workedHoursToday = ref<string | null>(null);
 const workedHoursThisWeek = ref<string | null>(null);
 const workedHoursThisMonth = ref<string | null>(null);
 const arrivalTime = ref<string | null>(null);
 const workTime = ref<string | null>(null);
-// ============================
-// Variables liées à la date sélectionnée
-// ============================
 
-const df = (date: Date) => moment(date).format('DD-MM-YYYY');
+// const df = (date: Date) => moment(date).format('DD-MM-YYYY');
 
 // ============================
 // onMounted: Initialisation des données au montage du composant
 // ============================
 onMounted(async () => {
-  // if (!user.value) {
-  //   const response = await getUser(1);
-  //   // console.log("response", response);
-  //   userStore.setUser(response);
-  // }
-  userStore.login()
+  await userStore.login()
   console.log("usertest", user.value);
-
   // console.log(moment().format('HH:mm:ss'));
   // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
-
-  // console.log(moment().format('HH:mm:ss'));
-  // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
-  // ============================
-  // Fonction DayCard: Recuperation du temps journalier travaille (clock)
-  // ============================
-  const { startOfDay, endOfDay } = getCurrentDay();
-  const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
-  workedHoursToday.value = formatHours(hoursToday);
-
-  // Pour la semaine en cours
-  const { startOfWeek, endOfWeek } = getCurrentWeek();
-  const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
-  workedHoursThisWeek.value = formatHours(hoursThisWeek);
-
-  // Pour le mois en cours
-  const { startOfMonth, endOfMonth } = getCurrentMonth();
-  const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
-  workedHoursThisMonth.value = formatHours(hoursThisMonth);
-
-  // Récupérer les horodatages de l'utilisateur
-  const response_clock: response_clock = await getClockFromUser(user.value.id);
-
-  if (response_clock.status === 200) {
-    clocks.value = response_clock.data;
-    last_clock.value = clocks.value.data[0];
-    last_clock_value.value = last_clock.value.status;
-
-    // Récupérer l'heure d'arrivée (plus récent statut `true`)
-    const lastTrueClock = clocks.value.data.find((entry) => entry.status === true);
-    if (lastTrueClock) {
-      arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
-    } else {
-      arrivalTime.value = null; // Pas d'heure de pointage trouvée
-    }
-  }
-
-  // Mise à jour de l'heure actuelle et calcul du temps travaillé si `arrivalTime` est défini
-  current_time.value = moment().format('HH[h] mm[m]');
-  if (arrivalTime.value) {
-    const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
-    const duration = moment.duration(moment().diff(arrivalMoment));
-    workTime.value = formatHours(duration.asHours());
-  } else {
-    workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
-  }
 });
 
-watch(() => user.value, async (newUser) => {
-  if (newUser) {
-    console.log("newUser", newUser);
-    const response_clock = await getClockFromUser(newUser.id);
-    if (response_clock.status === 200) {
-      clockStore.setClock(response_clock.data.data);
-      current_time.value = moment().format('HH[h] mm[m]');
-    }
-  }
-});
 
-const handleChangeClock = async (checked: boolean) => {
-  clock_disable.value = true;
-}
 const formatHours = (hours) => {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
@@ -194,7 +119,6 @@ async function calculateWorkedHours(userId, startDate, endDate) {
       const duration = moment.duration(currentTime.diff(clockInTime));
       totalWorkedHours += duration.asHours();
     }
-
     return totalWorkedHours;
   }
 }
@@ -203,13 +127,60 @@ async function calculateWorkedHours(userId, startDate, endDate) {
 // Fonction handleChangeClock: Gestion du changement de pointage (clock)
 // ============================
 const handleChangeClock = async (checked: boolean) => {
-  last_clock_value.value = checked;
   //console.log(last_clock_value.value);
-  clock_diable.value = true;
+  clock_disable.value = true;
   const response = await createClock(
-    last_clock_value.value, user.value.id
+    checked, user.value.id
   );
+  console.log(response);
 }
+
+watch(() => user.value, async (newUser) => {
+  if (newUser) {
+    // ============================
+    // Fonction DayCard: Recuperation du temps journalier travaille (clock)
+    // ============================
+    const { startOfDay, endOfDay } = getCurrentDay();
+    const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
+    workedHoursToday.value = formatHours(hoursToday);
+
+    // Pour la semaine en cours
+    const { startOfWeek, endOfWeek } = getCurrentWeek();
+    const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
+    workedHoursThisWeek.value = formatHours(hoursThisWeek);
+
+    // Pour le mois en cours
+    const { startOfMonth, endOfMonth } = getCurrentMonth();
+    const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
+    workedHoursThisMonth.value = formatHours(hoursThisMonth);
+
+    // ============================
+    // fetch clock avec le nouvel utilisateur
+    // ============================
+    console.log("newUser", newUser);
+    const response_clock = await getClockFromUser(newUser.id);
+    if (response_clock.status === 200) {
+      clockStore.setClock(response_clock.data.data);
+      current_time.value = moment().format('HH[h] mm[m]');
+      // console.log("clock", clocks.value);
+      const lastTrueClock = clocks.value.find((entry) => entry.status === true);
+
+      if (lastTrueClock) {
+        arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
+      } else {
+        arrivalTime.value = null; // Pas d'heure de pointage trouvée
+      }
+
+      if (arrivalTime.value) {
+        const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+        const duration = moment.duration(moment().diff(arrivalMoment));
+        workTime.value = formatHours(duration.asHours());
+      } else {
+        workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
+      }
+    }
+  }
+});
 </script>
 
 <template>

@@ -95,3 +95,4 @@ export const getWorkingTimes = async (user: User | null) => {
     console.error("Error fetching getWorkingTimes:", error);
     throw error;
   }
+};

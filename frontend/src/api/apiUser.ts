@@ -39,7 +39,7 @@ function bufferToHex(buffer: ArrayBuffer) {
 // Example: Fetch users from the API
 export const getUser = async (user_id: number) => {
   try {
-    const response = await apiClient.get(`/users/${user_id}`);
+    const response = await apiClientProtected.get(`/users/${user_id}`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching users:", error);
