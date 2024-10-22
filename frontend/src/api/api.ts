@@ -12,6 +12,15 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
+export const apiClientProtected: AxiosInstance = axios.create({
+  baseURL: "/api", // Base URL for your API
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+  },
+});
+
 // Request interceptor to attach access token
 // apiClient.interceptors.request.use(
 //   (config) => {

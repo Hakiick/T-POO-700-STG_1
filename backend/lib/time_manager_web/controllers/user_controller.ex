@@ -6,6 +6,18 @@ defmodule TimeManagerWeb.UserController do
 
   action_fallback TimeManagerWeb.FallbackController
 
+  def get_from_jwt(conn, _params) do
+    try do
+      user = Guardian.Plug.current_resource(conn)
+      render(conn, :show, user: user)
+    rescue
+      Ecto.NoResultsError ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "User not found"})
+    end
+  end
+
   def show_from_mail_and_username(conn, params) do
     try do
       user = Accounts.get_user!(params)

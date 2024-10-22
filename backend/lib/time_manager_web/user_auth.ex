@@ -29,7 +29,7 @@ defmodule TimeManagerWeb.UserAuth do
     # |> put_resp_cookie("auth_token", jwt, http_only: true)
     |> json(%{
       refresh_token: refresh_token,
-      acces_token: acces_token,
+      access_token: acces_token,
       message: "User logged in successfully."
     })
   end

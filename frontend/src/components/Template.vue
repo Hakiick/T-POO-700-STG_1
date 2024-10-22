@@ -9,21 +9,17 @@ import MainNav from './MainNav.vue'
 import Search from './Search.vue'
 import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
-import { getUser } from '../api/apiUser'
 import WorkingTime from './WorkingTime.vue'
 
 import { Button } from './ui/button'
 import { Switch } from './ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { createClock, getClockFromUser } from '../api/apiClock'
 import moment from 'moment'
 import { useUserStore } from './store/userStore';
-import { AxiosResponse } from 'axios';
 import { useClockStore } from './store/clockStore';
-
-type response_clock = AxiosResponse;
 
 const userStore = useUserStore()
 const clockStore = useClockStore()
@@ -38,22 +34,27 @@ const clock_disable = ref(false);
 const current_time = ref("");
 
 onMounted(async () => {
-  if (!user.value) {
-    const response = await getUser(1);
-    // console.log("response", response);
-    userStore.setUser(response);
-  }
+  // if (!user.value) {
+  //   const response = await getUser(1);
+  //   // console.log("response", response);
+  //   userStore.setUser(response);
+  // }
+  userStore.login()
+  console.log("usertest", user.value);
 
-  const response_clock: response_clock = await getClockFromUser(user.value.id);
-  // console.log("clocks", response_clock);
-  if (response_clock.status === 200) {
-    clockStore.setClock(response_clock.data.data);
-    // console.log("clocks", last_clock.value);
-  }
-
-  current_time.value = moment().format('HH[h] mm[m]');
   // console.log(moment().format('HH:mm:ss'));
   // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
+});
+
+watch(() => user.value, async (newUser) => {
+  if (newUser) {
+    console.log("newUser", newUser);
+    const response_clock = await getClockFromUser(newUser.id);
+    if (response_clock.status === 200) {
+      clockStore.setClock(response_clock.data.data);
+      current_time.value = moment().format('HH[h] mm[m]');
+    }
+  }
 });
 
 const handleChangeClock = async (checked: boolean) => {

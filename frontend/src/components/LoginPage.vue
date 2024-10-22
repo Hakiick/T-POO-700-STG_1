@@ -3,14 +3,16 @@ import { ref } from 'vue'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { createUser } from '../api/apiUser';
-import router from '../router';
-import { useUserStore } from './store/userStore';
+import { createUser, loginUser } from '../api/apiUser';
+import router from '@/router';
+
 
 // Variables pour le formulaire de connexion
 const isLoadingSignIn = ref(false)
 const isCheckedSignIn = ref(false)
 const errorMessageSignIn = ref('')
+const emailSignIn = ref('')
+const passwordSignIn = ref('')
 
 // Variables pour le formulaire de création de compte
 const isLoadingSignUp = ref(false)
@@ -19,7 +21,6 @@ const errorMessageSignUp = ref('')
 const emailSignup = ref('')
 const passwordSignup = ref('')
 
-const userStore = useUserStore()
 
 // Variable pour suivre quelle div est actuellement active
 const activeDiv = ref<'signin' | 'signup' | null>(null)
@@ -40,6 +41,25 @@ async function onSubmitSignIn(event: Event) {
 
   // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignIn.value = true
+  // console.log({ email: emailSignup.value, username: passwordSignup.value })
+  const response = await loginUser(emailSignIn.value, passwordSignIn.value)
+  console.log(response)
+  if (response.status === 200) {
+
+    sessionStorage.setItem('access_token', response.data.access_token)
+    sessionStorage.setItem('refresh_token', response.data.refresh_token)
+    // userStore.login()
+
+    //redirect to login page
+    router.push({ name: 'home' })
+    return
+  }
+  //catch error 
+  if (response.data.errors) {
+    // console.log(response)
+    errorMessageSignUp.value = response.data.errors
+    return
+  }
   errorMessageSignIn.value = ''  // Réinitialiser le message d'erreur
 }
 
@@ -65,6 +85,8 @@ async function onSubmitSignUp(event: Event) {
   console.log(response)
   if (response.status === 201) {
     alert("veuillez vérifier votre boite mail pour activer votre compte")
+    //redirect to login page
+    router.push({ name: 'login' })
     return
   }
   //catch error 
@@ -99,12 +121,12 @@ async function onSubmitSignUp(event: Event) {
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email">Email</Label>
-              <Input id="email" placeholder="name@example.com" type="email" auto-capitalize="none" auto-complete="email"
-                auto-correct="off" :disabled="isLoadingSignIn"
+              <Input v-model="emailSignIn" id="email" placeholder="name@example.com" type="email" auto-capitalize="none"
+                auto-complete="email" auto-correct="off" :disabled="isLoadingSignIn"
                 class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             </div>
-            <Input id="password" placeholder="Enter your password" type="password" auto-capitalize="none"
-              auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
+            <Input v-model="passwordSignIn" id="password" placeholder="Enter your password" type="password"
+              auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
               class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignIn">
               Sign In with Email

@@ -61,6 +61,7 @@ defmodule TimeManagerWeb.Router do
 
     # post "/users/refresh", UserSessionController, :refresh
 
+    get "/user", UserController, :get_from_jwt
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
     put "/users/:userID", UserController, :update
