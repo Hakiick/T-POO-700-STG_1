@@ -51,17 +51,32 @@ export const createUser = async (
   email: string,
   password: string,
 ) => {
-
   if (!isValidEmail(email)) {
-    console.error("Invalid email format");
+    return { data: { errors: { email: ["Invalid email"] } } };
   }
 
   if (!isValidPassword(password)) {
-    console.error("Password must be at least 8 characters long, contain at least one letter and one number");
+    return {
+      data: {
+        errors: {
+          password: [
+            "Password must be at least 8 characters long, contain at least one letter and one number",
+          ],
+        },
+      },
+    };
   }
 
   if (!isValidUsername(username)) {
-    console.error("Username can only contain letters, numbers, and underscores");
+    return {
+      data: {
+        errors: {
+          username: [
+            "Username can only contain letters, numbers, and underscores",
+          ],
+        },
+      },
+    };
   }
 
   try {

@@ -63,11 +63,9 @@ async function onSubmitSignUp(event: Event) {
   // console.log({ email: emailSignup.value, username: passwordSignup.value })
   const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
   console.log(response)
-  if (response.data.id) {
-    //navitage to home page 
-    console.log("created")
-    userStore.setUser(response.data)
-    router.push({ name: 'home' })
+  if (response.status === 201) {
+    alert("veuillez vérifier votre boite mail pour activer votre compte")
+    return
   }
   //catch error 
   if (response.data.errors) {
