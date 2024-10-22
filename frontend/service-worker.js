@@ -30,8 +30,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.url.startsWith('chrome-extension')) {
-    return; // Ignore chrome-extension requests
+  if (event.request.url.startsWith('chrome-extension') || event.request.method !== 'GET') {
+    return;
   }
 
   event.respondWith(
