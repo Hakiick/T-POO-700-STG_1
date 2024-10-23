@@ -10,10 +10,7 @@ import {
   FlexRender,
   createColumnHelper,
   getCoreRowModel,
-  getExpandedRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   useVueTable,
 } from "@tanstack/vue-table";
 
@@ -49,11 +46,12 @@ import { User } from "./store/userStore.ts";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
 </script>
 <script lang="ts">
+
 export default defineComponent({
   data() {
     return {
       users: [],
-      newUser: { id: -1, username: "", email: "" },
+      newUser: { id: -1, username: "", email: "", password: "" },
       actionUser: { id: -1, username: "", email: "" },
       open: false,
     };
@@ -74,16 +72,18 @@ export default defineComponent({
     },
     async replaceElement(user: User) {
       const res = await updateUser(user);
+      console.log(res)
       let users: User[] = [];
       let index = this.users.findIndex((e) => e.id == user.id);
       this.users.slice(0, index).forEach((e) => users.push(e));
       users.push(user);
       this.users.slice(index + 1).forEach((e) => users.push(e));
       this.users = users;
+
     },
     async createElement() {
       try {
-        const res = await createUser(this.newUser.username, this.newUser.email);
+        const res = await createUser(this.newUser.username, this.newUser.email, this.newUser.password);
         let users: User[] = [];
         users.push(res.data);
         this.users.forEach((e: User) => users.push(e));
@@ -126,6 +126,7 @@ export default defineComponent({
             h("div", { class: "text-right" }, [
               h(
                 Button,
+                TimerIcon,
                 {
                   variant: "outline",
                   onClick: () => {
@@ -137,10 +138,9 @@ export default defineComponent({
                     };
                   },
                 },
-                TimerIcon
               ),
               h(Dialog, { variant: "outline" }, [
-                h(DialogTrigger, { asChild: true }, h(Button, {}, Pencil2Icon)),
+                h(DialogTrigger, { asChild: true }, h(Button, Pencil2Icon)),
                 h(DialogContent, {}, [
                   h(DialogHeader, {}, [
                     h(DialogTitle, {}, "Edit profile"),
@@ -183,14 +183,12 @@ export default defineComponent({
                         Button,
                         {
                           onClick: () => {
+                            const usernameInput = document.querySelector(`.input-name[data-id='${row.getValue("id")}']`) as HTMLInputElement
+                            const emailInput = document.querySelector(`.input-email[data-id='${row.getValue("id")}']`) as HTMLInputElement
                             this.replaceElement({
                               id: row.getValue("id"),
-                              username: document.querySelector(
-                                `.input-name[data-id='${row.getValue("id")}']`
-                              ).value,
-                              email: document.querySelector(
-                                `.input-email[data-id='${row.getValue("id")}']`
-                              ).value,
+                              username: usernameInput.value,
+                              email: emailInput.value,
                             });
                           },
                         },
@@ -202,11 +200,11 @@ export default defineComponent({
               ]),
               h(
                 Button,
+                TrashIcon,
                 {
                   variant: "destructive",
                   onClick: () => this.deleteElement(row.getValue("id")),
                 },
-                TrashIcon
               ),
             ]),
         }),
@@ -228,15 +226,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <WorkingTimeModal
-    :open="open"
-    :user="actionUser"
-    @close="
-      () => {
-        this.open = false;
-      }
-    "
-  />
+  <WorkingTimeModal :open="open" :user="actionUser" @close="() => {
+    this.open = false;
+  }
+    " />
 
   <div class="h-full w-full">
     <div class="border-b">
@@ -256,7 +249,9 @@ export default defineComponent({
 
           <Dialog>
             <DialogTrigger as-child>
-              <Button variant="outline"><PlusIcon /></Button>
+              <Button variant="outline">
+                <PlusIcon />
+              </Button>
             </DialogTrigger>
             <DialogContent class="sm:max-w-[425px]">
               <DialogHeader>
@@ -265,20 +260,11 @@ export default defineComponent({
               <div class="grid gap-4 py-4">
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="username" class="text-right"> Username </Label>
-                  <Input
-                    id="username"
-                    class="col-span-3"
-                    v-model="newUser.username"
-                  />
+                  <Input id="username" class="col-span-3" v-model="newUser.username" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="email" class="text-right"> Email </Label>
-                  <Input
-                    id="email"
-                    class="col-span-3"
-                    type="email"
-                    v-model="newUser.email"
-                  />
+                  <Input id="email" class="col-span-3" type="email" v-model="newUser.email" />
                 </div>
               </div>
               <DialogFooter>
@@ -292,20 +278,11 @@ export default defineComponent({
 
         <Table>
           <TableHeader>
-            <TableRow
-              v-for="headerGroup in table.getHeaderGroups()"
-              :key="headerGroup.id"
-            >
-              <TableHead
-                v-for="header in headerGroup.headers"
-                :key="header.id"
-                :data-pinned="header.column.getIsPinned()"
-              >
-                <FlexRender
-                  v-if="!header.isPlaceholder"
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
+            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+              <TableHead v-for="header in headerGroup.headers" :key="header.id"
+                :data-pinned="header.column.getIsPinned()">
+                <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                  :props="header.getContext()" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -313,15 +290,9 @@ export default defineComponent({
             <template v-if="table.getRowModel().rows?.length">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
                 <TableRow :data-state="row.getIsSelected() && 'selected'">
-                  <TableCell
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                    :data-pinned="cell.column.getIsPinned()"
-                  >
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
+                  <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
+                    :data-pinned="cell.column.getIsPinned()">
+                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="row.getIsExpanded()">
@@ -344,20 +315,10 @@ export default defineComponent({
 
     <div class="flex items-center m-5 justify-end space-x-2 py-4">
       <div class="space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.previousPage()"
-        >
+        <Button variant="outline" size="sm" :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
           Previous
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanNextPage()"
-          @click="table.nextPage()"
-        >
+        <Button variant="outline" size="sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()">
           Next
         </Button>
       </div>

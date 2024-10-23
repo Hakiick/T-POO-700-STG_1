@@ -33,7 +33,7 @@ async function fetchWorkingTime() {
   workingTimes.value = [];
   try {
     let res: WorkingTime[] = await getWorkingTimes(props.user);
-    res = res.filter((i: WorkingTime) => new Date(i.end) - new Date() > 0);
+    res = res.filter((i: WorkingTime) => new Date(i.end).getTime() - new Date().getTime() > 0);
     workingTimes.value = res;
   } catch (error) {
     // ignored
@@ -105,8 +105,8 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
 </script>
 <template>
   <Dialog :open="props.open" @update:open="(val) => {
-      if (!val) emit('close');
-    }
+    if (!val) emit('close');
+  }
     ">
     <DialogContent class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh]">
       <DialogHeader class="p-6 pb-0">
