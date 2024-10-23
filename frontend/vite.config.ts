@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite";
 // import { fileURLToPath, URL } from "url";
 import { resolve } from "path";
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -30,6 +31,29 @@ export default defineConfig({
     Icons({
       autoInstall: true, // Automatically installs icon packages when needed
     }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Time manager',
+        short_name: 'TM',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#3f51b5',
+        icons: [
+          {
+            src: 'icons/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    })
   ],
   resolve: {
     alias: {
@@ -37,3 +61,4 @@ export default defineConfig({
     },
   },
 });
+

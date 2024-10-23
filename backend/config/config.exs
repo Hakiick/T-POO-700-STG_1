@@ -22,6 +22,12 @@ config :time_manager, TimeManagerWeb.Endpoint,
   pubsub_server: TimeManager.PubSub,
   live_view: [signing_salt: "LrhrWpLZ"]
 
+config :time_manager, TimeManager.Guardian,
+  # Name of your application or domain
+  issuer: "time_manager",
+  # You should use a secure and random key
+  secret_key: "dev_secret_key"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -62,6 +68,17 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :swoosh, :api_client, Swoosh.ApiClient.Hackney
+
+# Your app name here
+config :time_manager, TimeManager.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.mail.ovh.net",
+  username: System.get_env("OVH_SMTP_USERNAME"),
+  password: System.get_env("OVH_SMTP_PASSWORD"),
+  port: 465,
+  ssl: true,
+  tls: :always,
+  auth: :always
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

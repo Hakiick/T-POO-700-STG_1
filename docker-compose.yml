@@ -19,7 +19,8 @@ services:
       MIX_ENV: prod
       DATABASE_URL: ${DATABASE_URL}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-
+      OVH_SMTP_USERNAME: ${OVH_SMTP_USERNAME}
+      OVH_SMTP_PASSWORD: ${OVH_SMTP_PASSWORD}
     ports:
       # - 4000:4000
       - 127.0.0.1:4000:4000

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useUserStore } from './store/userStore';
 import {
   Avatar,
   AvatarFallback,
@@ -22,6 +23,7 @@ const props = defineProps({
     required: true,
   },
 })
+const userStore = useUserStore()
 // console.log("testdsafsd", props.user.data.username)
 
 </script>
@@ -65,7 +67,7 @@ const props = defineProps({
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        Log out
+        <Button @click="userStore.logout()">Log out</Button>
         <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
       </DropdownMenuItem>
     </DropdownMenuContent>
