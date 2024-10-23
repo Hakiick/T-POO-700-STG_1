@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { type Ref, onMounted, ref, computed } from 'vue';
 import { useUserStore } from './store/userStore';
-import { getUser } from '../api/apiUser';
 import { getWorkingTimeByDate } from '../api/apiWorkingTime';
 import { getClocksFromUser } from '../api/apiClock';
 import { getChartComponent, currentChartType, chartTypes } from '../manager/chartManager';
@@ -49,10 +48,7 @@ const value = ref({
 // ============================
 
 onMounted(async () => {
-  if (!user.value) {
-    user.value = await getUser(1);
-  }
-  
+
   // Récupérer les données au chargement initial
   await fetchData();
 });
@@ -75,7 +71,7 @@ async function fetchData() {
     value.value.start.month - 1,
     value.value.start.day
   );
-  
+
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
@@ -225,28 +221,24 @@ function formatDate(dateString: string) {
   return `${day}/${month}`;
 }
 
-function formatHours(hours: number) {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return `${h}h ${m}m`;
-}
+// function formatHours(hours: number) {
+//   const h = Math.floor(hours);
+//   const m = Math.round((hours - h) * 60);
+//   return `${h}h ${m}m`;
+// }
 </script>
 
 <template>
   <Tabs default-value="monthly" class="space-y-4 h-full w-full">
     <TabsContent value="monthly" class="space-y-4 h-full w-full">
       <div class="grid gap-4 grid-cols-1 lg:grid-cols-10 h-full w-full mt-7">
-        
+
         <!-- Section graphique - 70% largeur à gauche -->
         <div class="col-span-1 lg:col-span-6 space-y-4 h-full w-full">
           <div class="h-full w-full">
             <div class="flex items-center justify-center space-x-4 mb-10">
-              <button
-                v-for="type in chartTypes"
-                :key="type"
-                @click="currentChartType = type"
-                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
+              <button v-for="type in chartTypes" :key="type" @click="currentChartType = type"
+                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
                 {{ type }}
               </button>
             </div>
@@ -254,8 +246,7 @@ function formatHours(hours: number) {
             <!-- Composant graphique dynamique -->
             <component
               :is="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).component"
-              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props"
-            />
+              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props" />
           </div>
         </div>
 
@@ -265,17 +256,15 @@ function formatHours(hours: number) {
           <div class="text-center mb-3">
             <Popover>
               <PopoverTrigger as-child>
-                <Button
-                  variant="outline"
-                  :class="cn(
-                    'w-full justify-start text-left font-normal',
-                    !value && 'text-muted-foreground',
-                  )"
-                >
+                <Button variant="outline" :class="cn(
+                  'w-full justify-start text-left font-normal',
+                  !value && 'text-muted-foreground',
+                )">
                   <CalendarIcon class="mr-2 h-4 w-4" />
                   <template v-if="value.start">
                     <template v-if="value.end">
-                      {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{ df.format(value.end.toDate(getLocalTimeZone())) }}
+                      {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{
+                        df.format(value.end.toDate(getLocalTimeZone())) }}
                     </template>
                     <template v-else>
                       {{ df.format(value.start.toDate(getLocalTimeZone())) }}
@@ -287,12 +276,8 @@ function formatHours(hours: number) {
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-auto p-0">
-                <RangeCalendar
-                  v-model="value"
-                  initial-focus
-                  :number-of-months="2"
-                  @update:start-value="(startDate) => value.start = startDate"
-                />
+                <RangeCalendar v-model="value" initial-focus :number-of-months="2"
+                  @update:start-value="(startDate) => value.start = startDate" />
               </PopoverContent>
             </Popover>
           </div>

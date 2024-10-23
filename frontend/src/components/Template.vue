@@ -57,9 +57,6 @@ onMounted(async () => {
   // console.log(moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'));
 });
 
-const handleChangeClock = async (checked: boolean) => {
-  clock_disable.value = true;
-
 const formatHours = (hours) => {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);

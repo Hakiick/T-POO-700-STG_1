@@ -7,6 +7,8 @@ import type { BaseChartProps } from '.'
 import { ChartSingleTooltip, defaultColors } from '@/components/ui/chart'
 import { cn } from '@/lib/utils'
 
+type KeyOfT = Extract<keyof T, string>
+
 const props = withDefaults(defineProps<Pick<BaseChartProps<T>, 'data' | 'colors' | 'index' | 'margin' | 'showLegend' | 'showTooltip' | 'filterOpacity'> & {
   /**
    * Sets the name of the key containing the quantitative chart values.
@@ -39,7 +41,6 @@ const props = withDefaults(defineProps<Pick<BaseChartProps<T>, 'data' | 'colors'
   showLegend: true,
 })
 
-type KeyOfT = Extract<keyof T, string>
 type Data = typeof props.data[number]
 
 const category = computed(() => props.category as KeyOfT)
@@ -62,24 +63,14 @@ const totalValue = computed(() => props.data.reduce((prev, curr) => {
 <template>
   <div :class="cn('w-full h-48 flex flex-col items-end', $attrs.class ?? '')">
     <VisSingleContainer :style="{ height: isMounted ? '100%' : 'auto' }" :margin="{ left: 20, right: 20 }" :data="data">
-      <ChartSingleTooltip
-        :selector="Donut.selectors.segment"
-        :index="category"
-        :items="legendItems"
-        :value-formatter="valueFormatter"
-        :custom-tooltip="customTooltip"
-      />
+      <ChartSingleTooltip :selector="Donut.selectors.segment" :index="category" :items="legendItems"
+        :value-formatter="valueFormatter" :custom-tooltip="customTooltip" />
 
-      <VisDonut
-        :value="(d: Data) => d[category]"
-        :sort-function="sortFunction"
-        :color="colors"
-        :arc-width="type === 'donut' ? 20 : 0"
-        :show-background="false"
-        :central-label="type === 'donut' ? valueFormatter(totalValue) : ''"
-        :events="{
+      <VisDonut :value="(d: Data) => d[category]" :sort-function="sortFunction" :color="colors"
+        :arc-width="type === 'donut' ? 20 : 0" :show-background="false"
+        :central-label="type === 'donut' ? valueFormatter(totalValue) : ''" :events="{
           [Donut.selectors.segment]: {
-            click: (d: Data, ev: PointerEvent, i: number, elements: HTMLElement[]) => {
+            click: (d: Data, _ev: PointerEvent, i: number, elements: HTMLElement[]) => {
               if (d?.data?.[index] === activeSegmentKey) {
                 activeSegmentKey = undefined
                 elements.forEach(el => el.style.opacity = '1')
@@ -91,8 +82,7 @@ const totalValue = computed(() => props.data.reduce((prev, curr) => {
               }
             },
           },
-        }"
-      />
+        }" />
 
       <slot />
     </VisSingleContainer>

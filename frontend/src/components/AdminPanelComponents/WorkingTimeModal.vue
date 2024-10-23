@@ -104,62 +104,43 @@ async function removeWorkingTime(id: Number) {
 watch(() => props.user?.id ?? -1, fetchWorkingTime);
 </script>
 <template>
-  <Dialog
-    :open="props.open"
-    @update:open="
-      (val) => {
-        if (!val) emit('close');
-      }
-    "
-  >
-    <DialogContent
-      class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh]"
-    >
+  <Dialog :open="props.open" @update:open="(val) => {
+      if (!val) emit('close');
+    }
+    ">
+    <DialogContent class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh]">
       <DialogHeader class="p-6 pb-0">
-        <DialogTitle
-          >Working time of {{ props.user?.username ?? "" }}</DialogTitle
-        >
+        <DialogTitle>Working time of {{ props.user?.username ?? "" }}</DialogTitle>
         <DialogDescription> </DialogDescription>
-        <Button @click="newWorkingTime"><PlusIcon /></Button>
+        <Button @click="newWorkingTime">
+          <PlusIcon />
+        </Button>
       </DialogHeader>
       <div class="grid gap-4 py-4 overflow-y-auto px-6">
         <div class="flex flex-col">
-          <template
-            v-if="workingTimes.length != 0"
-            v-for="formattedDate in formattedDates"
-          >
+          <template v-if="workingTimes.length != 0" v-for="formattedDate in formattedDates">
             <div class="flex border p-2 mb-2">
               <div class="grow">
                 <div class="flex justify-between w-5/6">
                   <label>Start time </label>
-                  <Input
-                    type="datetime-local"
-                    :value="formattedDate.formattedStartTime.get()"
-                    :min="formatDate(Date.now())"
-                    @input="
+                  <Input type="datetime-local" :value="formattedDate.formattedStartTime.get()"
+                    :min="formatDate(Date.now())" @input="
                       formattedDate.formattedStartTime.set($event.target.value)
-                    "
-                  ></Input>
+                      "></Input>
                 </div>
 
                 <div class="flex justify-between w-5/6">
                   <label>End time</label>
-                  <Input
-                    type="datetime-local"
-                    :value="formattedDate.formattedEndTime.get()"
-                    :min="formatDate(Date.now())"
-                    @input="
+                  <Input type="datetime-local" :value="formattedDate.formattedEndTime.get()"
+                    :min="formatDate(Date.now())" @input="
                       formattedDate.formattedEndTime.set($event.target.value)
-                    "
-                  ></Input>
+                      "></Input>
                 </div>
               </div>
               <div>
-                <Button
-                  variant="destructive"
-                  @click="removeWorkingTime(formattedDate.id)"
-                  ><TrashIcon
-                /></Button>
+                <Button variant="destructive" @click="removeWorkingTime(formattedDate.id)">
+                  <TrashIcon />
+                </Button>
               </div>
             </div>
           </template>
