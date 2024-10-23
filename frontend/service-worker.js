@@ -1,5 +1,3 @@
-const { default: axios } = require("axios");
-
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open("my-cache").then((cache) => {
@@ -32,31 +30,29 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (
-    event.request.url.startsWith("chrome-extension") ||
-    event.request.method !== "GET"
-  ) {
-    return;
-  }
+  if (event.request.method !== "GET") return; // Only cache GET requests
 
   event.respondWith(
-    caches
-      .match(event.request)
-      .then((response) => {
-        console.log(response);
-        return (
-          response ||
-          axios(event.request).then((response) => {
-            return caches.open("my-cache").then((cache) => {
-              cache.put(event.request, response.clone());
-              return response;
-            });
-          })
-        );
-      })
-      .catch(() => {
-        return caches.match("/index.html");
-      }),
+    caches.open("my-cache").then(async (cache) => {
+      try {
+        // Attempt to fetch the latest version from the network
+        const networkResponse = await fetch(event.request);
+
+        // Clone the network response for caching
+        const clonedResponse = networkResponse.clone();
+
+        // Update the cache with the latest network response
+        cache.put(event.request, clonedResponse);
+
+        // Return the network response to the client
+        return networkResponse;
+      } catch (error) {
+        // If network request fails (e.g., offline), return cached response
+        const cachedResponse = await cache.match(event.request);
+
+        // Fallback to cache if it exists, otherwise a default offline page can be served
+        return cachedResponse || caches.match("/index.html");
+      }
+    }),
   );
-  //console.log('Fetching:', event.request.url);
 });
