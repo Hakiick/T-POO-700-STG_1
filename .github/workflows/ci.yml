@@ -55,7 +55,7 @@ jobs:
         working-directory: ./frontend
       - run: rm -f package-lock.json
         working-directory: ./frontend
-      - run: npm i
+      - run: npm install
         working-directory: ./frontend
 
       # Run frontend build
