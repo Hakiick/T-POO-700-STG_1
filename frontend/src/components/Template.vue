@@ -7,16 +7,16 @@ defineOptions({
   displayName: "Home Page",
 });
 import MainNav from './MainNav.vue'
-import Search from './Search.vue'
-import TeamSwitcher from './TeamSwitcher.vue'
 import UserNav from './UserNav.vue'
 import ChartRange from './ChartRange.vue';
-
-import { Switch } from './ui/switch'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Tabs, TabsContent } from './ui/tabs'
-import { onMounted, ref, computed } from 'vue'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { onMounted, ref, computed} from 'vue'
+
 import moment from 'moment'
+import 'moment/locale/fr';
+moment.locale('fr');
+
 import { AxiosResponse } from 'axios';
 
 // ============================
@@ -45,19 +45,25 @@ const clocks = ref(null);
 const last_clock = ref(null);
 const last_clock_value = ref(false);
 const clock_diable = ref(false);
-const current_time = ref("");
-const clockDataWeek = ref<any>(null);
-const clockDataMonth = ref<any>(null);
 const workedHoursToday = ref<string | null>(null);
 const workedHoursThisWeek = ref<string | null>(null);
 const workedHoursThisMonth = ref<string | null>(null);
 const arrivalTime = ref<string | null>(null);
 const workTime = ref<string | null>(null);
-// ============================
-// Variables liées à la date sélectionnée
-// ============================
 
-const df = (date: Date) => moment(date).format('DD-MM-YYYY');
+const isDesktop = ref(false);
+
+const checkIsDesktop = () => {
+  isDesktop.value = window.innerWidth >= 1024;
+};
+
+const formattedDate = computed(() => {
+  return moment().format('dddd D MMMM');
+});
+
+const formattedTime = computed(() => {
+  return moment().format('HH[h] mm[m]');
+});
 
 // ============================
 // onMounted: Initialisation des données au montage du composant
@@ -68,6 +74,9 @@ onMounted(async () => {
     // console.log("response", response);
     userStore.setUser(response);
   }
+
+  checkIsDesktop();
+  window.addEventListener('resize', checkIsDesktop);
 
   // ============================
   // Fonction DayCard: Recuperation du temps journalier travaille (clock)
@@ -103,9 +112,6 @@ onMounted(async () => {
     }
   }
 
-  // Mise à jour de l'heure actuelle et calcul du temps travaillé si `arrivalTime` est défini
-  current_time.value = moment().format('HH[h] mm[m]');
-
   if (arrivalTime.value) {
     const arrivalMoment = moment(arrivalTime.value, 'YYYY-MM-DD HH:mm');
     const duration = moment.duration(moment().diff(arrivalMoment));
@@ -114,7 +120,7 @@ onMounted(async () => {
     workTime.value = '...';
   }
 });
-
+  
 const formattedArrivalTime = computed(() => {
       return arrivalTime.value ? moment(arrivalTime.value).format('HH[h] mm[m]') : '...';
     });
@@ -202,100 +208,81 @@ const handleChangeClock = async (checked: boolean) => {
 </script>
 
 <template>
-  <div class="flex-col flex">
-    <div class="border-b">
-      <div class="flex h-16 items-center px-4">
-        <TeamSwitcher />
-        <MainNav class="mx-6" />
-        <div v-if="user" class="ml-auto flex items-center space-x-4">
-          <Search />
-          <UserNav :user="user" />
+  <div class="grid grid-cols-1 lg:grid-cols-10 min-h-screen">
+    <!-- NavBar -->
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+      <h1 class="font-bold mt-5 flex justify-center">
+        Time Manager
+      </h1>
+      <div v-if="user" class="flex items-center justify-center py-8 border-b-4">
+        <UserNav :user="user" />
+      </div>
+      <!-- MainNav for Desktop -->
+      <div class="flex items-center justify-center py-2 border-b-4 hidden lg:block">
+        <MainNav class="mx-4" />
+      </div>
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
+      </div>
+      <div class="text-center items-center justify-center p-8 border-b-4">
+        <p>{{ formattedDate }}</p>
+        <p class="text-xl font-bold">{{ formattedTime }}</p>
+      </div>
+      <div class="text-center items-center justify-center p-4">
+        <div class="mb-2">
+          <p>Quotidien</p>
+          <p class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-2">
+          <p>Hebdomadaire</p>
+          <p class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-2">
+          <p>Mensuel</p>
+          <p class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-2">
+          <p>Temps travaillé</p>
+          <p class="text-2xl font-bold text-success">{{ "" + workTime || "..." }}</p>
+        </div>
+        <hr class="my-2">
+        <div class="mb-2">
+          <p>Arrivé</p>
+          <p class="text-2xl font-bold text-danger">{{ formattedArrivalTime || '...' }}</p>
         </div>
       </div>
     </div>
 
-    <div class="flex-1 space-y-0 p-8 pt-6">
-      <div class="flex items-center justify-between flex-wrap">
+    <!-- Main Content -->
+    <div class="col-span-1 lg:col-span-9 flex flex-col justify-between p-8">
+      <Card
+        class="box-content p-9 border-4 cursor-pointer m-0 mb-8"
+        :class="last_clock_value ? 'bg-red-500' : 'bg-green-500'"
+        @click="handleChangeClock"
+      >
+        <CardHeader class="flex flex-col items-center justify-center space-y-0 pb-1 px-6 pt-3">
+          <div class="text-4xl text-white">
+            <template v-if="last_clock_value">
+              🌙
+            </template>
+            <template v-else>
+              ☀️
+            </template>
+          </div>
+          <CardTitle class="text-xl font-bold text-white mt-2">
+            {{ last_clock_value ? 'Clock Out' : 'Clock In' }}
+          </CardTitle>
+        </CardHeader>
+      </Card>
 
-        <Card class="h-29 w-full md:w-auto sm:min-w-72">
-          <CardHeader class="flex flex-row items-center justify-center space-y-0 pb-1 px-6 pt-3">
-            <CardTitle :class="last_clock_value ? 'text-red-500' : 'text-green-500'" class="text-xl font-bold">
-              {{ last_clock_value ? 'Fin de journée' : 'Début de journée' }}
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent class="flex flex-col items-center justify-center text-center">
-            <div class="flex items-center justify-between w-full px-6">
-              <div class="flex flex-col items-center font-bold">
-                <p class="text-xs text-muted-foreground">Arrivée</p>
-                <div class="text-sm text-muted-foreground">
-                  {{ formattedArrivalTime || '...' }}
-                </div>
-              </div>
-              <Switch class="mt-2" :disabled="clock_diable" :checked="last_clock_value"
-                @update:checked="handleChangeClock" />
-              <div class="flex flex-col items-center font-bold">
-                <p class="text-xs text-muted-foreground">Heure actuelle</p>
-                <div class="text-sm text-muted-foreground">
-                  {{ current_time || '...' }}
-                </div>
-              </div>
-            </div>
-            <div class="text-2xl font-bold text-primary mt-2">
-              {{ "Vous avez pointé il y a " + workTime || "..." }}
-            </div>
-          </CardContent>
-        </Card>
-
-
-        <h1 class="text-5xl font-bold tracking-tight mt-5 flex justify-center flex-1">
-          Tableau de bord
-        </h1>
+      <!-- ChartRange for Desktop -->
+      <div v-if="isDesktop" class="mt-8">
+        <ChartRange :user="user" />
       </div>
-
-      <div class="flex flex-col items-center justify-center w-full">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full mt-7">
-          <Card class="flex flex-col items-center justify-center text-center w-full">
-            <CardHeader>
-              <CardTitle class="text-xl font-medium">Heures Travaillées Aujourd'hui</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card class="flex flex-col items-center justify-center text-center w-full">
-            <CardHeader>
-              <CardTitle class="text-xl font-medium">Heures Travaillées Cette Semaine</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h'
-                }}</div>
-            </CardContent>
-          </Card>
-
-          <Card class="flex flex-col items-center justify-center text-center w-full">
-            <CardHeader>
-              <CardTitle class="text-xl font-medium">Heures Travaillées Ce Mois</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth :
-                '0h' }}</div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <hr>
-      
-      <Tabs default-value="monthly" class="space-y-4 h-full w-full">
-        <TabsContent value="monthly" class="space-y-4 h-full w-full">
-          <CardContent class="bottom-p-0 h-full" v-if="user">
-            <ChartRange :user="user" />
-          </CardContent>
-        </TabsContent>
-      </Tabs>
     </div>
   </div>
 </template>
