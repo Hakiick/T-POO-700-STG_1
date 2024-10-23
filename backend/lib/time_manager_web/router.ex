@@ -27,6 +27,17 @@ defmodule TimeManagerWeb.Router do
     get "/clock/:userID", ClockController, :show
     get "/clocks/:userID", ClockController, :index
     post "/clocks/:userID", ClockController, :create
+
+    get "/teams", TeamsController, :index
+    post "/teams", TeamsController, :create
+    put "/teams/:id", TeamsController, :update
+    delete "/teams/:id", TeamsController, :delete
+
+    get "/manage", ManageController, :index
+    get "/manage/:id", ManageController, :show
+    post "/manage", ManageController, :create
+    put "/manage/:id", ManageController, :update
+    delete "/manage/:id", ManageController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
