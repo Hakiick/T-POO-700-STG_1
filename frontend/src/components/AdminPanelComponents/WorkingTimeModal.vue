@@ -33,7 +33,7 @@ async function fetchWorkingTime() {
   workingTimes.value = [];
   try {
     let res: WorkingTime[] = await getWorkingTimes(props.user);
-    res = res.filter((i: WorkingTime) => new Date(i.end) - new Date() > 0);
+    res = res.filter((i: WorkingTime) => new Date(i.end).getTime() - new Date().getTime() > 0);
     workingTimes.value = res;
   } catch (error) {
     // ignored
