@@ -87,7 +87,7 @@ onMounted(async () => {
   workedHoursThisMonth.value = formatHours(hoursThisMonth);
 
   // Récupérer les horodatages de l'utilisateur
-  const response_clock: response_clock = await getClockFromUser(user.value.id);
+  const response_clock = await getClockFromUser(user.value.id);
 
   if (response_clock.status === 200) {
     clocks.value = response_clock.data;
@@ -97,22 +97,27 @@ onMounted(async () => {
     // Récupérer l'heure d'arrivée (plus récent statut `true`)
     const lastTrueClock = clocks.value.data.find((entry) => entry.status === true);
     if (lastTrueClock) {
-      arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
+      arrivalTime.value = moment(lastTrueClock.time).format('YYYY-MM-DD HH:mm');
     } else {
-      arrivalTime.value = null; // Pas d'heure de pointage trouvée
+      arrivalTime.value = null;
     }
   }
 
   // Mise à jour de l'heure actuelle et calcul du temps travaillé si `arrivalTime` est défini
   current_time.value = moment().format('HH[h] mm[m]');
+
   if (arrivalTime.value) {
-    const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+    const arrivalMoment = moment(arrivalTime.value, 'YYYY-MM-DD HH:mm');
     const duration = moment.duration(moment().diff(arrivalMoment));
     workTime.value = formatHours(duration.asHours());
   } else {
-    workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
+    workTime.value = '...';
   }
 });
+
+const formattedArrivalTime = computed(() => {
+      return arrivalTime.value ? moment(arrivalTime.value).format('HH[h] mm[m]') : '...';
+    });
 
 
 const formatHours = (hours) => {
@@ -224,7 +229,7 @@ const handleChangeClock = async (checked: boolean) => {
               <div class="flex flex-col items-center font-bold">
                 <p class="text-xs text-muted-foreground">Arrivée</p>
                 <div class="text-sm text-muted-foreground">
-                  {{ arrivalTime || '...' }}
+                  {{ formattedArrivalTime || '...' }}
                 </div>
               </div>
               <Switch class="mt-2" :disabled="clock_diable" :checked="last_clock_value"
@@ -237,7 +242,7 @@ const handleChangeClock = async (checked: boolean) => {
               </div>
             </div>
             <div class="text-2xl font-bold text-primary mt-2">
-              {{ "Vous avez pointé il y a : " + workTime || "..." }}
+              {{ "Vous avez pointé il y a " + workTime || "..." }}
             </div>
           </CardContent>
         </Card>
