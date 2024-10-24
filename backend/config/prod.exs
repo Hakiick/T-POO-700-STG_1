@@ -24,5 +24,26 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :time_manager, TimeManager.Guardian,
+  # Name of your application or domain
+  issuer: "time_manager",
+  # You should use a secure and random key
+  secret_key: "wZZmhgb5huThibmm7YOJ131OdAQbm5VbnfXcZWtUZ7RUWe9KsBve9zTSYltVzdXF"
+
+config :time_manager, TimeManager.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "ssl0.ovh.net",
+  username: System.get_env("OVH_SMTP_USERNAME"),
+  password: System.get_env("OVH_SMTP_PASSWORD"),
+  port: 587,
+  tls: :always,
+  auth: :always,
+  # Disable SSL
+  ssl: false,
+  retries: 1,
+  no_mx_lookups: false,
+  # Disable peer verification
+  tls_options: [verify: :verify_none]
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
