@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useUserStore } from './store/userStore';
 import {
   Avatar,
   AvatarFallback,
@@ -65,7 +66,7 @@ const userInitial = computed(() => {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        Log out
+        <Button @click="userStore.logout()">Log out</Button>
         <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
       </DropdownMenuItem>
     </DropdownMenuContent>

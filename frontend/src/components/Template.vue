@@ -10,6 +10,7 @@ import MainNav from './MainNav.vue'
 import UserNav from './UserNav.vue'
 import ChartRange from './ChartRange.vue';
 import { Tabs, TabsContent } from './ui/tabs'
+
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { onMounted, ref, computed} from 'vue'
 
@@ -23,28 +24,25 @@ import { AxiosResponse } from 'axios';
 // Imports des API
 // ============================
 import { getUser } from '../api/apiUser';
+
 import { createClock, getClockFromUser, getClocksFromUser } from '../api/apiClock';
-
-// ============================
-// Import du store
-// ============================
+import moment from 'moment'
 import { useUserStore } from './store/userStore';
+import { useClockStore } from './store/clockStore';
 
-// ============================
-// Types
-// ============================
-type response_clock = AxiosResponse;
+const userStore = useUserStore()
+const clockStore = useClockStore()
 
 // ============================
 // Variables liées à l'utilisateur et aux données de pointage
 // ============================
-const userStore = useUserStore();
 const user = computed(() => userStore.user);
 
 const clocks = ref(null);
 const last_clock = ref(null);
 const last_clock_value = ref(false);
 const clock_diable = ref(false);
+
 const workedHoursToday = ref<string | null>(null);
 const workedHoursThisWeek = ref<string | null>(null);
 const workedHoursThisMonth = ref<string | null>(null);
@@ -69,6 +67,7 @@ const formattedTime = computed(() => {
 // onMounted: Initialisation des données au montage du composant
 // ============================
 onMounted(async () => {
+
   if (!user.value) {
     const response = await getUser(1);
     // console.log("response", response);
@@ -189,7 +188,6 @@ async function calculateWorkedHours(userId, startDate, endDate) {
       const duration = moment.duration(currentTime.diff(clockInTime));
       totalWorkedHours += duration.asHours();
     }
-
     return totalWorkedHours;
   }
 }
@@ -198,13 +196,62 @@ async function calculateWorkedHours(userId, startDate, endDate) {
 // Fonction handleChangeClock: Gestion du changement de pointage (clock)
 // ============================
 const handleChangeClock = async (checked: boolean) => {
-  last_clock_value.value = checked;
   //console.log(last_clock_value.value);
-  clock_diable.value = true;
+  clock_disable.value = true;
   const response = await createClock(
-    { time: moment.utc().format('YYYY-MM-DDTHH:mm:ss[Z]'), status: last_clock_value.value }, user.value.id
+    checked, user.value.id
   );
+  console.log(response);
 }
+
+watch(() => user.value, async (newUser) => {
+  if (newUser) {
+
+    // ============================
+    // fetch clock avec le nouvel utilisateur
+    // ============================
+    console.log("newUser", newUser);
+    const response_clock = await getClockFromUser(newUser.id);
+    if (response_clock.status === 200) {
+      clockStore.setClock(response_clock.data.data);
+      current_time.value = moment().format('HH[h] mm[m]');
+      // console.log("clock", clocks.value);
+      const lastTrueClock = clocks.value.find((entry) => entry.status === true);
+
+      if (lastTrueClock) {
+        arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
+      } else {
+        arrivalTime.value = null; // Pas d'heure de pointage trouvée
+      }
+
+      if (arrivalTime.value) {
+        const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+        const duration = moment.duration(moment().diff(arrivalMoment));
+        workTime.value = formatHours(duration.asHours());
+      } else {
+        workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
+      }
+
+      // ============================
+      // Fonction DayCard: Recuperation du temps journalier travaille (clock)
+      // ============================
+      const { startOfDay, endOfDay } = getCurrentDay();
+      const hoursToday = await calculateWorkedHours(user.value.id, startOfDay, endOfDay);
+      workedHoursToday.value = formatHours(hoursToday);
+
+      // Pour la semaine en cours
+      const { startOfWeek, endOfWeek } = getCurrentWeek();
+      const hoursThisWeek = await calculateWorkedHours(user.value.id, startOfWeek, endOfWeek);
+      workedHoursThisWeek.value = formatHours(hoursThisWeek);
+
+      // Pour le mois en cours
+      const { startOfMonth, endOfMonth } = getCurrentMonth();
+      const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
+      workedHoursThisMonth.value = formatHours(hoursThisMonth);
+    }
+
+  }
+});
 </script>
 
 <template>
