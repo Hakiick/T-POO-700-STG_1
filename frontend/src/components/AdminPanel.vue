@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { 
-  ref, 
-  onMounted, 
-  h, 
-  computed 
+import {
+  ref,
+  onMounted,
+  h,
 } from "vue";
 import {
   createUser,
@@ -33,11 +32,11 @@ import Search from "./Search.vue";
 import TeamSwitcher from "./TeamSwitcher.vue";
 import UserNav from "./UserNav.vue";
 import Button from "./ui/button/Button.vue";
-import { 
-  TrashIcon, 
-  Pencil2Icon, 
-  PlusIcon, 
-  TimerIcon 
+import {
+  TrashIcon,
+  Pencil2Icon,
+  PlusIcon,
+  TimerIcon
 } from "@radix-icons/vue";
 
 import {
@@ -53,6 +52,7 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
+import { User } from "./store/userStore.ts";
 
 const users = ref<User[]>([]);
 const newUser = ref({ id: -1, username: "", email: "", password: "" });
