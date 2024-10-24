@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useUserStore } from './store/userStore';
 import {
   Avatar,
   AvatarFallback,
@@ -16,25 +15,24 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
+import { useUserStore } from './store/userStore';
+import { computed } from 'vue'
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-})
-const userStore = useUserStore()
-// console.log("testdsafsd", props.user.data.username)
+const userStore = useUserStore();
+const user = computed(() => userStore.user);
 
+const userInitial = computed(() => {
+  return user.value.username ? user.value.username.charAt(0).toUpperCase() : '';
+});
 </script>
 
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="ghost" class="relative h-8 w-8 rounded-full">
-        <Avatar class="h-8 w-8">
+      <Button variant="ghost" class="relative h-12 w-12 rounded-full">
+        <Avatar class="h-12 w-12">
           <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-          <AvatarFallback>SC</AvatarFallback>
+          <AvatarFallback>{{ userInitial }}</AvatarFallback>
         </Avatar>
       </Button>
     </DropdownMenuTrigger>
@@ -42,10 +40,10 @@ const userStore = useUserStore()
       <DropdownMenuLabel class="font-normal flex">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            {{ props.user.username || "Loading" }}
+            {{ user.username || "Loading" }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            {{ props.user.email }}
+            {{ user.email }}
           </p>
         </div>
       </DropdownMenuLabel>
@@ -67,7 +65,7 @@ const userStore = useUserStore()
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <Button @click="userStore.logout()">Log out</Button>
+        Log out
         <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
       </DropdownMenuItem>
     </DropdownMenuContent>
