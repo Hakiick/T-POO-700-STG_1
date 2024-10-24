@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "./components/Template.vue";
 import LoginPage from "./components/LoginPage.vue";
+import ChartRange from "./components/ChartRange.vue";
 import UserAdminManagementPage from "./components/AdminPanel.vue";
 
 export default createRouter({
@@ -16,6 +17,11 @@ export default createRouter({
       path: "/login",
       name: "login",
       component: LoginPage,
+    },
+    {
+      path: "/dashboard",
+      name: "ChartRange",
+      component: ChartRange,
     },
     {
       path: "/admin/users",
