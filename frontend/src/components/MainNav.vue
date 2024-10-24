@@ -10,6 +10,9 @@ import { cn } from '../lib/utils'
     <a href="/login" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
       login
     </a>
+    <a href="/admin/dashboard" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+      Admin Dashboard
+    </a>
     <!-- <a href="/login" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"> -->
     <!--   Products -->
     <!-- </a> -->

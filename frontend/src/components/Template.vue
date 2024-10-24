@@ -141,7 +141,6 @@ watch(() => user.value, async (newUser) => {
     // ============================
     // fetch clock avec le nouvel utilisateur
     // ============================
-    console.log("newUser", newUser);
     const response_clock = await getClockFromUser(newUser.id);
     if (response_clock.status === 200) {
       clockStore.setClock(response_clock.data.data);
