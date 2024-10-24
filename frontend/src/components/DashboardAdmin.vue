@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import MainNav from './MainNav.vue';
-import UserNav from './UserNav.vue';
-import moment from 'moment'
-
 import { type Ref, onMounted, ref, computed } from 'vue';
 import { useUserStore } from './store/userStore';
 import { getUser } from '../api/apiUser';
@@ -12,7 +8,7 @@ import { getChartComponent, currentChartType, chartTypes } from '../manager/char
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { RangeCalendar } from './ui/range-calendar';
 import { cn } from '../lib/utils';
-import { CalendarDate, DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import { CalendarIcon } from '@radix-icons/vue';
 import { Tabs, TabsContent } from './ui/tabs';
 import { getMonday, getSunday } from '../manager/DateUtils';
@@ -23,6 +19,10 @@ import { Button } from './ui/button';
 // Initialisation et variables globales
 // ============================
 
+const df = new DateFormatter('fr-FR', {
+  dateStyle: 'medium',
+});
+
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 const workingtime = ref<any>(null);
@@ -31,18 +31,18 @@ const workDays = ref<any[]>([]);
 const data = ref<any[]>([]);
 const workingDataTable = ref<any[]>([]);
 
-const df = new DateFormatter('en-US', {
-  dateStyle: 'long',
-})
-
-const value = ref<DateValue>()
-
-const formattedDate = computed(() => {
-  return moment().format('dddd D MMMM');
-});
-const formattedTime = computed(() => {
-  return moment().format('HH[h] mm[m]');
-});
+const value = ref({
+  start: new CalendarDate(
+    getMonday(new Date()).getFullYear(),
+    getMonday(new Date()).getMonth() + 1,
+    getMonday(new Date()).getDate()
+  ),
+  end: new CalendarDate(
+    getSunday(new Date()).getFullYear(),
+    getSunday(new Date()).getMonth() + 1,
+    getSunday(new Date()).getDate()
+  ),
+}) as Ref<DateRange>;
 
 // ============================
 // Fonction exécutée au montage
@@ -53,6 +53,7 @@ onMounted(async () => {
     user.value = await getUser(1);
   }
   
+  // Récupérer les données au chargement initial
   await fetchData();
 });
 
@@ -60,7 +61,7 @@ onMounted(async () => {
 // Fonction pour appliquer la nouvelle plage de dates
 // ============================
 
-async function applyDate() {
+async function applyDateRange() {
   await fetchData();
 }
 
@@ -69,24 +70,19 @@ async function applyDate() {
 // ============================
 
 async function fetchData() {
-  if (!value.value) {
-    console.error("Aucune date sélectionnée");
-    return;
-  }
-
-  // Récupérer la date sélectionnée dans le calendrier
-  const selectedDate = new Date(
-    value.value.year,
-    value.value.month - 1,
-    value.value.day
+  const startDate = new Date(
+    value.value.start.year,
+    value.value.start.month - 1,
+    value.value.start.day
+  );
+  
+  const endDate = new Date(
+    value.value.end.year,
+    value.value.end.month - 1,
+    value.value.end.day + 1  // Ajout d'un jour ici
   );
 
-  // Définir le début et la fin de la journée
-  const startDate = new Date(selectedDate.setHours(0, 0, 0, 0));
-  const endDate = new Date(selectedDate.setHours(23, 59, 59, 999));
-
   try {
-    // Appeler l'API pour récupérer les données en utilisant la date avec début et fin de journée
     const workingTimeResponse = await getWorkingTimeByDate(user.value.id, startDate.toISOString(), endDate.toISOString());
     const clockDataResponse = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
 
@@ -135,8 +131,8 @@ function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
       date: new Date(workingTime.start).toLocaleDateString(),
       startTime: new Date(workingTime.start).toLocaleTimeString(),
       endTime: new Date(workingTime.end).toLocaleTimeString(),
-      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A',
-      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A'
+      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A',  // Valeur par défaut N/A
+      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A'        // Valeur par défaut N/A
     });
   });
 
@@ -237,84 +233,102 @@ function formatHours(hours: number) {
 </script>
 
 <template>
-<div class="grid grid-cols-1 lg:grid-cols-10 min-h-screen">
-    <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
-      <h1 class="font-bold mt-5 flex justify-center">
-        Time Manager
-      </h1>
-      <div v-if="user" class="flex items-center justify-center py-8 border-b-4">
-        <UserNav :user="user" />
-      </div>
-      <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
-        <MainNav class="mx-4" />
-      </div>
-      <!-- MainNav for Mobile -->
-      <div class="absolute top-4 right-4 lg:hidden">
-        <MainNav class="mx-4" />
-      </div>
-      <div class="text-center items-center justify-center p-8 border-b-4">
-        <p>{{ formattedDate }}</p>
-        <p class="text-xl font-bold">{{ formattedTime }}</p>
-      </div>
-    </div>
+  <Tabs default-value="monthly" class="space-y-4 h-full w-full">
+    <TabsContent value="monthly" class="space-y-4 h-full w-full">
+      <div class="grid gap-4 grid-cols-1 lg:grid-cols-10 h-full w-full mt-7">
+        
+        <!-- Section graphique - 70% largeur à gauche -->
+        <div class="col-span-1 lg:col-span-6 space-y-4 h-full w-full">
+          <div class="h-full w-full">
+            <div class="flex items-center justify-center space-x-4 mb-10">
+              <button
+                v-for="type in chartTypes"
+                :key="type"
+                @click="currentChartType = type"
+                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                {{ type }}
+              </button>
+            </div>
 
-    <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4">
-      <!-- Calendrier avec bouton d'application -->
-      <div class="text-center mb-3">
-        <Popover>
-          <PopoverTrigger as-child>
-            <Button
-              variant="outline"
-              :class="[
-                'w-full justify-start text-left font-normal',
-                !value && 'text-muted-foreground',
-              ]"
-            >
-            <CalendarIcon class="mr-2 h-4 w-4" />
-            {{ value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date" }}
-          </Button>
-          </PopoverTrigger>
-          <PopoverContent class="w-auto p-0">
-            <Calendar
-              v-model="value"
-              initial-focus
+            <!-- Composant graphique dynamique -->
+            <component
+              :is="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).component"
+              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props"
             />
-          </PopoverContent>
-        </Popover>
-      </div>
+          </div>
+        </div>
 
-      <!-- Bouton pour appliquer la plage de dates -->
-      <div class="text-center mb-3">
-        <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white">
-          Appliquer
-        </Button>
-      </div>
+        <!-- Section emploi du temps - 30% largeur à droite -->
+        <div class="col-span-1 lg:col-span-4 h-full w-full space-y-4">
+          <!-- Calendrier avec bouton d'application -->
+          <div class="text-center mb-3">
+            <Popover>
+              <PopoverTrigger as-child>
+                <Button
+                  variant="outline"
+                  :class="cn(
+                    'w-full justify-start text-left font-normal',
+                    !value && 'text-muted-foreground',
+                  )"
+                >
+                  <CalendarIcon class="mr-2 h-4 w-4" />
+                  <template v-if="value.start">
+                    <template v-if="value.end">
+                      {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{ df.format(value.end.toDate(getLocalTimeZone())) }}
+                    </template>
+                    <template v-else>
+                      {{ df.format(value.start.toDate(getLocalTimeZone())) }}
+                    </template>
+                  </template>
+                  <template v-else>
+                    Pick a date
+                  </template>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-auto p-0">
+                <RangeCalendar
+                  v-model="value"
+                  initial-focus
+                  :number-of-months="2"
+                  @update:start-value="(startDate) => value.start = startDate"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-      <!-- Emploi du temps -->
-      <div class="text-center mb-3">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th class="px-4 py-2 text-left">Username</th>
-              <th class="px-4 py-2 text-left">Work In</th>
-              <th class="px-4 py-2 text-left">Work Out</th>
-              <th class="px-4 py-2 text-left">Clock In</th>
-              <th class="px-4 py-2 text-left">Clock Out</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, index) in workingDataTable" :key="index">
-              <td class="border px-4 py-2">{{ row.date }}</td>
-              <td class="border px-4 py-2">{{ row.startTime }}</td>
-              <td class="border px-4 py-2">{{ row.endTime }}</td>
-              <td class="border px-4 py-2">{{ row.clockStart }}</td>
-              <td class="border px-4 py-2">{{ row.clockEnd }}</td>
-            </tr>
-          </tbody>
-        </table>
+          <!-- Bouton pour appliquer la plage de dates -->
+          <div class="text-center mb-3">
+            <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white">
+              Appliquer
+            </Button>
+          </div>
+
+          <!-- Emploi du temps -->
+          <div class="text-center mb-3">
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th class="px-4 py-2 text-left">Date</th>
+                  <th class="px-4 py-2 text-left">Heure de début</th>
+                  <th class="px-4 py-2 text-left">Heure de fin</th>
+                  <th class="px-4 py-2 text-left">Pointage de début</th>
+                  <th class="px-4 py-2 text-left">Pointage de fin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in workingDataTable" :key="index">
+                  <td class="border px-4 py-2">{{ row.date }}</td>
+                  <td class="border px-4 py-2">{{ row.startTime }}</td>
+                  <td class="border px-4 py-2">{{ row.endTime }}</td>
+                  <td class="border px-4 py-2">{{ row.clockStart }}</td>
+                  <td class="border px-4 py-2">{{ row.clockEnd }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </TabsContent>
+  </Tabs>
 </template>
