@@ -327,4 +327,30 @@ defmodule TimeManager.Accounts do
   def change_manage(%Manage{} = manage, attrs \\ %{}) do
     Manage.changeset(manage, attrs)
   end
+
+  @doc """
+  Returns an users list get from team id
+  """
+  def get_users_from_team(%Teams{} = team) do
+    Repo.all(
+      from u in User,
+      join: m in Manage, on: u.id == m.user_id,
+      where: m.team_id == ^team.id
+    )
+  end
+
+  def get_teams_from_user(%User{} = user) do
+    Repo.all(
+      from t in Teams,
+      join: m in Manage, on: t.id == m.team_id,
+      where: m.user_id == ^user.id
+    )
+  end
+
+  def get_from_user_and_team(%User{} = user, %Teams{} = team) do
+    Repo.one(
+      from m in Manage,
+      where: m.user_id == ^user.id and m.team_id == ^team.id
+    )
+  end
 end

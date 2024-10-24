@@ -39,13 +39,15 @@ import MainNav from "./MainNav.vue";
 import Button from "./ui/button/Button.vue";
 import Input from "./ui/input/Input.vue";
 import Label from "./ui/label/Label.vue";
-import { TrashIcon, Pencil2Icon, PlusIcon } from "@radix-icons/vue";
+import { TrashIcon, Pencil2Icon, PlusIcon, PersonIcon } from "@radix-icons/vue";
+import ManageUserModal from "./AdminPanelComponents/ManageUserModal.vue";
 
 import { computed, h, onMounted, Ref, ref } from "vue";
 
 const teams: Ref<Team[], Team[]> = ref([]);
 const actionTeam: Ref<Team, Team> = ref({ id: -1, name: "", description: "" });
 const open: Ref<boolean, boolean> = ref(false);
+const openManageModal: Ref<boolean, boolean> = ref(false);
 
 const columns = computed(() => {
   const columnHelper = createColumnHelper<Team>();
@@ -53,26 +55,27 @@ const columns = computed(() => {
   return [
     columnHelper.accessor("name", {
       header: "Name",
-      cell: ({ row }) =>
-        h(
-          "div",
-          { class: "capitalize names", "data-id": row.getValue("id") },
-          row.getValue("name")
-        ),
+      cell: ({ row }) => h("div", {}, row.getValue("name")),
     }),
     columnHelper.accessor("description", {
       header: "Description",
-      cell: ({ row }) =>
-        h(
-          "div",
-          { class: "capitalize names", "data-id": row.getValue("id") },
-          row.getValue("description")
-        ),
+      cell: ({ row }) => h("div", {}, row.getValue("description")),
     }),
     columnHelper.accessor("id", {
       header: () => h("div", { class: "text-right" }, "Actions"),
       cell: ({ row }) =>
         h("div", { class: "text-right" }, [
+          h(
+            Button,
+            {
+              variant: "outline",
+              onClick() {
+                openManageModal.value = true;
+                actionTeam.value = row.original;
+              }
+            },
+            h(PersonIcon)
+          ),
           h(
             Button,
             {
@@ -123,7 +126,6 @@ onMounted(fetchAllUser);
 
 async function fetchAllUser() {
   const response = await getAllTeam();
-  console.log(columns.value);
   teams.value = response;
 }
 
@@ -151,7 +153,6 @@ async function createOrUpdateElement() {
   );
 
   teams.value.forEach((value, index) => {
-    console.log(value, index);
     if (index != teamIndex) tempTeams.push(value);
     else tempTeams.push(actionTeam.value);
   });
@@ -160,7 +161,7 @@ async function createOrUpdateElement() {
 }
 </script>
 <template>
-  <div class="h-full w-full">
+  <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
         <MainNav class="mx-6" />
@@ -227,7 +228,10 @@ async function createOrUpdateElement() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+    
+
         </div>
+        <ManageUserModal :open="openManageModal" :team="actionTeam" @close="() => openManageModal = false"/>
         <Table>
           <TableHeader>
             <TableRow

@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import { apiClient } from "./api";
 
 
@@ -42,7 +41,7 @@ export const deleteTeam = async(team: Team) : Promise<boolean> => {
 
 export const updateTeam = async(team: Team) : Promise<boolean> => {
     try {
-        const response = await apiClient.put(`/teams/${team.id}`, team);
+        const response = await apiClient.put(`/teams/${team.id}`, {teams: team});
         console.log(response.status)
         return true;
     } catch (error) {

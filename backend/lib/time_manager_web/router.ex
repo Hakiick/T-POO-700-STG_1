@@ -33,11 +33,10 @@ defmodule TimeManagerWeb.Router do
     put "/teams/:id", TeamsController, :update
     delete "/teams/:id", TeamsController, :delete
 
-    get "/manage", ManageController, :index
-    get "/manage/:id", ManageController, :show
+    get "/teams/:id/users", ManageController, :index_users_from_team
+    get "/users/:id/teams", ManageController, :index_teams_from_user
     post "/manage", ManageController, :create
-    put "/manage/:id", ManageController, :update
-    delete "/manage/:id", ManageController, :delete
+    delete "/manage/:userID/:teamID", ManageController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
