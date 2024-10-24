@@ -3,6 +3,7 @@ import HomePage from "./components/Template.vue";
 import LoginPage from "./components/LoginPage.vue";
 import ChartRange from "./components/ChartRange.vue";
 import UserAdminManagementPage from "./components/AdminPanel.vue";
+import DashBoardAdmin from "./components/DashBoardAdmin.vue";
 
 export default createRouter({
   history: createWebHistory(),
@@ -27,6 +28,11 @@ export default createRouter({
       path: "/admin/users",
       name: "UserAdminManagement",
       component: UserAdminManagementPage
-    }
+    },
+    {
+      path: "/admin/dashboard",
+      name: "DashBoardAdmin",
+      component: DashBoardAdmin
+    },
   ],
 });
