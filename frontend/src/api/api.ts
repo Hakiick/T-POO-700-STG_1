@@ -11,16 +11,33 @@ export const apiClient: AxiosInstance = axios.create({
     "Access-Control-Allow-Origin": "*",
   },
 });
-
 export const apiClientProtected: AxiosInstance = axios.create({
-  baseURL: "/api", // Base URL for your API
+  baseURL: "/api",
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
     "Cache-Control": "max-age=60",
   },
 });
+//
+// Add a request interceptor to dynamically set the Authorization header
+apiClientProtected.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem("access_token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// export const apiClientProtected: AxiosInstance = axios.create({
+//   baseURL: "/api", // Base URL for your API
+//   headers: {
+//     "Content-Type": "application/json",
+//     "Access-Control-Allow-Origin": "*",
+//     Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+//     "Cache-Control": "max-age=60",
+//   },
+// });
 
 // // Request interceptor to attach access token
 // axios.interceptors.request.use(

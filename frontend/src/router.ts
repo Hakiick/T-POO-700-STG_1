@@ -6,7 +6,6 @@ import UserAdminManagementPage from "./components/UserAdminPanel.vue";
 import TeamsAdminPage from "./components/TeamAdminPanel.vue";
 import DashBoardAdmin from "./components/DashBoardAdmin.vue";
 import { useUserStore } from "./components/store/userStore";
-import { computed } from "vue";
 
 const routes = [
   {
@@ -57,30 +56,32 @@ router.beforeEach(async (to, _from, next) => {
   // const groups = to.matched[0].meta.groups;
   const userStore = useUserStore();
 
-  if (to.name === "NotFound") {
-    next();
+  // Redirect to home if trying to access the login page while already logged in
+  if (to.name === "login" && sessionStorage.getItem("refresh_token")) {
+    return next({ name: "home" });
   }
 
+  // If route doesn't require auth, proceed
   if (!requiresAuth) {
-    next();
-    return;
+    return next();
   }
 
-  if (to.name === "Login" && sessionStorage.getItem("refresh_token")) {
-    next({ name: "home" });
-    return;
-  }
-
+  // If auth is required, check if refresh_token exists
   if (!sessionStorage.getItem("refresh_token")) {
-    next({ name: "login" });
-    return;
+    return next({ name: "login" });
   }
 
+  // Attempt to log in with stored token
+  await userStore.login();
+
+  // If user is not logged in after attempting login, redirect to login
   if (!userStore.user) {
-    userStore.login();
+    return next({ name: "login" });
   }
 
+  // If all checks pass, allow route navigation
   next();
+
   // const user = computed(userStore.user);
 
   // let groupCheck = false;

@@ -65,8 +65,9 @@ const userInitial = computed(() => {
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        Log out
-        <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        <Button class="w-full" @click="userStore.logout"> Log out
+          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+        </Button>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
