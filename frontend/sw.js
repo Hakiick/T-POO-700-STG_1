@@ -11,7 +11,7 @@ self.addEventListener("install", (event) => {
       ]);
     }),
   );
-  // console.log("Service Worker installing.");
+  //console.log('Service Worker installing.');
 });
 
 self.addEventListener("activate", (event) => {
@@ -30,10 +30,8 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const requestUrl = new URL(event.request.url);
-  // console.log("Fetching:", requestUrl.href, "Scheme:", requestUrl.protocol);
   if (event.request.method !== "GET") return; // Only cache GET requests
-
+  console.log("Fetching:", requestUrl.href, "Scheme:", requestUrl.protocol);
   if (requestUrl.protocol === "http:" || requestUrl.protocol === "https:") {
     event.respondWith(
       caches.open("my-cache").then(async (cache) => {
