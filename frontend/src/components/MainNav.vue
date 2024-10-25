@@ -1,63 +1,49 @@
 <script setup lang="ts">
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from './ui/navigation-menu'
+import { ref, onMounted } from 'vue';
+import { cn } from '../lib/utils';
 
-const components: { title: string, href: string, description: string }[] = [
-  {
-    title: 'Users',
-    href: '/admin/users',
-    description: 'To administrate users on the web'
-  },
-  {
-    title: 'Teams',
-    href: '/admin/teams',
-    description: 'To administrate teams on the web'
-  }
+const isMenuOpen = ref(false);
 
-]
+const isDesktop = ref(false);
+const checkIsDesktop = () => {
+  isDesktop.value = window.innerWidth >= 1024;
+};
+onMounted(async () => {
+  checkIsDesktop();
+  window.addEventListener('resize', checkIsDesktop);
+});
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
 </script>
 
 <template>
-  <NavigationMenu>
-    <NavigationMenuList>
-      <NavigationMenuItem>
-        <NavigationMenuLink href="/" :class="navigationMenuTriggerStyle()">
-          Dashboard
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink href="/login" :class="navigationMenuTriggerStyle()">
-          Login
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuTrigger>Admin</NavigationMenuTrigger>
-        <NavigationMenuContent>
-          <ul class="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-            <li v-for="component in components" :key="component.title">
-              <NavigationMenuLink as-child>
-                <a
-                  :href="component.href"
-                  class="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                >
-                  <div class="text-sm font-medium leading-none">{{ component.title }}</div>
-                  <p class="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                    {{ component.description }}
-                  </p>
-                </a>
-              </NavigationMenuLink>
-            </li>
-          </ul>
-        </NavigationMenuContent>
-      </NavigationMenuItem>
-      
-    </NavigationMenuList>
-  </NavigationMenu>
+  <nav :class="cn('flex flex-col items-center space-y-4 lg:space-y-6', $attrs.class ?? '')">
+    <button @click="toggleMenu" class="lg:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+      <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+      </svg>
+    </button>
+    <div :class="cn('lg:flex lg:flex-col lg:items-center lg:space-y-4', { 'block': isMenuOpen, 'hidden': !isMenuOpen })">
+      <a href="/" class="block text-sm font-medium transition-colors hover:text-primary py-2 lg:py-0">
+        Home
+      </a>
+      <a href="/login" class="block text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2 lg:py-0">
+        Login
+      </a>
+      <a v-if="!isDesktop" href="/dashboard" class="block text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2 lg:py-0">
+        Dashboard
+      </a>
+      <a href="/admin/dashboard" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+      Admin Dashboard
+    </a>
+      <!-- <a href="/login" class="block text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2 lg:py-0"> -->
+      <!--   Products -->
+      <!-- </a> -->
+      <!-- <a href="/login" class="block text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2 lg:py-0"> -->
+      <!--   Settings -->
+      <!-- </a> -->
+    </div>
+  </nav>
 </template>

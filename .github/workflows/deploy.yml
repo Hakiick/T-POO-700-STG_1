@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
@@ -27,7 +27,7 @@ jobs:
         run: docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1 && docker push ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-frontend:v1
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
 
     steps:

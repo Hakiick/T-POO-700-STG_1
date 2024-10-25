@@ -25,6 +25,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+      OVH_SMTP_USERNAME: ${OVH_SMTP_USERNAME}
+      OVH_SMTP_PASSWORD: ${OVH_SMTP_PASSWORD}
     ports:
       - "4000:4000"
     volumes:

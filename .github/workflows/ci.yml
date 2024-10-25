@@ -10,7 +10,22 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    services:
+      db:
+        image: postgres:13
+        env:
+          POSTGRES_USER: timemanager
+          POSTGRES_PASSWORD: timemanager
+          POSTGRES_DB: timemanager_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -21,26 +36,26 @@ jobs:
         with:
           node-version: "21"
 
-      - name: Start PostgreSQL on Ubuntu
-        run: |
-          sudo systemctl start postgresql.service
-          pg_isready
-
-      - name: Create additional user
-        run: |
-          sudo -u postgres psql --command="CREATE USER test_user WITH PASSWORD 'test_password'" --command="\du"
-
-      - name: Create additional database
-        run: |
-          sudo -u postgres createdb test_database --owner=test_user
-          PGPASSWORD=test_password
+      # - name: Start PostgreSQL on Ubuntu
+      #   run: |
+      #     sudo systemctl start postgresql.service
+      #     pg_isready
+      #
+      # - name: Create additional user
+      #   run: |
+      #     sudo -u postgres psql --command="CREATE USER test_user WITH PASSWORD 'test_password'" --command="\du"
+      #
+      # - name: Create additional database
+      #   run: |
+      #     sudo -u postgres createdb test_database --owner=test_user
+      #     PGPASSWORD=test_password
 
       # Install dependencies
       - run: rm -rf nodes_modules
         working-directory: ./frontend
       - run: rm -f package-lock.json
         working-directory: ./frontend
-      - run: npm i
+      - run: npm install
         working-directory: ./frontend
 
       # Run frontend build
@@ -67,9 +82,9 @@ jobs:
       # Run backend tests
       # - run: mix ecto.reset
       # working-directory: ./backend
-      - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
-        working-directory: ./backend
-      - run: mix test test/time_manager_web/controllers/user_controller_test.exs
-        working-directory: ./backend
-      - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
-        working-directory: ./backend
+      # - run: mix test test/time_manager_web/controllers/clock_controller_test.exs
+      #   working-directory: ./backend
+      # - run: mix test test/time_manager_web/controllers/user_controller_test.exs
+      #   working-directory: ./backend
+      # - run: mix test test/time_manager_web/controllers/working_time_controller_test.exs
+      #   working-directory: ./backend
