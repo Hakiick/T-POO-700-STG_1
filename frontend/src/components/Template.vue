@@ -67,7 +67,7 @@ onMounted(async () => {
   checkIsDesktop();
   window.addEventListener('resize', checkIsDesktop);
 });
-  
+
 const formattedArrivalTime = computed(() => {
   return arrivalTime.value ? moment(arrivalTime.value, 'HH:mm') : '...';
 });
@@ -150,7 +150,13 @@ const handleChangeClock = async (checked: boolean) => {
   const response = await createClock(
     checked, user.value.id
   );
-  console.log(response);
+  if (response.data) {
+    clockStore.setLastClock(response.data);
+  }
+  else {
+    clock_disable.value = false;
+  }
+  // console.log(response);
 }
 
 watch(() => user.value, async (newUser) => {
@@ -237,7 +243,8 @@ watch(() => user.value, async (newUser) => {
         <hr class="my-2">
         <div class="mb-2">
           <p>Month</p>
-          <p class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</p>
+          <p class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}
+          </p>
         </div>
         <hr class="my-2">
         <div class="mb-2">
@@ -254,11 +261,8 @@ watch(() => user.value, async (newUser) => {
 
     <!-- Main Content -->
     <div class="col-span-1 lg:col-span-9 flex flex-col justify-between p-8">
-      <Card
-        class="box-content p-9 border-4 cursor-pointer m-0 mb-8"
-        :class="last_clock_value ? 'bg-red-500' : 'bg-green-500'"
-        @click="handleChangeClock"
-      >
+      <Card class="box-content p-9 border-4 cursor-pointer m-0 mb-8"
+        :class="last_clock_value ? 'bg-red-500' : 'bg-green-500'" @click="handleChangeClock(!last_clock_value)">
         <CardHeader class="flex flex-col items-center justify-center space-y-0 pb-1 px-6 pt-3">
           <div class="text-4xl text-white">
             <template v-if="last_clock_value">
