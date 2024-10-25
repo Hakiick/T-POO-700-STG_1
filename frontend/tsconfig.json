@@ -8,12 +8,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+   "skipLibCheck": true
   },
+
   "exclude": [
-    "src/components/ui/*",
-    "src/components/ui",
-    "src/components/ui/",
-    "nodes_modules/*"
+    "src/components",  // Exclude all files and subdirectories within ui folder
+    "node_modules"  // Correct spelling of node_modules
   ]
 }

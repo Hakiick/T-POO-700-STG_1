@@ -29,7 +29,11 @@
     "src/components/ui/*",
     "src/components/ui",
     "src/components/ui/",
-      "nodes_modules/*"
+    "src/components/",
+    "src/components/*",
+    "src/components",
+    "node_modules/*",
+    "node_modules"
     ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

@@ -27,7 +27,8 @@
     "src/components/ui/*",
     "src/components/ui",
     "src/components/ui/",
-    "nodes_modules/*"
+    "node_modules/*",
+    "node_modules"
   ],
   "include": ["vite.config.ts"]
 }
