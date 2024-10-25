@@ -1,10 +1,10 @@
 import { User } from "@/components/store/userStore";
-import { apiClient } from "./api";
+import { apiClientProtected } from "./api";
 import { Team } from "./apiTeams";
 
 export const getAllUsersFromTeam = async(team: Team): Promise<User[]> => {
     try {
-        const response = await apiClient.get(`/teams/${team.id}/users`);
+        const response = await apiClientProtected.get(`/teams/${team.id}/users`);
         return response.data.data;
     } catch (error) {
         console.error(error);
@@ -14,7 +14,7 @@ export const getAllUsersFromTeam = async(team: Team): Promise<User[]> => {
 
 export const getAllTeamsFromUser = async(user: User): Promise<Team[]> => {
     try {
-        const response = await apiClient.get(`/users/${user.id}/teams`);
+        const response = await apiClientProtected.get(`/users/${user.id}/teams`);
         return response.data.data;
     } catch(error) {
         console.error(error);
