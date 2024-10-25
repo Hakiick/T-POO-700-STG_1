@@ -53,6 +53,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
 import { User } from "./store/userStore.ts";
+import NavAdmin from "./NavAdmin.vue";
 
 const users = ref<User[]>([]);
 const newUser = ref({ id: -1, username: "", email: "", password: "" });
@@ -185,7 +186,7 @@ const table = useVueTable({
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
         <TeamSwitcher />
-        <MainNav class="mx-6" />
+        <NavAdmin class="mx-6" />
         <div v-if="users.length" class="ml-auto flex items-center space-x-4">
           <Search />
           <UserNav :user="users[0]" />
