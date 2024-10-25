@@ -24,7 +24,7 @@ export const getAllTeamsFromUser = async(user: User): Promise<Team[]> => {
 
 export const addUserInTeam = async (user:User, team: Team): Promise<boolean> => {
     try {
-        const response = await apiClient.post("/manage", {
+        const response = await apiClientProtected.post("/manage", {
             "userId": user.id,
             "teamId": team.id
         });
@@ -36,7 +36,7 @@ export const addUserInTeam = async (user:User, team: Team): Promise<boolean> => 
 
 export const deleteUserInTeam = async (user:User, team: Team): Promise<boolean> => {
     try {
-        const response = await apiClient.delete(`/manage/${user.id}/${team.id}`)
+        const response = await apiClientProtected.delete(`/manage/${user.id}/${team.id}`)
         return response.status == 204;
     } catch(error) {
         console.error(error);
