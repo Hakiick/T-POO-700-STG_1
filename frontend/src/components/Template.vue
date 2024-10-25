@@ -61,8 +61,8 @@ const formattedTime = computed(() => {
 // ============================
 // onMounted: Initialisation des données au montage du composant
 // ============================
-onMounted(async () => {
-  await userStore.login()
+onMounted(() => {
+  // await userStore.login()
 
   checkIsDesktop();
   window.addEventListener('resize', checkIsDesktop);
