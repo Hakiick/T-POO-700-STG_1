@@ -1,23 +1,19 @@
 <script setup lang="ts">
 import MainNav from './MainNav.vue';
 import UserNav from './UserNav.vue';
+import TeamSwitcher from './TeamSwitcher.vue';
 import moment from 'moment'
 
-import { type Ref, onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useUserStore } from './store/userStore';
-import { getUser } from '../api/apiUser';
+import { getAllUser } from '../api/apiUser';
 import { getWorkingTimeByDate } from '../api/apiWorkingTime';
 import { getClocksFromUser } from '../api/apiClock';
-import { getChartComponent, currentChartType, chartTypes } from '../manager/chartManager';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { RangeCalendar } from './ui/range-calendar';
-import { cn } from '../lib/utils';
-import { CalendarDate, DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
+import { DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
 import { CalendarIcon } from '@radix-icons/vue';
-import { Tabs, TabsContent } from './ui/tabs';
-import { getMonday, getSunday } from '../manager/DateUtils';
-import type { DateRange } from 'radix-vue';
 import { Button } from './ui/button';
+import { Calendar } from './ui/calendar'
 
 // ============================
 // Initialisation et variables globales
@@ -25,11 +21,8 @@ import { Button } from './ui/button';
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
-const workingtime = ref<any>(null);
-const clockData = ref<any>(null);
-const workDays = ref<any[]>([]);
-const data = ref<any[]>([]);
 const workingDataTable = ref<any[]>([]);
+const usersList = ref<any[]>([]);
 
 const df = new DateFormatter('en-US', {
   dateStyle: 'long',
@@ -49,11 +42,7 @@ const formattedTime = computed(() => {
 // ============================
 
 onMounted(async () => {
-  if (!user.value) {
-    user.value = await getUser(1);
-  }
-  
-  await fetchData();
+  await userStore.login()
 });
 
 // ============================
@@ -74,76 +63,66 @@ async function fetchData() {
     return;
   }
 
-  // Récupérer la date sélectionnée dans le calendrier
+  if (!user.value || !user.value.id) {
+    console.error("Erreur : utilisateur introuvable ou ID manquant");
+    return;
+  }
+
   const selectedDate = new Date(
     value.value.year,
     value.value.month - 1,
     value.value.day
   );
-
-  // Définir le début et la fin de la journée
   const startDate = new Date(selectedDate.setHours(0, 0, 0, 0));
   const endDate = new Date(selectedDate.setHours(23, 59, 59, 999));
 
   try {
-    // Appeler l'API pour récupérer les données en utilisant la date avec début et fin de journée
-    const workingTimeResponse = await getWorkingTimeByDate(user.value.id, startDate.toISOString(), endDate.toISOString());
-    const clockDataResponse = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
+    usersList.value = await getAllUser();
 
-    // Vérification des données récupérées, si absentes, définir des valeurs par défaut
-    const workingTimeData = workingTimeResponse?.data?.data ?? [];
-    const clockDataEntries = clockDataResponse?.data?.data ?? [];
+    // Initialise le tableau avant de le remplir
+    workingDataTable.value = [];
+    usersList.value.forEach(async (user) => {
+      const workingTimeResponse = await getWorkingTimeByDate(user.id, startDate.toISOString(), endDate.toISOString());
+      const clockDataResponse = await getClocksFromUser(user.id, startDate.toISOString(), endDate.toISOString());
 
-    workingtime.value = workingTimeData;
-    clockData.value = clockDataEntries;
+      const workingTimeData = workingTimeResponse?.data?.data ?? [];
+      const clockDataEntries = clockDataResponse?.data?.data ?? [];
 
-    // Si aucune donnée n'est présente, afficher des valeurs par défaut
-    const workingDays = workingTimeData.length ? aggregateWorkingTime(workingTimeData) : [{ name: 'Aucune donnée', planned: 0 }];
-    const clockDays = clockDataEntries.length ? calculateWork(clockDataEntries) : [{ name: 'Aucune donnée', real: 0 }];
-
-    workDays.value = workingDays.map(workDay => {
-      const clockDay = clockDays.find(day => day.name === workDay.name);
-      const realTime = clockDay ? clockDay.real : 0;
-
-      return {
-        name: workDay.name,
-        planned: workDay.planned,
-        real: realTime,
-      };
+      // Ajouter les données au tableau au lieu de les écraser
+      workingDataTable.value.push(...createDataTable(workingTimeData, clockDataEntries, user));
     });
-
-    data.value = workDays.value.length ? workDays.value : [{ name: 'Aucune donnée', planned: 0, real: 0 }];
-    workingDataTable.value = createDataTable(workingTimeData, clockDataEntries);
   } catch (error) {
     console.error("Erreur lors de la récupération des données : ", error);
   }
 }
 
+
 // ============================
 // Fonction pour créer un tableau de données
 // ============================
 
-function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
-
+function createDataTable(workingTimeEntries, clockEntries, user) {
   let dataTable = [];
 
-  workingTimeEntries.forEach((workingTime) => {
-    const clockStart = clockEntries.find((clock) => clock.status === true && new Date(clock.time).toDateString() === new Date(workingTime.start).toDateString());
-    const clockEnd = clockEntries.find((clock) => clock.status === false && new Date(clock.time).toDateString() === new Date(workingTime.end).toDateString());
+  // Filtrer les entrées d'horloge pour obtenir les deux premières avec status true et false
+  const clockStartEntries = clockEntries.filter(entry => entry.status === true).slice(0, 2);
+  const clockEndEntries = clockEntries.filter(entry => entry.status === false).slice(0, 2);
 
+  // Parcourir les deux premières entrées de temps de travail
+  workingTimeEntries.slice(0, 2).forEach((workingTime, index) => {
     dataTable.push({
-      date: new Date(workingTime.start).toLocaleDateString(),
-      startTime: new Date(workingTime.start).toLocaleTimeString(),
-      endTime: new Date(workingTime.end).toLocaleTimeString(),
-      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A',
-      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A'
+      username: user.username || 'N/A',
+      startTime: workingTime.start ? new Date(workingTime.start).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+      endTime: workingTime.end ? new Date(workingTime.end).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+      clockStart: clockStartEntries[index] ? new Date(clockStartEntries[index].time).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+      clockEnd: clockEndEntries[index] ? new Date(clockEndEntries[index].time).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A'
     });
   });
 
   // Si aucune donnée n'est présente
   if (!dataTable.length) {
     dataTable.push({
-      date: 'Aucune donnée',
+      username: 'Aucune donnée',
       startTime: 'N/A',
       endTime: 'N/A',
       clockStart: 'N/A',
@@ -153,145 +132,65 @@ function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
 
   return dataTable;
 }
-
-// ============================
-// Fonctions utilitaires pour l'agrégation des temps de travail et les calculs
-// ============================
-
-function aggregateWorkingTime(workingTimeEntries: any[]) {
-  const aggregated: Record<string, { planned: number }> = {};
-
-  workingTimeEntries.forEach(entry => {
-    const formattedDate = formatDate(entry.start);
-    const { durationNumeric } = calculateDuration(entry.start, entry.end);
-
-    if (!aggregated[formattedDate]) {
-      aggregated[formattedDate] = { planned: 0 };
-    }
-    aggregated[formattedDate].planned += durationNumeric;
-  });
-
-  return Object.keys(aggregated).map(name => ({
-    name,
-    planned: aggregated[name].planned,
-  }));
-}
-
-function calculateWork(clockEntries: any[]) {
-  if (!Array.isArray(clockEntries)) return [];
-
-  const workByDate: Record<string, { real: number }> = {};
-  let startTime: string | null = null;
-
-  clockEntries.forEach(entry => {
-    const formattedDate = formatDate(entry.time);
-
-    if (entry.status) {
-      startTime = entry.time;
-    } else if (startTime) {
-      const { durationNumeric } = calculateDuration(startTime, entry.time);
-
-      if (!workByDate[formattedDate]) {
-        workByDate[formattedDate] = { real: 0 };
-      }
-
-      workByDate[formattedDate].real += durationNumeric;
-      startTime = null;
-    }
-  });
-
-  return Object.keys(workByDate).map(date => ({
-    name: date,
-    real: workByDate[date].real,
-  }));
-}
-
-function calculateDuration(start: string, end: string) {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
-  const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
-
-  const hours = Math.floor(durationInMinutes / 60);
-  const minutes = durationInMinutes % 60;
-
-  return {
-    durationNumeric: durationInMinutes / 60,
-    durationFormatted: `${hours}h ${minutes}m`,
-  };
-}
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-
-  return `${day}/${month}`;
-}
-
-function formatHours(hours: number) {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return `${h}h ${m}m`;
-}
 </script>
 
 <template>
-<div class="grid grid-cols-1 lg:grid-cols-10 min-h-screen">
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
     <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
-      <h1 class="font-bold mt-5 flex justify-center">
+    <div class="col-span-1 lg:col-span-2/ lg:border-r-4 relative w-full lg:w-auto">
+      <h1 class="font-bold mt-5 flex justify-center lg:justify-center">
         Time Manager
       </h1>
-      <div v-if="user" class="flex items-center justify-center py-8 border-b-4">
+      <div v-if="user" class="flex items-center justify-center py-4 lg:py-8 border-b-4">
         <UserNav :user="user" />
       </div>
-      <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
-        <MainNav class="mx-4" />
-      </div>
       <!-- MainNav for Mobile -->
-      <div class="absolute top-4 right-4 lg:hidden">
-        <MainNav class="mx-4" />
+      <div class="lg:hidden flex justify-center">
+        <MainNav />
       </div>
-      <div class="text-center items-center justify-center p-8 border-b-4">
+      <div class="text-center items-center justify-center p-4 lg:p-8 border-b-4">
         <p>{{ formattedDate }}</p>
         <p class="text-xl font-bold">{{ formattedTime }}</p>
       </div>
     </div>
 
-    <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4">
-      <!-- Calendrier avec bouton d'application -->
-      <div class="text-center mb-3">
-        <Popover>
-          <PopoverTrigger as-child>
-            <Button
-              variant="outline"
-              :class="[
-                'w-full justify-start text-left font-normal',
-                !value && 'text-muted-foreground',
-              ]"
-            >
-            <CalendarIcon class="mr-2 h-4 w-4" />
-            {{ value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date" }}
-          </Button>
-          </PopoverTrigger>
-          <PopoverContent class="w-auto p-0">
-            <Calendar
-              v-model="value"
-              initial-focus
-            />
-          </PopoverContent>
-        </Popover>
+    <div class="col-span-1 lg:col-span-8 h-full w-full space-y-4 pt-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex justify-center">
+          <TeamSwitcher class="w-full text-center" />
+        </div>
+        <div>
+          <!-- Calendrier avec bouton d'application -->
+          <div class="text-center flex justify-center mb-3">
+            <Popover>
+              <PopoverTrigger as-child>
+                <Button
+                  variant="outline"
+                  :class="[
+                    'w-full justify-start text-left font-normal',
+                    !value && 'text-muted-foreground',
+                  ]"
+                >
+                  <CalendarIcon class="mr-2 h-4 w-4" />
+                  {{ value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date" }}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent class="w-auto p-0">
+                <Calendar
+                  v-model="value"
+                  initial-focus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div class="text-center mb-3">
+            <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white">
+              Appliquer
+            </Button>
+          </div>
+        </div>
       </div>
-
-      <!-- Bouton pour appliquer la plage de dates -->
-      <div class="text-center mb-3">
-        <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white">
-          Appliquer
-        </Button>
-      </div>
-
+      
       <!-- Emploi du temps -->
       <div class="text-center mb-3">
         <table class="w-full">
@@ -306,7 +205,7 @@ function formatHours(hours: number) {
           </thead>
           <tbody>
             <tr v-for="(row, index) in workingDataTable" :key="index">
-              <td class="border px-4 py-2">{{ row.date }}</td>
+              <td class="border px-4 py-2">{{ row.username }}</td>
               <td class="border px-4 py-2">{{ row.startTime }}</td>
               <td class="border px-4 py-2">{{ row.endTime }}</td>
               <td class="border px-4 py-2">{{ row.clockStart }}</td>

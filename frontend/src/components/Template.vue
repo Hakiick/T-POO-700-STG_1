@@ -41,7 +41,7 @@ const arrivalTime = ref<string | null>(null);
 const workTime = ref<string | null>(null);
 const isDesktop = ref(false);
 const clocks = computed(() => clockStore.clocks);
-// const last_clock = computed(() => clockStore.lastClock);
+
 const last_clock_value = computed(() => clockStore.lastClock?.status);
 const clock_disable = ref(false);
 const current_time = ref("");
