@@ -4,7 +4,7 @@ import { apiClientProtected } from "./api";
 export interface Team {
     id: number,
     name: string,
-    description: string | null
+    description: string | undefined
 }
 
 export const getAllTeam = async () : Promise<Team[]> => {

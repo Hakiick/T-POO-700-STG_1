@@ -1,17 +1,9 @@
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  h,
-} from "vue";
-import {
-  createUser,
-  deleteUser,
-  getAllUser,
-  updateUser,
-} from "../api/apiUser.ts";
+import { ref, onMounted, h, computed } from "vue";
+import { createUserAdmin, deleteUser, getAllUser, updateUser } from "../api/apiUser.ts";
 
 import {
+  FlexRender,
   createColumnHelper,
   getCoreRowModel,
   getPaginationRowModel,
@@ -27,38 +19,29 @@ import {
   TableRow,
 } from "./ui/table";
 
-import MainNav from "./MainNav.vue";
-import Search from "./Search.vue";
 import TeamSwitcher from "./TeamSwitcher.vue";
-import UserNav from "./UserNav.vue";
-import Button from "./ui/button/Button.vue";
-import {
-  TrashIcon,
-  Pencil2Icon,
-  PlusIcon,
-  TimerIcon
-} from "@radix-icons/vue";
+import { TrashIcon, PlusIcon, TimerIcon, Pencil2Icon } from "@radix-icons/vue";
 
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import Input from "./ui/input/Input.vue";
+import Label from "./ui/label/Label.vue";
+import Button from "./ui/button/Button.vue";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
 import { User } from "./store/userStore.ts";
 import NavAdmin from "./NavAdmin.vue";
 
 const users = ref<User[]>([]);
-const newUser = ref({ id: -1, username: "", email: "", password: "" });
-const actionUser = ref({ id: -1, username: "", email: "" });
-const open = ref(false);
+const actionUser = ref<User>({ id: -1, username: "", email: "" });
+const openWorkingTimeModal = ref<boolean>(false);
+const openActionUserModal = ref<boolean>(false);
 
 const fetchAllUsers = async () => {
   users.value = await getAllUser();
@@ -71,180 +54,201 @@ const deleteUserById = async (id: number) => {
   }
 };
 
-const createElement = async () => {
-  try {
-    const res = await createUser(newUser.value.username, newUser.value.email, newUser.value.password);
-    users.value.unshift(res.data);
-    newUser.value = { id: -1, username: "", email: "", password: "" };
-  } catch (error) {
-    console.error("Error creating element:", error);
+const createOrUpdateElement = async() => {
+  let tempUsers: User[] = [];
+  if (actionUser.value.id > 0) {
+    await updateUser(actionUser.value);
+  } else {
+    let newUser = await createUserAdmin(actionUser.value);
+    tempUsers.push(newUser);
   }
+}
+
+const resetActionUser = () => {
+  actionUser.value = {
+    id: -1,
+    username: "",
+    email: "",
+  };
 };
 
-const replaceElement = async (user: User) => {
-  const res = await updateUser(user);
-  if (res) {
-    const index = users.value.findIndex((u) => u.id === user.id);
-    if (index !== -1) users.value.splice(index, 1, user);
-  }
-};
+onMounted(fetchAllUsers);
 
-onMounted(() => {
-  fetchAllUsers();
+const columns = computed(() => {
+  const columnHelper = createColumnHelper<User>();
+  return [
+    columnHelper.accessor("username", {
+      header: "Username",
+      cell: ({ row }) => h("div", {}, row.getValue("username")),
+    }),
+    columnHelper.accessor("email", {
+      header: "Email",
+      cell: ({ row }) => h("div", {}, row.getValue("email")),
+    }),
+    columnHelper.accessor("id", {
+      header: () => h("div", { class: "text-right" }, "Actions"),
+      cell: ({ row }) =>
+        h("div", { class: "text-right" }, [
+          h(
+            Button,
+            {
+              variant: "outline",
+              onClick: () => {
+                openWorkingTimeModal.value = true;
+                actionUser.value = row.original;
+              },
+            },
+            h(TimerIcon)
+          ),
+          h(
+            Button,
+            {
+              onClick() {
+                openActionUserModal.value = true;
+                actionUser.value = row.original;
+              }
+            },
+            h(Pencil2Icon)
+          ),
+          h(
+            Button,
+            {
+              variant: "destructive",
+              onClick: () => deleteUserById(row.getValue("id")),
+            },
+            h(TrashIcon)
+          ),
+        ]),
+    }),
+  ];
 });
 
-const columnHelper = createColumnHelper<User>();
+const table = computed(() => {
+  return useVueTable({
+    data: users,
+    columns: columns.value,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+});
 
-const columns = [
-  columnHelper.accessor("username", {
-    header: "Username",
-    cell: ({ row }) =>
-      h("div", { class: "capitalize usernames" }, row.getValue("username")),
-  }),
-  columnHelper.accessor("email", {
-    header: "Email",
-    cell: ({ row }) =>
-      h("div", { class: "lowercase emails" }, row.getValue("email")),
-  }),
-  columnHelper.accessor("id", {
-    header: () => h("div", { class: "text-right" }, "Actions"),
-    cell: ({ row }) =>
-      h("div", { class: "text-right" }, [
-        h(Button, TimerIcon, {
-          variant: "outline",
-          onClick: () => {
-            open.value = true;
-            actionUser.value = {
-              id: row.getValue("id"),
-              username: row.getValue("username"),
-              email: row.getValue("email"),
-            };
-          },
-        }),
-        h(Dialog, {}, [
-          h(DialogTrigger, { asChild: true }, h(Button, Pencil2Icon)),
-          h(DialogContent, {}, [
-            h(DialogHeader, {}, [
-              h(DialogTitle, {}, "Edit profile"),
-              h(DialogDescription, {}, "Modifier les informations du client ici"),
-            ]),
-            h("div", { class: "grid gap-4 py-4" }, [
-              h("div", { class: "grid grid-cols-4 items-center gap-4" }, [
-                h(Label, {}, "Email"),
-                h(Input, {
-                  type: "email",
-                  class: "col-span-3",
-                  modelValue: actionUser.value.email,
-                  onInput: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    actionUser.value.email = target.value;
-                  },
-                }),
-              ]),
-              h("div", { class: "grid grid-cols-4 items-center gap-4" }, [
-                h(Label, {}, "Username"),
-                h(Input, {
-                  type: "text",
-                  class: "col-span-3",
-                  modelValue: actionUser.value.username,
-                  onInput: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    actionUser.value.username = target.value;
-                  },
-                }),
-              ]),
-            ]),
-            h(DialogFooter, {}, [
-              h(DialogClose, { asChild: true }, [
-                h(Button, {
-                  onClick: () => replaceElement(actionUser.value),
-                }, "Save changes"),
-              ]),
-            ]),
-          ]),
-        ]),
-        h(Button, TrashIcon, {
-          variant: "destructive",
-          onClick: () => deleteUserById(row.getValue("id")),
-        }),
-      ]),
-  }),
-];
-
-const table = useVueTable({
-  data: users.value,
-  columns,
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
+const updateUserDialog = computed(() => {
+  return actionUser.value.id != -1;
 });
 </script>
 
 <template>
-  <WorkingTimeModal :open="open" :user="actionUser" @close="() => (open = false)" />
-
-  <div class="h-full w-full">
+  <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
         <TeamSwitcher />
         <NavAdmin class="mx-6" />
-        <div v-if="users.length" class="ml-auto flex items-center space-x-4">
-          <Search />
-          <UserNav :user="users[0]" />
-        </div>
       </div>
     </div>
     <div class="rounded-md border">
       <div class="m-5">
         <div class="flex justify-between text-center align-center">
-          <h1 class="text-3xl bold uppercase">Admin panel</h1>
+          <h1 class="text-3xl bold uppercase">Gestions des users</h1>
 
-          <Dialog>
+          <Dialog
+            :open="openActionUserModal"
+            @update:open="(val) => (openActionUserModal = val)"
+          >
             <DialogTrigger as-child>
-              <Button variant="outline">
+              <Button variant="outline" @click="resetActionUser">
                 <PlusIcon />
               </Button>
             </DialogTrigger>
             <DialogContent class="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add profile</DialogTitle>
+                <DialogTitle>
+                  <template v-if="updateUserDialog"> Update user </template>
+                  <template v-else> Create user </template>
+                </DialogTitle>
+                <DialogDescription>
+                  <template v-if="updateUserDialog">
+                    Update the user {{ actionUser.username }}
+                  </template>
+                  <template v-else>
+                    Create the user {{ actionUser.username }}
+                  </template>
+                </DialogDescription>
               </DialogHeader>
               <div class="grid gap-4 py-4">
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="username" class="text-right"> Username </Label>
-                  <Input id="username" class="col-span-3" v-model="newUser.username" />
+                  <Input
+                    id="username"
+                    class="col-span-3"
+                    v-model="actionUser.username"
+                  />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="email" class="text-right"> Email </Label>
-                  <Input id="email" class="col-span-3" type="email" v-model="newUser.email" />
+                  <Input
+                    id="email"
+                    class="col-span-3"
+                    type="email"
+                    v-model="actionUser.email"
+                  />
                 </div>
               </div>
               <DialogFooter>
                 <DialogClose>
-                  <Button @click="createElement"> Save changes </Button>
+                  <Button @click="createOrUpdateElement"> Save changes </Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
+        <WorkingTimeModal
+          :open="openWorkingTimeModal"
+          :user="actionUser"
+          @close="() => (openWorkingTimeModal = false)"
+        />
 
         <Table>
           <TableHeader>
-            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-              <TableHead v-for="header in headerGroup.headers" :key="header.id">
-                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+            <TableRow
+              v-for="headerGroup in table.getHeaderGroups()"
+              :key="headerGroup.id"
+            >
+              <TableHead
+                v-for="header in headerGroup.headers"
+                :key="header.id"
+                :data-pinned="header.column.getIsPinned()"
+              >
+                <FlexRender
+                  v-if="!header.isPlaceholder"
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="table.getRowModel().rows.length">
+            <template v-if="table.getRowModel().rows?.length">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
-                <TableRow>
-                  <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                <TableRow :data-state="row.getIsSelected() && 'selected'">
+                  <TableCell
+                    v-for="cell in row.getVisibleCells()"
+                    :key="cell.id"
+                    :data-pinned="cell.column.getIsPinned()"
+                  >
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow v-if="row.getIsExpanded()">
+                  <TableCell :colspan="row.getAllCells().length">
+                    {{ row.original }}
                   </TableCell>
                 </TableRow>
               </template>
             </template>
+
             <TableRow v-else>
               <TableCell :colspan="columns.length" class="h-24 text-center">
                 No results.
@@ -256,10 +260,20 @@ const table = useVueTable({
     </div>
 
     <div class="flex items-center m-5 justify-end space-x-2 py-4">
-      <Button variant="outline" size="sm" @click="table.previousPage()" :disabled="!table.getCanPreviousPage()">
+      <Button
+        variant="outline"
+        size="sm"
+        @click="table.previousPage()"
+        :disabled="!table.getCanPreviousPage()"
+      >
         Previous
       </Button>
-      <Button variant="outline" size="sm" @click="table.nextPage()" :disabled="!table.getCanNextPage()">
+      <Button
+        variant="outline"
+        size="sm"
+        @click="table.nextPage()"
+        :disabled="!table.getCanNextPage()"
+      >
         Next
       </Button>
     </div>

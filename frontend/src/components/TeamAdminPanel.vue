@@ -41,13 +41,13 @@ import Label from "./ui/label/Label.vue";
 import { TrashIcon, Pencil2Icon, PlusIcon, PersonIcon } from "@radix-icons/vue";
 import ManageUserModal from "./AdminPanelComponents/ManageUserModal.vue";
 
-import { computed, h, onMounted, Ref, ref } from "vue";
+import { computed, h, onMounted, ref } from "vue";
 import NavAdmin from "./NavAdmin.vue";
 
-const teams: Ref<Team[], Team[]> = ref([]);
-const actionTeam: Ref<Team, Team> = ref({ id: -1, name: "", description: "" });
-const open: Ref<boolean, boolean> = ref(false);
-const openManageModal: Ref<boolean, boolean> = ref(false);
+const teams = ref<Team[]>([]);
+const actionTeam = ref<Team>({ id: -1, name: "", description: "" });
+const open = ref<boolean>(false);
+const openManageModal = ref<boolean>(false);
 
 const columns = computed(() => {
   const columnHelper = createColumnHelper<Team>();
@@ -72,7 +72,7 @@ const columns = computed(() => {
               onClick() {
                 openManageModal.value = true;
                 actionTeam.value = row.original;
-              }
+              },
             },
             h(PersonIcon)
           ),
@@ -170,7 +170,7 @@ async function createOrUpdateElement() {
     <div class="rounded-md border">
       <div class="m-5">
         <div class="flex justify-between text-center align-center">
-          <div class="text-3xl bold uppsercase">Gestions des teams</div>
+          <h1 class="text-3xl bold uppercase">Gestions des teams</h1>
           <Dialog
             :open="open"
             @update:open="
@@ -180,7 +180,7 @@ async function createOrUpdateElement() {
             "
           >
             <DialogTrigger as-child>
-              <Button variant="outline" :onclick="resetActionTeam"
+              <Button variant="outline" @click="resetActionTeam"
                 ><PlusIcon
               /></Button>
             </DialogTrigger>
@@ -228,10 +228,12 @@ async function createOrUpdateElement() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-    
-
         </div>
-        <ManageUserModal :open="openManageModal" :team="actionTeam" @close="() => openManageModal = false"/>
+        <ManageUserModal
+          :open="openManageModal"
+          :team="actionTeam"
+          @close="() => (openManageModal = false)"
+        />
         <Table>
           <TableHeader>
             <TableRow

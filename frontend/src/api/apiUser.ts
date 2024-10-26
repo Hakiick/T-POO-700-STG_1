@@ -138,25 +138,34 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Example: Update a user
-export const updateUser = async (user: User) => {
+export const updateUser = async (user: User) : Promise<boolean> =>  {
   try {
-    const response = await apiClient.put(`/users/${user.id}`, { user });
-    return response.data;
+    await apiClientProtected.put(`/users/${user.id}`, { user });
+    return true;
   } catch (error) {
     console.error("Error updating user:", error);
     // throw error;
-    return error;
+    return false;
   }
 };
 
 // Example: Delete a user
 export const deleteUser = async (user: User): Promise<Boolean> => {
   try {
-    const response = await apiClient.delete(`/users/${user.id}`);
+    const response = await apiClientProtected.delete(`/users/${user.id}`);
     return response.status == 204;
   } catch (error) {
     console.error("Error deleting user:", error);
     // throw error;
-    return error;
+    return false;
   }
 };
+
+export const createUserAdmin = async (user: User): Promise<User> => {
+  try {
+    const response = await apiClientProtected.post(`/admin/users`, user);
+    return response.data;
+  } catch(error) {
+    console.error(error);
+  }
+}

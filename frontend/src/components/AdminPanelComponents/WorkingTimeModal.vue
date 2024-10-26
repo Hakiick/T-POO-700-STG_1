@@ -5,9 +5,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
+  DialogDescription
 } from "../ui/dialog";
 
-import { Button } from "../ui/button";
+import Button from "../ui/button/Button.vue";
+import Input from "../ui/input/Input.vue";
+import Label from "../ui/label/Label.vue";
 import { User } from "../store/userStore.ts";
 import { ref, watch, Ref, computed } from "vue";
 import {
@@ -131,7 +135,7 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
             <div class="flex border p-2 mb-2">
               <div class="grow">
                 <div class="flex justify-between w-5/6">
-                  <label>Start time </label>
+                  <Label>Start time </label>
                   <Input
                     type="datetime-local"
                     :value="formattedDate.formattedStartTime.get()"
