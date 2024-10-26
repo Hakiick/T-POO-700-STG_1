@@ -35,7 +35,6 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
-import MainNav from "./MainNav.vue";
 import Button from "./ui/button/Button.vue";
 import Input from "./ui/input/Input.vue";
 import Label from "./ui/label/Label.vue";
@@ -43,6 +42,7 @@ import { TrashIcon, Pencil2Icon, PlusIcon, PersonIcon } from "@radix-icons/vue";
 import ManageUserModal from "./AdminPanelComponents/ManageUserModal.vue";
 
 import { computed, h, onMounted, Ref, ref } from "vue";
+import NavAdmin from "./NavAdmin.vue";
 
 const teams: Ref<Team[], Team[]> = ref([]);
 const actionTeam: Ref<Team, Team> = ref({ id: -1, name: "", description: "" });
@@ -164,7 +164,7 @@ async function createOrUpdateElement() {
   <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
-        <MainNav class="mx-6" />
+        <NavAdmin class="mx-6" />
       </div>
     </div>
     <div class="rounded-md border">

@@ -1,20 +1,36 @@
 <script setup lang="ts">
-import { cn } from '../lib/utils'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from './ui/navigation-menu'
+
 </script>
 
 <template>
-  <nav :class="cn('flex items-center space-x-4 lg:space-x-6', $attrs.class ?? '')">
-    <a href="/" class="text-sm font-medium transition-colors hover:text-primary">
-      Dashboard
-    </a>
-    <a href="/login" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-      login
-    </a>
-    <!-- <a href="/login" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"> -->
-    <!--   Products -->
-    <!-- </a> -->
-    <!-- <a href="/login" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"> -->
-    <!--   Settings -->
-    <!-- </a> -->
-  </nav>
+  <NavigationMenu>
+    <NavigationMenuList>
+
+      <NavigationMenuItem>
+        <NavigationMenuLink href="/admin/dashboard" :class="navigationMenuTriggerStyle()">
+          Dashboard
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuLink href="/admin/users" :class="navigationMenuTriggerStyle()">
+          Users
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
+        <NavigationMenuLink href="/admin/teams" :class="navigationMenuTriggerStyle()">
+          Teams
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+      
+    </NavigationMenuList>
+  </NavigationMenu>
 </template>
