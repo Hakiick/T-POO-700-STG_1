@@ -5,6 +5,7 @@ defmodule TimeManager.Accounts.User do
   schema "users" do
     field :email, :string
     field :username, :string
+    field :role, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
@@ -38,9 +39,14 @@ defmodule TimeManager.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :username, :password])
+    |> cast(attrs, [:email, :username, :role, :password])
     |> validate_email(opts)
     |> validate_password(opts)
+  end
+
+  def role_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:role])
   end
 
   defp validate_email(changeset, opts) do

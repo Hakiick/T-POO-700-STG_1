@@ -9,6 +9,7 @@ defmodule TimeManagerWeb.UserRegistrationJSON do
         id: user.id,
         username: user.username,
         email: user.email,
+        role: user.role,
         inserted_at: user.inserted_at
       }
     }

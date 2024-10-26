@@ -61,6 +61,18 @@ defmodule TimeManager.Accounts do
     Repo.all(User)
   end
 
+  def update_user_role_to_manager(%User{} = user) do
+    user
+    |> User.role_changeset(%{role: "manager"})
+    |> Repo.update()
+  end
+
+  def update_user_role_to_user(%User{} = user) do
+    user
+    |> User.role_changeset(%{role: "user"})
+    |> Repo.update()
+  end
+
   @doc """
   Gets a user by email.
 
@@ -515,11 +527,14 @@ defmodule TimeManager.Accounts do
     get_manage_by(params)
   end
 
-  defp get_manage_by(%{ "user_id" => user_id, "team_id" => team_id}), do: Repo.all(from m in Manage, where: m.team_id == ^team_id and m.user_id == ^user_id)
+  defp get_manage_by(%{"user_id" => user_id, "team_id" => team_id}),
+    do: Repo.all(from m in Manage, where: m.team_id == ^team_id and m.user_id == ^user_id)
 
-  defp get_manage_by(%{"team_id" => team_id}), do: Repo.all(from m in Manage, where: m.team_id == ^team_id)
+  defp get_manage_by(%{"team_id" => team_id}),
+    do: Repo.all(from m in Manage, where: m.team_id == ^team_id)
 
-  defp get_manage_by(%{"user_id" => user_id}), do: Repo.all(from m in Manage, where: m.user_id == ^user_id)
+  defp get_manage_by(%{"user_id" => user_id}),
+    do: Repo.all(from m in Manage, where: m.user_id == ^user_id)
 
   defp get_manage_by(%{"id" => id}), do: Repo.get!(Manage, id)
 
@@ -595,24 +610,20 @@ defmodule TimeManager.Accounts do
   """
   def get_users_from_team(%Teams{} = team) do
     Repo.all(
-      from u in User,
-      join: m in Manage, on: u.id == m.user_id,
-      where: m.team_id == ^team.id
+      from u in User, join: m in Manage, on: u.id == m.user_id, where: m.team_id == ^team.id
     )
   end
 
   def get_teams_from_user(%User{} = user) do
     Repo.all(
-      from t in Teams,
-      join: m in Manage, on: t.id == m.team_id,
-      where: m.user_id == ^user.id
+      from t in Teams, join: m in Manage, on: t.id == m.team_id, where: m.user_id == ^user.id
     )
   end
 
   def get_from_user_and_team(%User{} = user, %Teams{} = team) do
     Repo.one(
       from m in Manage,
-      where: m.user_id == ^user.id and m.team_id == ^team.id
+        where: m.user_id == ^user.id and m.team_id == ^team.id
     )
   end
 end

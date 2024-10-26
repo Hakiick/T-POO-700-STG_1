@@ -34,6 +34,22 @@ defmodule TimeManagerWeb.UserController do
     end
   end
 
+  def update_role_to_manager(conn, %{"userID" => id}) do
+    user = Accounts.get_user!(%{"id" => id})
+
+    with {:ok, %User{} = user} <- Accounts.update_user_role_to_manager(user) do
+      render(conn, :show_role, user: user)
+    end
+  end
+
+  def update_role_to_user(conn, %{"userID" => id}) do
+    user = Accounts.get_user!(%{"id" => id})
+
+    with {:ok, %User{} = user} <- Accounts.update_user_role_to_user(user) do
+      render(conn, :show_role, user: user)
+    end
+  end
+
   def index(conn, _param) do
     users = Accounts.list_users()
     render(conn, :index, users: users)

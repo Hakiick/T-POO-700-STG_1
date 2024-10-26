@@ -21,26 +21,31 @@ users_attrs = [
   %{
     username: "Alice",
     email: "alice@example.com",
+    role: "general_manager",
     password: "ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976"
   },
   %{
     username: "Bob",
     email: "bob@example.com",
+    role: "manager",
     password: "5ff860bf1190596c7188ab851db691f0f3169c453936e9e1eba2f9a47f7a0018"
   },
   %{
     username: "Charlie",
     email: "charlie@example.com",
+    role: "manager",
     password: "add7232b65bb559f896cbcfa9a600170a7ca381a0366789dcf59ad986bdf4a98"
   },
   %{
     username: "David",
     email: "david@example.com",
+    role: "manager",
     password: "d4e3f52c47a33949241f67af482f562ece6f62e618b041a62d00fa7ba5dae280"
   },
   %{
     username: "Eve",
     email: "eve@example.com",
+    role: "user",
     password: "d0574c4966d2c326193622feebc64991c5b59807ae68fa8255b26c79f4bf917a"
   }
 ]

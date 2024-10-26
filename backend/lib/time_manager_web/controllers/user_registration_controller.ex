@@ -5,8 +5,13 @@ defmodule TimeManagerWeb.UserRegistrationController do
   alias TimeManagerWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
+    # add the role to the user_params
+    user_params = Map.put(user_params, "role", "user")
+    # IO.inspect(user_params)
+
     case Accounts.register_user(user_params) do
       {:ok, user} ->
+        # IO.inspect(user)
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(
             user,

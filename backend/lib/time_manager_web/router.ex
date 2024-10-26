@@ -13,6 +13,16 @@ defmodule TimeManagerWeb.Router do
       error_handler: TimeManagerWeb.AuthErrorHandler
   end
 
+  pipeline :manager_access do
+    plug :accepts, ["json"]
+    plug TimeManagerWeb.Plugs.RolePlug, roles: ["manager", "general_manager"]
+  end
+
+  pipeline :general_manager_access do
+    plug :accepts, ["json"]
+    plug TimeManagerWeb.Plugs.RolePlug, roles: ["general_manager"]
+  end
+
   pipeline :api_refresh do
     plug :accepts, ["json"]
 
@@ -22,6 +32,7 @@ defmodule TimeManagerWeb.Router do
   pipeline :api_protected do
     plug :accepts, ["json"]
 
+    plug TimeManager.Accounts.Middleware
     plug TimeManager.Accounts.Middleware
   end
 
@@ -80,15 +91,26 @@ defmodule TimeManagerWeb.Router do
     get "/clocks/:userID", ClockController, :index
     post "/clocks/:userID", ClockController, :create
 
-    get "/teams", TeamsController, :index
-    post "/teams", TeamsController, :create
-    put "/teams/:id", TeamsController, :update
-    delete "/teams/:id", TeamsController, :delete
+    scope "/admin" do
+      pipe_through :manager_access
 
-    get "/teams/:id/users", ManageController, :index_users_from_team
-    get "/users/:id/teams", ManageController, :index_teams_from_user
-    post "/manage", ManageController, :create
-    delete "/manage/:userID/:teamID", ManageController, :delete
+      get "/teams", TeamsController, :index
+      post "/teams", TeamsController, :create
+      put "/teams/:id", TeamsController, :update
+      delete "/teams/:id", TeamsController, :delete
+
+      get "/teams/:id/users", ManageController, :index_users_from_team
+      get "/users/:id/teams", ManageController, :index_teams_from_user
+      post "/manage", ManageController, :create
+      delete "/manage/:userID/:teamID", ManageController, :delete
+
+      scope "/gestion" do
+        pipe_through :general_manager_access
+
+        get "/promote_to_manager/:userID", UserController, :update_role_to_manager
+        get "/demote_to_user/:userID", UserController, :update_role_to_user
+      end
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
