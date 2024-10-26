@@ -37,14 +37,25 @@ import Button from "./ui/button/Button.vue";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
 import { User } from "./store/userStore.ts";
 import NavAdmin from "./NavAdmin.vue";
+import { getAllUsersFromTeam } from "../api/apiManage.ts";
+import { useTeamStore } from "./store/teamStore.ts";
 
 const users = ref<User[]>([]);
-const actionUser = ref<User>({ id: -1, username: "", email: "" });
+const actionUser = ref<User>({ id: -1, username: "", role: "", email: "" });
 const openWorkingTimeModal = ref<boolean>(false);
 const openActionUserModal = ref<boolean>(false);
+const teamStore = useTeamStore();
 
 const fetchAllUsers = async () => {
-  users.value = await getAllUser();
+  const team = teamStore.currentTeam;
+  if (team?.id == -1) {
+    users.value = await getAllUser();
+  } 
+  else {
+    users.value = await getAllUsersFromTeam(teamStore.currentTeam)
+
+  }
+
 };
 
 const deleteUserById = async (id: number) => {
@@ -60,6 +71,7 @@ const createOrUpdateElement = async() => {
     await updateUser(actionUser.value);
   } else {
     let newUser = await createUserAdmin(actionUser.value);
+    console.log(newUser);
     tempUsers.push(newUser);
   }
 }
@@ -68,6 +80,7 @@ const resetActionUser = () => {
   actionUser.value = {
     id: -1,
     username: "",
+    role: "",
     email: "",
   };
 };
@@ -141,7 +154,7 @@ const updateUserDialog = computed(() => {
   <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
-        <TeamSwitcher @teamChange=""/>
+        <TeamSwitcher @teamChange="fetchAllUsers"/>
         <NavAdmin class="mx-6" />
       </div>
     </div>

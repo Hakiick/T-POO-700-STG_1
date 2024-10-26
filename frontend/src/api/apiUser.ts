@@ -50,7 +50,7 @@ export const getUser = async (user_id: number) => {
 // Example: Create a new user
 export const getAllUser = async (): Promise<User[]> => {
   try {
-    const response = await apiClientProtected.get(`/users/all`);
+    const response = await apiClientProtected.get(`/admin/gestion/users/all`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -164,7 +164,7 @@ export const deleteUser = async (user: User): Promise<Boolean> => {
 
 export const createUserAdmin = async (user: User): Promise<User> => {
   try {
-    const response = await apiClientProtected.post(`/admin/users`, user);
+    const response = await apiClientProtected.post(`/admin/users`, {user});
     return response.data;
   } catch(error) {
     console.error(error);

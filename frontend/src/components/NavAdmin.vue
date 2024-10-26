@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useUserStore } from './store/userStore';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,6 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from './ui/navigation-menu'
 
+const userStore = useUserStore();
 </script>
 
 <template>
@@ -26,7 +28,7 @@ import {
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <NavigationMenuLink href="/admin/teams" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/admin/teams" :class="navigationMenuTriggerStyle()" v-if="userStore.user.role == 'general_manager'">
           Teams
         </NavigationMenuLink>
       </NavigationMenuItem>

@@ -124,7 +124,7 @@ const updateTeamDialog = computed(() => {
 });
 
 onMounted(() => {
-  teams.value = useTeamStore().accessibleTeams;
+  teams.value = useTeamStore().accessibleTeams.filter(iTeam => iTeam.id != -1);
 });
 
 
