@@ -11,7 +11,7 @@ defmodule TimeManagerWeb.UserController do
       user = Guardian.Plug.current_resource(conn)
 
       conn
-      |> put_resp_header("cache-control", "private, max-age=3600")
+      # |> put_resp_header("cache-control", "private, max-age=3600")
       |> render(:show, user: user)
     rescue
       Ecto.NoResultsError ->

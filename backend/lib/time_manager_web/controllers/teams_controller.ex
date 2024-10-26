@@ -15,7 +15,7 @@ defmodule TimeManagerWeb.TeamsController do
     with {:ok, %Teams{} = teams} <- Accounts.create_teams(teams_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/teams/#{teams}")
+      # |> put_resp_header("location", ~p"/api/teams/#{teams}")
       |> render(:show, teams: teams)
     end
   end

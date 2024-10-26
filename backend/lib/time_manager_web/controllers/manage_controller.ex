@@ -12,16 +12,14 @@ defmodule TimeManagerWeb.ManageController do
   end
 
   def create(conn, %{"userId" => user_id, "teamId" => team_id}) do
-      manage_params = %{"user_id" => user_id, "team_id" => team_id}
+    manage_params = %{"user_id" => user_id, "team_id" => team_id}
 
-      with {:ok, %Manage{} = manage} <- Accounts.create_manage(manage_params) do
-        conn
-        |> put_status(:created)
-        |> put_resp_header("location", ~p"/api/manage/#{manage}")
-        |> render(:show, manage: manage)
-      end
-
-
+    with {:ok, %Manage{} = manage} <- Accounts.create_manage(manage_params) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header("location", ~p"/api/manage/#{manage}")
+      |> render(:show, manage: manage)
+    end
   end
 
   def show(conn, %{"id" => id}) do
@@ -32,6 +30,7 @@ defmodule TimeManagerWeb.ManageController do
   def update(conn, %{"id" => id, "userId" => user_id, "teamId" => team_id}) do
     manage = Accounts.get_manage!(id)
     manage_params = %{"user_id" => user_id, "team_id" => team_id}
+
     with {:ok, %Manage{} = manage} <- Accounts.update_manage(manage, manage_params) do
       render(conn, :show, manage: manage)
     end
@@ -49,12 +48,20 @@ defmodule TimeManagerWeb.ManageController do
 
   def index_users_from_team(conn, %{"id" => id}) do
     team = Accounts.get_teams!(id)
+    user = Guardian.Plug.current_resource(conn)
+
+    if !Accounts.is_manager?(user, team) do
+      conn
+      |> put_status(:forbidden)
+      |> json(%{error: "You are not allowed to access this resource"})
+    end
+
     users = Accounts.get_users_from_team(team)
     render(conn, :index, users: users)
   end
 
-  def index_teams_from_user(conn, %{"id" => id}) do
-    user = Accounts.get_user!(%{"id" => id})
+  def index_teams_from_user(conn, _params) do
+    user = Guardian.Plug.current_resource(conn)
 
     teams = Accounts.get_teams_from_user(user)
     render(conn, :index, teams: teams)

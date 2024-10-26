@@ -74,7 +74,6 @@ defmodule TimeManagerWeb.Router do
 
     get "/user", UserController, :get_from_jwt
     get "/users", UserController, :show_from_mail_and_username
-    get "/users/all", UserController, :index
     get "/users/:userID", UserController, :show
 
     # WORKING TIME Routes
@@ -97,18 +96,20 @@ defmodule TimeManagerWeb.Router do
 
       post "/users", UserRegistrationController, :create_by_manager
 
-      get "/teams", TeamsController, :index
-      post "/teams", TeamsController, :create
-      put "/teams/:id", TeamsController, :update
-      delete "/teams/:id", TeamsController, :delete
-
       get "/teams/:id/users", ManageController, :index_users_from_team
-      get "/users/:id/teams", ManageController, :index_teams_from_user
+      get "/users/teams", ManageController, :index_teams_from_user
       post "/manage", ManageController, :create
       delete "/manage/:userID/:teamID", ManageController, :delete
 
       scope "/gestion" do
         pipe_through :general_manager_access
+
+        get "/users/all", UserController, :index
+
+        get "/teams", TeamsController, :index
+        post "/teams", TeamsController, :create
+        put "/teams/:id", TeamsController, :update
+        delete "/teams/:id", TeamsController, :delete
 
         get "/promote_to_manager/:userID", UserController, :update_role_to_manager
         get "/demote_to_user/:userID", UserController, :update_role_to_user
