@@ -6,6 +6,7 @@ import UserAdminManagementPage from "./components/UserAdminPanel.vue";
 import TeamsAdminPage from "./components/TeamAdminPanel.vue";
 import DashBoardAdmin from "./components/DashBoardAdmin.vue";
 import { useUserStore } from "./components/store/userStore";
+import { useTeamStore } from "./components/store/teamStore";
 
 const routes = [
   {
@@ -55,6 +56,7 @@ router.beforeEach(async (to, _from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   // const groups = to.matched[0].meta.groups;
   const userStore = useUserStore();
+  const teamStore = useTeamStore();
 
   // Redirect to home if trying to access the login page while already logged in
   if (to.name === "login" && sessionStorage.getItem("refresh_token")) {
@@ -73,6 +75,9 @@ router.beforeEach(async (to, _from, next) => {
 
   // Attempt to log in with stored token
   await userStore.login();
+
+  // populate the team store
+  await teamStore.populateTeamStore();
 
   // If user is not logged in after attempting login, redirect to login
   if (!userStore.user) {

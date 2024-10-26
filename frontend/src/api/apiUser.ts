@@ -62,6 +62,7 @@ export const getAllUser = async (): Promise<User[]> => {
 export const getCurrentUser = async () => {
   try {
     const response = await apiClientProtected.get(`/user`);
+    console.log(response);
     return response;
   } catch (error) {
     console.error("Error fetching users:", error);

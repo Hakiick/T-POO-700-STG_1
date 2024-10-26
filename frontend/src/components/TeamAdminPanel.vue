@@ -43,6 +43,7 @@ import ManageUserModal from "./AdminPanelComponents/ManageUserModal.vue";
 
 import { computed, h, onMounted, ref } from "vue";
 import NavAdmin from "./NavAdmin.vue";
+import { useTeamStore } from "./store/teamStore.ts";
 
 const teams = ref<Team[]>([]);
 const actionTeam = ref<Team>({ id: -1, name: "", description: "" });
@@ -122,12 +123,10 @@ const updateTeamDialog = computed(() => {
   return actionTeam.value.id != -1;
 });
 
-onMounted(fetchAllUser);
+onMounted(() => {
+  teams.value = useTeamStore().accessibleTeams;
+});
 
-async function fetchAllUser() {
-  const response = await getAllTeam();
-  teams.value = response;
-}
 
 async function deleteElement(id: number) {
   if (id <= 0) return;
