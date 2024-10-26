@@ -140,7 +140,7 @@ export const loginUser = async (email: string, password: string) => {
 // Example: Update a user
 export const updateUser = async (user: User) : Promise<boolean> =>  {
   try {
-    await apiClientProtected.put(`/users/${user.id}`, { user });
+    await apiClientProtected.put(`/admin/users/${user.id}`, { user });
     return true;
   } catch (error) {
     console.error("Error updating user:", error);
@@ -152,7 +152,7 @@ export const updateUser = async (user: User) : Promise<boolean> =>  {
 // Example: Delete a user
 export const deleteUser = async (user: User): Promise<Boolean> => {
   try {
-    const response = await apiClientProtected.delete(`/users/${user.id}`);
+    const response = await apiClientProtected.delete(`/admin/users/${user.id}`);
     return response.status == 204;
   } catch (error) {
     console.error("Error deleting user:", error);
