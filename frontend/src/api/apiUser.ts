@@ -1,3 +1,4 @@
+import { LocationQueryValue } from "vue-router";
 import { User } from "../components/store/userStore";
 import { apiClient, apiClientProtected } from "./api";
 
@@ -157,6 +158,40 @@ export const deleteUser = async (user: User): Promise<Boolean> => {
   } catch (error) {
     console.error("Error deleting user:", error);
     // throw error;
+    return error;
+  }
+};
+
+// reset password
+export const resetPassword = async (
+  password: string,
+  reset_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.put(
+      `/users/reset_password/${reset_token}`,
+      {
+        user: {
+          password: password,
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error("Error reset password:", error);
+    return error;
+  }
+};
+
+// confirm mail
+export const confirmMail = async (
+  confirm_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.get(`/users/confirm/${confirm_token}`, {});
+    return response;
+  } catch (error) {
+    console.error("Error confirm:", error);
     return error;
   }
 };

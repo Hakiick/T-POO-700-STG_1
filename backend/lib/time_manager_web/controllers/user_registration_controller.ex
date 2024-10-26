@@ -9,13 +9,19 @@ defmodule TimeManagerWeb.UserRegistrationController do
     user_params = Map.put(user_params, "role", "user")
     # IO.inspect(user_params)
 
+    base_url = TimeManagerWeb.Endpoint.config(:url)[:host]
+    scheme = if Mix.env() == :prod, do: "https", else: "http"
+    port = if Mix.env() == :prod, do: 80, else: 5173
+
+    full_base_url = "#{scheme}://#{base_url}:#{port}"
+
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         # IO.inspect(user)
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(
             user,
-            &url(~p"/api/users/confirm/#{&1}")
+            &"#{full_base_url}/users/confirm/?token=#{&1}"
           )
 
         conn
@@ -41,14 +47,18 @@ defmodule TimeManagerWeb.UserRegistrationController do
     user_params =
       Map.put(user_params, "password", :crypto.strong_rand_bytes(16) |> Base.encode64())
 
-    # IO.inspect(user_params)
+    base_url = TimeManagerWeb.Endpoint.config(:url)[:host]
+    scheme = if Mix.env() == :prod, do: "https", else: "http"
+    port = if Mix.env() == :prod, do: 80, else: 5173
+
+    full_base_url = "#{scheme}://#{base_url}:#{port}"
 
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         {:ok, _} =
           Accounts.deliver_user_reset_password_instructions(
             user,
-            &url(~p"/users/reset_password/#{&1}")
+            &"#{full_base_url}/users/reset_password/?token=#{&1}"
           )
 
         conn

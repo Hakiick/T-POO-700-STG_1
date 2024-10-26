@@ -70,7 +70,7 @@ async function onSubmitSignUp(event: Event) {
   // Simuler un chargement
   setTimeout(() => {
     isLoadingSignUp.value = false
-  }, 300)
+  }, 5000)
 
   if (!isCheckedSignUp.value) {
     errorMessageSignUp.value = "You haven't accepted our Terms of Service and Privacy Policy."
@@ -84,7 +84,9 @@ async function onSubmitSignUp(event: Event) {
   const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
   console.log(response)
   if (response.status === 201) {
-    alert("veuillez vérifier votre boite mail pour activer votre compte")
+    if (window.confirm("veuillez vérifier votre boite mail pour activer votre compte")) {
+      window.location.reload(); // Refreshes the page if "OK" is clicked
+    }
     //redirect to login page
     router.push({ name: 'login' })
     return

@@ -5,6 +5,8 @@ import ChartRange from "./components/ChartRange.vue";
 import UserAdminManagementPage from "./components/UserAdminPanel.vue";
 import TeamsAdminPage from "./components/TeamAdminPanel.vue";
 import DashBoardAdmin from "./components/DashBoardAdmin.vue";
+import NewPassword from "./components/NewPassword.vue";
+import ConfirmAccount from "./components/ConfirmAccount.vue";
 import { useUserStore } from "./components/store/userStore";
 
 const routes = [
@@ -19,6 +21,16 @@ const routes = [
     path: "/login",
     name: "login",
     component: LoginPage,
+  },
+  {
+    path: "/users/reset_password",
+    name: "passwordReset",
+    component: NewPassword,
+  },
+  {
+    path: "/users/confirm",
+    name: "confirmAccount",
+    component: ConfirmAccount,
   },
   {
     path: "/dashboard",
