@@ -616,6 +616,16 @@ defmodule TimeManager.Accounts do
   end
 
   @doc """
+  Returns true if the user is a manager of the team.
+  """
+  def is_manager?(%User{} = user, %Teams{} = team) do
+    case get_from_user_and_team(user, team) do
+      nil -> false
+      _ -> true
+    end
+  end
+
+  @doc """
   Returns an users list get from team id
   """
   def get_users_from_team(%Teams{} = team) do
