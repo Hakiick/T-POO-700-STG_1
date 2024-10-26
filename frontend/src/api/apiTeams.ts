@@ -9,7 +9,7 @@ export interface Team {
 
 export const getAllTeam = async () : Promise<Team[]> => {
     try {
-        const response = await apiClientProtected.get("/teams")
+        const response = await apiClientProtected.get("/admin/teams")
         return response.data.data;
     } catch(error) {
         console.error(error);
@@ -18,7 +18,7 @@ export const getAllTeam = async () : Promise<Team[]> => {
 
 export const createTeam = async(team: Team) : Promise<Team> => {
     try {
-        const response = await apiClientProtected.post("/teams", {teams: team})
+        const response = await apiClientProtected.post("/admin/teams", {teams: team})
     
         console.log(response.data);
         return response.data.data
@@ -29,7 +29,7 @@ export const createTeam = async(team: Team) : Promise<Team> => {
 
 export const deleteTeam = async(team: Team) : Promise<boolean> => {
     try {
-        const response = await apiClientProtected.delete(`/teams/${team.id}`);
+        const response = await apiClientProtected.delete(`/admin/teams/${team.id}`);
         return response.status == 204;
     } catch(error) {
         console.error(error);
@@ -41,7 +41,7 @@ export const deleteTeam = async(team: Team) : Promise<boolean> => {
 
 export const updateTeam = async(team: Team) : Promise<boolean> => {
     try {
-        const response = await apiClientProtected.put(`/teams/${team.id}`, {teams: team});
+        const response = await apiClientProtected.put(`/admin/teams/${team.id}`, {teams: team});
         console.log(response.status)
         return true;
     } catch (error) {
