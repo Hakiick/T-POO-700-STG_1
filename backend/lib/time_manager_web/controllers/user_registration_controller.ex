@@ -53,7 +53,9 @@ defmodule TimeManagerWeb.UserRegistrationController do
 
         conn
         |> put_status(:created)
-        |> json(%{ok: "user created"})
+
+        # |> json(%{ok: "user created"})
+        render(conn, :show, user: user)
 
       # |> UserAuth.log_in_user(user)
 
