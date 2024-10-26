@@ -141,7 +141,7 @@ const updateUserDialog = computed(() => {
   <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
-        <TeamSwitcher />
+        <TeamSwitcher @teamChange=""/>
         <NavAdmin class="mx-6" />
       </div>
     </div>

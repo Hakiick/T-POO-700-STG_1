@@ -2,7 +2,7 @@
 // @ts-ignore
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 import { cn } from '../lib/utils'
 import {
@@ -44,14 +44,15 @@ const teams = ref<Team[]>([]);
 const open = ref(false)
 const showNewTeamDialog = ref(false)
 const selectedTeam = ref<Team>();
-
+const teamStore = useTeamStore();
 onMounted(() => {
-  const teamStore = useTeamStore();
+  
   teams.value = teamStore.accessibleTeams;
   selectedTeam.value = teamStore.currentTeam;
-  console.log(teamStore.currentTeam);
-  console.log(teams.value, selectedTeam.value)
 })
+
+const emit = defineEmits(['teamChange'])
+
 </script>
 
 <template>
@@ -71,8 +72,13 @@ onMounted(() => {
             <CommandEmpty>No team found.</CommandEmpty>
             <CommandGroup>
               <CommandItem v-for="team in teams" :key="team.id" :value="team" class="text-sm" @select="() => {
-                selectedTeam = team
-                open = false
+                if(teamStore.setCurrentTeam(team)) 
+                {
+                  selectedTeam = teamStore.currentTeam;
+                  emit('teamChange');
+                }
+                
+                open = false;
               }">
                 {{ team.name }}
                 <!-- <CheckIcon :class="cn('ml-auto h-4 w-4', -->

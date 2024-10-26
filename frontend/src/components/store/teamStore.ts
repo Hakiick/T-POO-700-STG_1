@@ -40,7 +40,21 @@ export const useTeamStore = defineStore("team", () => {
 
     }
 
+    const setCurrentTeam = (team: Team) : boolean => {
+
+        if (currentTeam.value.id == team.id)
+            return false;
+
+        if (accessibleTeams.value.filter(iTeam => iTeam.id == team.id).length == 0) 
+            return false;
+
+        currentTeam.value = team;
+        return true;
 
 
-    return { accessibleTeams, currentTeam, populateTeamStore }
+    }
+
+
+
+    return { accessibleTeams, currentTeam, populateTeamStore, setCurrentTeam }
 })
