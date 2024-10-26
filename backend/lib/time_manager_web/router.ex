@@ -94,6 +94,8 @@ defmodule TimeManagerWeb.Router do
     scope "/admin" do
       pipe_through :manager_access
 
+      post "/users", UserRegistrationController, :create_by_manager
+
       get "/teams", TeamsController, :index
       post "/teams", TeamsController, :create
       put "/teams/:id", TeamsController, :update
