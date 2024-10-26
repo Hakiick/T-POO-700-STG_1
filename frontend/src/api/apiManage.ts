@@ -14,7 +14,7 @@ export const getAllUsersFromTeam = async(team: Team | undefined): Promise<User[]
     }
 }
 
-export const getAllTeamsFromUser = async(user: User): Promise<Team[]> => {
+export const getAllTeamsFromUser = async(): Promise<Team[]> => {
     try {
         const response = await apiClientProtected.get(`/admin/users/teams`);
         return response.data.data;

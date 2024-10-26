@@ -2,47 +2,23 @@
 // @ts-ignore
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import { cn } from '../lib/utils'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from './ui/avatar'
 import { Button } from './ui/button'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from './ui/command'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from './ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select'
 import { Team } from '../api/apiTeams'
 import { useTeamStore } from './store/teamStore'
 
 const teams = ref<Team[]>([]);
 
 const open = ref(false)
-const showNewTeamDialog = ref(false)
 const selectedTeam = ref<Team>();
 const teamStore = useTeamStore();
 onMounted(() => {

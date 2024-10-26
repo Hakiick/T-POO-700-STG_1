@@ -19,7 +19,7 @@ export const useTeamStore = defineStore("team", () => {
         console.log(user.role)
         switch(user.role) {
             case "manager":
-                accessibleTeams.value = await getAllTeamsFromUser(user);
+                accessibleTeams.value = await getAllTeamsFromUser();
                 break;
             case "general_manager":
                 accessibleTeams.value = await getAllTeam();

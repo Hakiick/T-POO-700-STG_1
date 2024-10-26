@@ -2,7 +2,6 @@
 import {
   createTeam,
   deleteTeam,
-  getAllTeam,
   Team,
   updateTeam,
 } from "../api/apiTeams.ts";
