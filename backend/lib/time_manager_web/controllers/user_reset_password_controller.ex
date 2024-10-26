@@ -35,11 +35,13 @@ defmodule TimeManagerWeb.UserResetPasswordController do
     case Accounts.reset_user_password(conn.assigns.user, user_params) do
       {:ok, _} ->
         conn
-        |> put_flash(:info, "Password reset successfully.")
-        |> redirect(to: ~p"/users/log_in")
+        |> put_status(:ok)
+        |> json(%{ok: "Password updated."})
 
       {:error, changeset} ->
-        render(conn, :edit, changeset: changeset)
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: changeset.errors[:password]})
     end
   end
 

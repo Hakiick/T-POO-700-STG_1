@@ -44,6 +44,11 @@ defmodule TimeManager.Accounts.User do
     |> validate_password(opts)
   end
 
+  def manager_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :username])
+  end
+
   def role_changeset(user, attrs) do
     user
     |> cast(attrs, [:role])

@@ -78,6 +78,15 @@ defmodule TimeManagerWeb.UserController do
 
   def update(conn, %{"userID" => id, "user" => user_params}) do
     user = Accounts.get_user!(%{"id" => id})
+    current_user = Guardian.Plug.current_resource(conn)
+
+    if current_user.role != "general_manager" do
+      if user.role == "general_manager" or user.role == "manager" do
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "manager cannot be updated"})
+      end
+    end
 
     with {:ok, %User{} = user} <- Accounts.update_user(user, user_params) do
       render(conn, :show, user: user)
@@ -86,6 +95,16 @@ defmodule TimeManagerWeb.UserController do
 
   def delete(conn, %{"userID" => id}) do
     user = Accounts.get_user!(%{"id" => id})
+
+    current_user = Guardian.Plug.current_resource(conn)
+
+    if current_user.role != "general_manager" do
+      if user.role == "general_manager" or user.role == "manager" do
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "manager cannot be updated"})
+      end
+    end
 
     with {:ok, %User{}} <- Accounts.delete_user(user) do
       send_resp(conn, :no_content, "")

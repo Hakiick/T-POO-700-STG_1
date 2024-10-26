@@ -73,6 +73,16 @@ defmodule TimeManager.Accounts do
     |> Repo.update()
   end
 
+  def update_user(%User{} = user, user_params) do
+    user
+    |> User.manager_changeset(user_params)
+    |> Repo.update()
+  end
+
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
+  end
+
   @doc """
   Gets a user by email.
 

@@ -76,8 +76,6 @@ defmodule TimeManagerWeb.Router do
     get "/users", UserController, :show_from_mail_and_username
     get "/users/all", UserController, :index
     get "/users/:userID", UserController, :show
-    put "/users/:userID", UserController, :update
-    delete "/users/:userID", UserController, :delete
 
     # WORKING TIME Routes
     get "/workingtime/:userID", WorkingTimeController, :index
@@ -93,6 +91,9 @@ defmodule TimeManagerWeb.Router do
 
     scope "/admin" do
       pipe_through :manager_access
+
+      put "/users/:userID", UserController, :update
+      delete "/users/:userID", UserController, :delete
 
       post "/users", UserRegistrationController, :create_by_manager
 

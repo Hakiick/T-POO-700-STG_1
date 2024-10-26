@@ -24,7 +24,7 @@ defmodule TimeManagerWeb.UserRegistrationJSON do
   end
 
   # Helper function to translate error messages
-  defp translate_error({msg, opts}) do
+  defp translate_error({msg, _opts}) do
     # Translate or format error messages here if needed
     # For simplicity, just returning the message
     msg
