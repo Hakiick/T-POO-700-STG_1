@@ -172,6 +172,30 @@ export const createUserAdmin = async (user: User): Promise<User> => {
   }
 };
 
+export const updateRoleToManager = async (user_id: number) => {
+  try {
+    const response = await apiClientProtected.get(
+      `/admin/gestion/promote_to_manager/${user_id}`,
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const updateRoleToUser = async (user_id: number) => {
+  try {
+    const response = await apiClientProtected.get(
+      `/admin/gestion/demote_to_user/${user_id}`,
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
 // reset password
 export const resetPassword = async (
   password: string,
