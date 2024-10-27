@@ -3,8 +3,8 @@ defmodule TimeManager.Repo.Migrations.CreateManage do
 
   def change do
     create table(:manage) do
-      add :user_id, references(:users, on_delete: :nothing)
-      add :team_id, references(:teams, on_delete: :nothing)
+      add :user_id, references(:users, on_delete: :delete_all)
+      add :team_id, references(:teams, on_delete: :delete_all)
 
       timestamps(type: :utc_datetime)
     end
