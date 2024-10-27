@@ -37,7 +37,7 @@ export default createRouter({
     },
     {
       path: "/hr/dashboard",
-      name: "DashBoardAdmin",
+      name: "DashboardHr",
       component: DashboardHr
     },
   ],
