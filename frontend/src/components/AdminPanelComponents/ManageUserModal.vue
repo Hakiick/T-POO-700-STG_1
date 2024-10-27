@@ -31,7 +31,7 @@ const usersInTeam: Ref<User[], User[]> = ref([]);
 const selectedUsers: Ref<Number[], Number[]> = ref([]);
 
 async function fetchAllData() {
-  let usersArray = await Promise.all([ getAllUser(), getAllUsersFromTeam(props.team)]);
+  let usersArray = await Promise.all([getAllUser(), getAllUsersFromTeam(props.team)]);
   usersInTeam.value = usersArray[1];
   users.value = usersArray[0].filter((user) => {
     return usersInTeam.value.filter((user1) => user.id == user1.id).length == 0;
@@ -87,19 +87,13 @@ watch(() => props.team?.id ?? -1, fetchAllData);
 </script>
 
 <template>
-  <Dialog
-    :open="props.open"
-    @update:open="
-      (val) => {
-        if (!val) emit('close');
-      }
-    "
-  >
-    <DialogContent class="max-w-[50vw]">
+  <Dialog :open="props.open" @update:open="(val) => {
+    if (!val) emit('close');
+  }
+    ">
+    <DialogContent class="md:max-w-[50vw] sm:min-w-[600px] w-screen">
       <DialogHeader class="p-6 pb-0">
-        <DialogTitle
-          >Users in the team {{ props.team?.name ?? "" }}</DialogTitle
-        >
+        <DialogTitle>Users in the team {{ props.team?.name ?? "" }}</DialogTitle>
         <DialogDescription>You can change users in team here</DialogDescription>
       </DialogHeader>
       <div class="grid gap-4 py-4 overflow-y-auto px-6">
@@ -109,22 +103,16 @@ watch(() => props.team?.id ?? -1, fetchAllData);
               <h4 class="mb-4 text-sm font-medium leading-none">Not in team</h4>
             </div>
 
-            <div
-              v-for="user in users"
-              :key="user.id"
-              class="sm-text border p-2 m-2"
-              :class="{ 'bg-blue-300': selectedUsers.includes(user.id) }"
-              :onclick="
-                () => {
-                  let tempArray = [];
-                  selectedUsers.forEach((iSelected) => {
-                    if (iSelected != user.id) tempArray.push(iSelected);
-                  });
-                  if (!selectedUsers.includes(user.id)) tempArray.push(user.id);
-                  selectedUsers = tempArray;
-                }
-              "
-            >
+            <div v-for="user in users" :key="user.id" class="sm-text border p-2 m-2"
+              :class="{ 'bg-blue-300': selectedUsers.includes(user.id) }" :onclick="() => {
+                let tempArray = [];
+                selectedUsers.forEach((iSelected) => {
+                  if (iSelected != user.id) tempArray.push(iSelected);
+                });
+                if (!selectedUsers.includes(user.id)) tempArray.push(user.id);
+                selectedUsers = tempArray;
+              }
+                ">
               {{ user.username }}
             </div>
           </ScrollArea>
@@ -142,22 +130,16 @@ watch(() => props.team?.id ?? -1, fetchAllData);
               <h4 class="mb-4 text-sm font-medium leading-none">In team</h4>
             </div>
 
-            <div
-              v-for="user in usersInTeam"
-              :key="user.id"
-              class="sm-text border p-2 m-2"
-              :class="{ 'bg-blue-300': selectedUsers.includes(user.id) }"
-              :onclick="
-                () => {
-                  let tempArray = [];
-                  selectedUsers.forEach((iSelected) => {
-                    if (iSelected != user.id) tempArray.push(iSelected);
-                  });
-                  if (!selectedUsers.includes(user.id)) tempArray.push(user.id);
-                  selectedUsers = tempArray;
-                }
-              "
-            >
+            <div v-for="user in usersInTeam" :key="user.id" class="sm-text border p-2 m-2"
+              :class="{ 'bg-blue-300': selectedUsers.includes(user.id) }" :onclick="() => {
+                let tempArray = [];
+                selectedUsers.forEach((iSelected) => {
+                  if (iSelected != user.id) tempArray.push(iSelected);
+                });
+                if (!selectedUsers.includes(user.id)) tempArray.push(user.id);
+                selectedUsers = tempArray;
+              }
+                ">
               {{ user.username }}
             </div>
           </ScrollArea>
