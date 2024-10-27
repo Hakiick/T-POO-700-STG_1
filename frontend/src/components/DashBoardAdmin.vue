@@ -144,9 +144,13 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
       <div v-if="user" class="flex items-center justify-center py-4 lg:py-8 border-b-4">
         <UserNav :user="user" />
       </div>
+      <!-- MainNav for Desktop -->
+      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+        <MainNav class="mx-4" />
+      </div>
       <!-- MainNav for Mobile -->
-      <div class="lg:hidden flex justify-center">
-        <MainNav />
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
       </div>
       <div class="text-center items-center justify-center p-4 lg:p-8 border-b-4">
         <p>{{ formattedDate }}</p>

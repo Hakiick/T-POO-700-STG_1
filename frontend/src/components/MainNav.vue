@@ -36,8 +36,11 @@ const toggleMenu = () => {
         Dashboard
       </a>
       <a href="/admin/dashboard" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-      Admin Dashboard
-    </a>
+        Admin Dashboard
+      </a>
+      <a href="/hr/dashboard" class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        HR Dashboard
+      </a>
       <!-- <a href="/login" class="block text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-2 lg:py-0"> -->
       <!--   Products -->
       <!-- </a> -->
