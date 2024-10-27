@@ -31,6 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription
 } from "./ui/dialog";
 import Input from "./ui/input/Input.vue";
 import Label from "./ui/label/Label.vue";
