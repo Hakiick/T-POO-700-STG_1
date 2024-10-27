@@ -1,3 +1,4 @@
+import { LocationQueryValue } from "vue-router";
 import { User } from "../components/store/userStore";
 import { apiClient, apiClientProtected } from "./api";
 
@@ -139,7 +140,7 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Example: Update a user
-export const updateUser = async (user: User) : Promise<boolean> =>  {
+export const updateUser = async (user: User): Promise<boolean> => {
   try {
     await apiClientProtected.put(`/admin/users/${user.id}`, { user });
     return true;
@@ -164,9 +165,43 @@ export const deleteUser = async (user: User): Promise<Boolean> => {
 
 export const createUserAdmin = async (user: User): Promise<User> => {
   try {
-    const response = await apiClientProtected.post(`/admin/users`, {user});
+    const response = await apiClientProtected.post(`/admin/users`, { user });
     return response.data;
-  } catch(error) {
+  } catch (error) {
     console.error(error);
   }
-}
+};
+
+// reset password
+export const resetPassword = async (
+  password: string,
+  reset_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.put(
+      `/users/reset_password/${reset_token}`,
+      {
+        user: {
+          password: password,
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error("Error reset password:", error);
+    return error;
+  }
+};
+
+// confirm mail
+export const confirmMail = async (
+  confirm_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.get(`/users/confirm/${confirm_token}`, {});
+    return response;
+  } catch (error) {
+    console.error("Error confirm:", error);
+    return error;
+  }
+};
