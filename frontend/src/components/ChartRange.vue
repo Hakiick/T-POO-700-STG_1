@@ -13,6 +13,8 @@ import { Tabs, TabsContent } from './ui/tabs';
 import { getMonday, getSunday } from '../manager/DateUtils';
 import type { DateRange } from 'radix-vue';
 import { Button } from './ui/button';
+import MainNav from './MainNav.vue';
+import UserNav from './UserNav.vue';
 
 // ============================
 // Initialisation et variables globales
@@ -77,7 +79,7 @@ onMounted(async () => {
 
 
 // ============================
-// Fonction pour appliquer la nouvelle plage de dates
+// Fonction pour Apply la nouvelle plage de dates
 // ============================
 
 async function applyDateRange() {
@@ -98,7 +100,7 @@ async function fetchData() {
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
-    value.value.end.day + 1  // Ajout d'un jour ici
+    value.value.end.day + 1 
   );
 
   try {
@@ -246,6 +248,23 @@ function formatDate(dateString: string) {
 </script>
 
 <template>
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:hidden">
+    <!-- NavBar -->
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 mb-8">
+        Time Manager
+      </h1>
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
+      </div>
+    </div>
+  </div>
+
   <Tabs default-value="monthly" class="space-y-4 h-full w-full">
     <TabsContent value="monthly" class="space-y-4 h-full w-full">
       <div class="grid gap-4 grid-cols-1 lg:grid-cols-10 h-full w-full mt-7">
@@ -315,7 +334,7 @@ function formatDate(dateString: string) {
 
           <div class="text-center mb-3">
             <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white">
-              Appliquer
+              Apply
             </Button>
           </div>
         </div>
