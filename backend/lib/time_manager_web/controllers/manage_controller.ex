@@ -50,10 +50,12 @@ defmodule TimeManagerWeb.ManageController do
     team = Accounts.get_teams!(id)
     user = Guardian.Plug.current_resource(conn)
 
-    if !Accounts.is_manager?(user, team) do
-      conn
-      |> put_status(:forbidden)
-      |> json(%{error: "You are not allowed to access this resource"})
+    if user.role != "general_manager" do
+      if !Accounts.is_manager?(user, team) do
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not allowed to access this resource"})
+      end
     end
 
     users = Accounts.get_users_from_team(team)

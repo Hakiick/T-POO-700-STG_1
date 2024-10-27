@@ -37,9 +37,9 @@ defmodule TimeManagerWeb.ManageJSON do
     %{
       id: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
-
   end
 
   defp data(%Manage{} = manage) do

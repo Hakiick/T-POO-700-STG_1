@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, h, computed } from "vue";
-import { createUserAdmin, deleteUser, getAllUser, updateUser } from "../api/apiUser.ts";
+import { createUserAdmin, deleteUser, getAllUser, updateRoleToManager, updateRoleToUser, updateUser } from "../api/apiUser.ts";
 
 import {
   FlexRender,
+  Row,
   createColumnHelper,
   getCoreRowModel,
   getPaginationRowModel,
@@ -35,22 +36,32 @@ import Input from "./ui/input/Input.vue";
 import Label from "./ui/label/Label.vue";
 import Button from "./ui/button/Button.vue";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
-import { User } from "./store/userStore.ts";
+import { User, useUserStore } from "./store/userStore.ts";
 import NavAdmin from "./NavAdmin.vue";
 import { getAllUsersFromTeam } from "../api/apiManage.ts";
 import { useTeamStore } from "./store/teamStore.ts";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 
+const user = useUserStore().user;
 const users = ref<User[]>([]);
 const actionUser = ref<User>({ id: -1, username: "", role: "", email: "" });
 const openWorkingTimeModal = ref<boolean>(false);
 const openActionUserModal = ref<boolean>(false);
 const teamStore = useTeamStore();
+const roles = ["manager", "user"];
 
 const fetchAllUsers = async () => {
   const team = teamStore.currentTeam;
   if (team?.id == -1) {
     users.value = await getAllUser();
-  } 
+  }
   else {
     users.value = await getAllUsersFromTeam(teamStore.currentTeam)
 
@@ -65,7 +76,7 @@ const deleteUserById = async (id: number) => {
   }
 };
 
-const createOrUpdateElement = async() => {
+const createOrUpdateElement = async () => {
   let tempUsers: User[] = [];
   if (actionUser.value.id > 0) {
     await updateUser(actionUser.value);
@@ -75,6 +86,29 @@ const createOrUpdateElement = async() => {
     tempUsers.push(newUser);
   }
 }
+
+const handleRoleChange = async (role: string, row: Row<User>) => {
+  // console.log(role, row.getValue("id"));
+  if (role === "manager") {
+    const resp = await updateRoleToManager(row.getValue("id"));
+
+    if (resp.status !== 200) {
+      alert("Error occured");
+      window.location.reload();
+    }
+
+  } else if (role === "user") {
+    const resp = await updateRoleToUser(row.getValue("id"));
+
+    if (resp.status !== 200) {
+      alert("Error occured");
+      window.location.reload();
+    }
+  }
+
+
+  // updateUser(row.original);
+};
 
 const resetActionUser = () => {
   actionUser.value = {
@@ -97,6 +131,40 @@ const columns = computed(() => {
     columnHelper.accessor("email", {
       header: "Email",
       cell: ({ row }) => h("div", {}, row.getValue("email")),
+    }),
+    columnHelper.accessor("role", {
+      header: "Role",
+      // cell: ({ row }) => h("div", {}, [h(Button, {}, row.getValue("role"))]),
+      cell: ({ row }) => h(
+        "div",
+        {},
+        user.role === "general_manager" && row.getValue("role") !== "general_manager" ? [
+          h(
+            Select,
+            {
+              value: row.getValue("role"),
+              "onUpdate:modelValue": (newValue: string) => handleRoleChange(newValue, row),
+              defaultValue: row.getValue("role"),
+            },
+            [
+              h(SelectTrigger, { class: "w-[180px]" }, [
+                h(SelectValue, { placeholder: "Select a role" }),
+              ]),
+              h(SelectContent, {}, [
+                h(SelectGroup, {}, [
+                  ...roles.map((role) =>
+                    h(
+                      SelectItem,
+                      { value: role },
+                      role.charAt(0).toUpperCase() + role.slice(1)
+                    )
+                  ),
+                ]),
+              ]),
+            ]
+          )
+        ] : row.getValue("role")
+      ),
     }),
     columnHelper.accessor("id", {
       header: () => h("div", { class: "text-right" }, "Actions"),
@@ -154,7 +222,7 @@ const updateUserDialog = computed(() => {
   <div class="h-screen">
     <div class="border-b">
       <div class="flex h-16 items-center px-4">
-        <TeamSwitcher @teamChange="fetchAllUsers"/>
+        <TeamSwitcher @teamChange="fetchAllUsers" />
         <NavAdmin class="mx-6" />
       </div>
     </div>
@@ -163,10 +231,7 @@ const updateUserDialog = computed(() => {
         <div class="flex justify-between text-center align-center">
           <h1 class="text-3xl bold uppercase">Gestions des users</h1>
 
-          <Dialog
-            :open="openActionUserModal"
-            @update:open="(val) => (openActionUserModal = val)"
-          >
+          <Dialog :open="openActionUserModal" @update:open="(val) => (openActionUserModal = val)">
             <DialogTrigger as-child>
               <Button variant="outline" @click="resetActionUser">
                 <PlusIcon />
@@ -190,20 +255,11 @@ const updateUserDialog = computed(() => {
               <div class="grid gap-4 py-4">
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="username" class="text-right"> Username </Label>
-                  <Input
-                    id="username"
-                    class="col-span-3"
-                    v-model="actionUser.username"
-                  />
+                  <Input id="username" class="col-span-3" v-model="actionUser.username" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label for="email" class="text-right"> Email </Label>
-                  <Input
-                    id="email"
-                    class="col-span-3"
-                    type="email"
-                    v-model="actionUser.email"
-                  />
+                  <Input id="email" class="col-span-3" type="email" v-model="actionUser.email" />
                 </div>
               </div>
               <DialogFooter>
@@ -214,28 +270,16 @@ const updateUserDialog = computed(() => {
             </DialogContent>
           </Dialog>
         </div>
-        <WorkingTimeModal
-          :open="openWorkingTimeModal"
-          :user="actionUser"
-          @close="() => (openWorkingTimeModal = false)"
-        />
+        <WorkingTimeModal :open="openWorkingTimeModal" :user="actionUser"
+          @close="() => (openWorkingTimeModal = false)" />
 
         <Table>
           <TableHeader>
-            <TableRow
-              v-for="headerGroup in table.getHeaderGroups()"
-              :key="headerGroup.id"
-            >
-              <TableHead
-                v-for="header in headerGroup.headers"
-                :key="header.id"
-                :data-pinned="header.column.getIsPinned()"
-              >
-                <FlexRender
-                  v-if="!header.isPlaceholder"
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
+            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+              <TableHead v-for="header in headerGroup.headers" :key="header.id"
+                :data-pinned="header.column.getIsPinned()">
+                <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                  :props="header.getContext()" />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -243,15 +287,9 @@ const updateUserDialog = computed(() => {
             <template v-if="table.getRowModel().rows?.length">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
                 <TableRow :data-state="row.getIsSelected() && 'selected'">
-                  <TableCell
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                    :data-pinned="cell.column.getIsPinned()"
-                  >
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
+                  <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
+                    :data-pinned="cell.column.getIsPinned()">
+                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="row.getIsExpanded()">
@@ -273,20 +311,10 @@ const updateUserDialog = computed(() => {
     </div>
 
     <div class="flex items-center m-5 justify-end space-x-2 py-4">
-      <Button
-        variant="outline"
-        size="sm"
-        @click="table.previousPage()"
-        :disabled="!table.getCanPreviousPage()"
-      >
+      <Button variant="outline" size="sm" @click="table.previousPage()" :disabled="!table.getCanPreviousPage()">
         Previous
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="table.nextPage()"
-        :disabled="!table.getCanNextPage()"
-      >
+      <Button variant="outline" size="sm" @click="table.nextPage()" :disabled="!table.getCanNextPage()">
         Next
       </Button>
     </div>
