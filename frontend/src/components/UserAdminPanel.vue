@@ -85,6 +85,17 @@ const createOrUpdateElement = async () => {
     console.log(newUser);
     tempUsers.push(newUser);
   }
+
+  let userIndex = users.value.findIndex(
+    iUser => iUser.id == actionUser.value.id
+  );
+
+  users.value.forEach((value, index) => {
+    if (index != userIndex) tempUsers.push(value);
+    else tempUsers.push(actionUser.value);
+  });
+
+  users.value = tempUsers;
 }
 
 const handleRoleChange = async (role: string, row: Row<User>) => {
