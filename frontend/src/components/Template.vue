@@ -106,7 +106,7 @@ onMounted(async () => {
 });
 
 const formattedArrivalTime = computed(() => {
-  return arrivalTime.value ? moment(arrivalTime.value, 'HH:mm') : '...';
+  return arrivalTime.value ? moment(arrivalTime.value, 'HH:mm').format('HH[h] mm[m]') : '...';
 });
 
 
@@ -199,13 +199,18 @@ const handleChangeClock = async (checked: boolean) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-10 min-h-screen">
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
     <!-- NavBar -->
     <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
-      <h1 class="font-bold mt-5 flex justify-center">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4" v-show="!isDesktop">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
         Time Manager
       </h1>
-      <div v-if="user" class="flex items-center justify-center py-8 border-b-4">
+      <!-- UserNav for Desktop -->
+      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
         <UserNav :user="user" />
       </div>
       <!-- MainNav for Desktop -->
@@ -239,7 +244,7 @@ const handleChangeClock = async (checked: boolean) => {
         <hr class="my-2">
         <div class="mb-2">
           <p>Time worked</p>
-          <p class="text-2xl font-bold text-success">{{ "" + workTime || "..." }}</p>
+          <p class="text-2xl font-bold text-success">{{ workTime || "..." }}</p>
         </div>
         <hr class="my-2">
         <div class="mb-2">

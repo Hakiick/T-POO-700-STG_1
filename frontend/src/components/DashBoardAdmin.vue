@@ -1,35 +1,50 @@
 <script setup lang="ts">
-import { type Ref, onMounted, ref, computed } from 'vue';
+import MainNav from './MainNav.vue';
+import UserNav from './UserNav.vue';
+import TeamSwitcher from './TeamSwitcher.vue';
+import moment from 'moment';
+
+import { onMounted, ref, computed } from 'vue';
 import { useUserStore } from './store/userStore';
-import { getUser } from '../api/apiUser';
+import { useTeamStore } from "./store/teamStore.ts";
+import { getAllUser } from '../api/apiUser';
+import { getAllUsersFromTeam } from "../api/apiManage.ts";
 import { getWorkingTimeByDate } from '../api/apiWorkingTime';
 import { getClocksFromUser } from '../api/apiClock';
-import { getChartComponent, currentChartType, chartTypes } from '../manager/chartManager';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { RangeCalendar } from './ui/range-calendar';
-import { cn } from '../lib/utils';
-import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
-import { CalendarIcon } from '@radix-icons/vue';
-import { Tabs, TabsContent } from './ui/tabs';
+import { CalendarDate, DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
 import { getMonday, getSunday } from '../manager/DateUtils';
-import type { DateRange } from 'radix-vue';
+import { CalendarIcon } from '@radix-icons/vue';
 import { Button } from './ui/button';
+import { RangeCalendar } from './ui/range-calendar';
+import { Calendar } from './ui/calendar';
+import { cn } from '../lib/utils';
 
 // ============================
 // Initialisation et variables globales
 // ============================
 
-const df = new DateFormatter('fr-FR', {
-  dateStyle: 'medium',
-});
-
+const teamStore = useTeamStore();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
-const workingtime = ref<any>(null);
-const clockData = ref<any>(null);
-const workDays = ref<any[]>([]);
-const data = ref<any[]>([]);
 const workingDataTable = ref<any[]>([]);
+const isDesktop = ref(false);
+const usersList = ref<any[]>([]);
+
+const checkIsDesktop = () => {
+  isDesktop.value = window.innerWidth >= 1024;
+};
+
+const df = new DateFormatter('en-US', {
+  dateStyle: 'long',
+});
+
+const formattedDate = computed(() => {
+  return moment().format('dddd D MMMM');
+});
+const formattedTime = computed(() => {
+  return moment().format('HH[h] mm[m]');
+});
 
 const value = ref({
   start: new CalendarDate(
@@ -48,20 +63,19 @@ const value = ref({
 // Fonction exécutée au montage
 // ============================
 
-onMounted(async () => {
-  if (!user.value) {
-    user.value = await getUser(1);
-  }
-  
-  // Récupérer les données au chargement initial
-  await fetchData();
+onMounted(() => {
+  checkIsDesktop();
+  window.addEventListener('resize', checkIsDesktop);
+
+  fetchAllUsers();
 });
 
+
 // ============================
-// Fonction pour appliquer la nouvelle plage de dates
+// Fonction pour Apply la nouvelle plage de dates
 // ============================
 
-async function applyDateRange() {
+async function applyDate() {
   await fetchData();
 }
 
@@ -70,6 +84,16 @@ async function applyDateRange() {
 // ============================
 
 async function fetchData() {
+  if (!value.value) {
+    console.error("Aucune date sélectionnée");
+    return;
+  }
+
+  if (!user.value || !user.value.id) {
+    console.error("Erreur : utilisateur introuvable ou ID manquant");
+    return;
+  }
+
   const startDate = new Date(
     value.value.start.year,
     value.value.start.month - 1,
@@ -79,39 +103,38 @@ async function fetchData() {
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
-    value.value.end.day + 1  // Ajout d'un jour ici
+    value.value.end.day + 1
   );
 
   try {
-    const workingTimeResponse = await getWorkingTimeByDate(user.value.id, startDate.toISOString(), endDate.toISOString());
-    const clockDataResponse = await getClocksFromUser(user.value.id, startDate.toISOString(), endDate.toISOString());
+    // Fetch all users
+    usersList.value = await fetchAllUsers();
 
-    // Vérification des données récupérées, si absentes, définir des valeurs par défaut
-    const workingTimeData = workingTimeResponse?.data?.data ?? [];
-    const clockDataEntries = clockDataResponse?.data?.data ?? [];
+    // Initialise le tableau avant de le remplir
+    workingDataTable.value = [];
+    console.log(startDate, endDate)
+    for (const user of usersList.value) {
+      const workingTimeResponse = await getWorkingTimeByDate(user.id, startDate.toISOString(), endDate.toISOString());
+      const clockDataResponse = await getClocksFromUser(user.id, startDate.toISOString(), endDate.toISOString());
 
-    workingtime.value = workingTimeData;
-    clockData.value = clockDataEntries;
+      const workingTimeData = workingTimeResponse?.data?.data ?? [];
+      const clockDataEntries = clockDataResponse?.data?.data ?? [];
 
-    // Si aucune donnée n'est présente, afficher des valeurs par défaut
-    const workingDays = workingTimeData.length ? aggregateWorkingTime(workingTimeData) : [{ name: 'Aucune donnée', planned: 0 }];
-    const clockDays = clockDataEntries.length ? calculateWork(clockDataEntries) : [{ name: 'Aucune donnée', real: 0 }];
-
-    workDays.value = workingDays.map(workDay => {
-      const clockDay = clockDays.find(day => day.name === workDay.name);
-      const realTime = clockDay ? clockDay.real : 0;
-
-      return {
-        name: workDay.name,
-        planned: workDay.planned,
-        real: realTime,
-      };
-    });
-
-    data.value = workDays.value.length ? workDays.value : [{ name: 'Aucune donnée', planned: 0, real: 0 }];
-    workingDataTable.value = createDataTable(workingTimeData, clockDataEntries);
+      // Ajouter les données au tableau
+      workingDataTable.value.push(...createDataTable(workingTimeData, clockDataEntries, user));
+    }
   } catch (error) {
     console.error("Erreur lors de la récupération des données : ", error);
+  }
+}
+
+// Fonction pour récupérer tous les utilisateurs
+async function fetchAllUsers() {
+  const team = teamStore.currentTeam;
+  if (team?.id === -1) {
+    return await getAllUser();
+  } else {
+    return await getAllUsersFromTeam(teamStore.currentTeam);
   }
 }
 
@@ -119,27 +142,52 @@ async function fetchData() {
 // Fonction pour créer un tableau de données
 // ============================
 
-function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
-
+function createDataTable(workingTimeEntries, clockEntries, user) {
   let dataTable = [];
 
-  workingTimeEntries.forEach((workingTime) => {
-    const clockStart = clockEntries.find((clock) => clock.status === true && new Date(clock.time).toDateString() === new Date(workingTime.start).toDateString());
-    const clockEnd = clockEntries.find((clock) => clock.status === false && new Date(clock.time).toDateString() === new Date(workingTime.end).toDateString());
+  // Grouper par date pour simplifier l'affichage
+  const groupedEntries = {};
 
-    dataTable.push({
-      date: new Date(workingTime.start).toLocaleDateString(),
-      startTime: new Date(workingTime.start).toLocaleTimeString(),
-      endTime: new Date(workingTime.end).toLocaleTimeString(),
-      clockStart: clockStart ? new Date(clockStart.time).toLocaleTimeString() : 'N/A',  // Valeur par défaut N/A
-      clockEnd: clockEnd ? new Date(clockEnd.time).toLocaleTimeString() : 'N/A'        // Valeur par défaut N/A
+  workingTimeEntries.forEach((entry) => {
+    const date = new Date(entry.start).toLocaleDateString('fr-FR');
+    if (!groupedEntries[date]) {
+      groupedEntries[date] = { workingTime: [], clockData: [] };
+    }
+    groupedEntries[date].workingTime.push(entry);
+  });
+
+  clockEntries.forEach((entry) => {
+    const date = new Date(entry.time).toLocaleDateString('fr-FR');
+    if (!groupedEntries[date]) {
+      groupedEntries[date] = { workingTime: [], clockData: [] };
+    }
+    groupedEntries[date].clockData.push(entry);
+  });
+
+  // Construire le tableau de données pour chaque date
+  Object.keys(groupedEntries).forEach((date) => {
+    const workingTimeForDate = groupedEntries[date].workingTime.slice(0, 2);
+    const clockDataForDate = groupedEntries[date].clockData;
+
+    const clockStartEntries = clockDataForDate.filter(entry => entry.status === true).slice(0, 2);
+    const clockEndEntries = clockDataForDate.filter(entry => entry.status === false).slice(0, 2);
+
+    workingTimeForDate.forEach((workingTime, index) => {
+      dataTable.push({
+        username: user.username || 'N/A',
+        date,
+        startTime: workingTime.start ? new Date(workingTime.start).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+        endTime: workingTime.end ? new Date(workingTime.end).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+        clockStart: clockStartEntries[index] ? new Date(clockStartEntries[index].time).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A',
+        clockEnd: clockEndEntries[index] ? new Date(clockEndEntries[index].time).toLocaleTimeString('fr-FR', { hour: "2-digit", minute: "2-digit", timeZone: 'UTC' }) : 'N/A'
+      });
     });
   });
 
-  // Si aucune donnée n'est présente
   if (!dataTable.length) {
     dataTable.push({
-      date: 'Aucune donnée',
+      username: 'Aucune donnée',
+      date: 'N/A',
       startTime: 'N/A',
       endTime: 'N/A',
       clockStart: 'N/A',
@@ -150,119 +198,45 @@ function createDataTable(workingTimeEntries: any[], clockEntries: any[]) {
   return dataTable;
 }
 
-// ============================
-// Fonctions utilitaires pour l'agrégation des temps de travail et les calculs
-// ============================
-
-function aggregateWorkingTime(workingTimeEntries: any[]) {
-  const aggregated: Record<string, { planned: number }> = {};
-
-  workingTimeEntries.forEach(entry => {
-    const formattedDate = formatDate(entry.start);
-    const { durationNumeric } = calculateDuration(entry.start, entry.end);
-
-    if (!aggregated[formattedDate]) {
-      aggregated[formattedDate] = { planned: 0 };
-    }
-    aggregated[formattedDate].planned += durationNumeric;
-  });
-
-  return Object.keys(aggregated).map(name => ({
-    name,
-    planned: aggregated[name].planned,
-  }));
-}
-
-function calculateWork(clockEntries: any[]) {
-  if (!Array.isArray(clockEntries)) return [];
-
-  const workByDate: Record<string, { real: number }> = {};
-  let startTime: string | null = null;
-
-  clockEntries.forEach(entry => {
-    const formattedDate = formatDate(entry.time);
-
-    if (entry.status) {
-      startTime = entry.time;
-    } else if (startTime) {
-      const { durationNumeric } = calculateDuration(startTime, entry.time);
-
-      if (!workByDate[formattedDate]) {
-        workByDate[formattedDate] = { real: 0 };
-      }
-
-      workByDate[formattedDate].real += durationNumeric;
-      startTime = null;
-    }
-  });
-
-  return Object.keys(workByDate).map(date => ({
-    name: date,
-    real: workByDate[date].real,
-  }));
-}
-
-function calculateDuration(start: string, end: string) {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const durationInMilliseconds = endDate.getTime() - startDate.getTime();
-  const durationInMinutes = Math.round(durationInMilliseconds / (1000 * 60));
-
-  const hours = Math.floor(durationInMinutes / 60);
-  const minutes = durationInMinutes % 60;
-
-  return {
-    durationNumeric: durationInMinutes / 60,
-    durationFormatted: `${hours}h ${minutes}m`,
-  };
-}
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-
-  return `${day}/${month}`;
-}
-
-function formatHours(hours: number) {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return `${h}h ${m}m`;
-}
 </script>
 
 <template>
-  <Tabs default-value="monthly" class="space-y-4 h-full w-full">
-    <TabsContent value="monthly" class="space-y-4 h-full w-full">
-      <div class="grid gap-4 grid-cols-1 lg:grid-cols-10 h-full w-full mt-7">
-        
-        <!-- Section graphique - 70% largeur à gauche -->
-        <div class="col-span-1 lg:col-span-6 space-y-4 h-full w-full">
-          <div class="h-full w-full">
-            <div class="flex items-center justify-center space-x-4 mb-10">
-              <button
-                v-for="type in chartTypes"
-                :key="type"
-                @click="currentChartType = type"
-                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                {{ type }}
-              </button>
-            </div>
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
+    <!-- NavBar -->
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4" v-show="!isDesktop">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
+        Time Manager
+      </h1>
+      <!-- UserNav for Desktop -->
+      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
+        <UserNav :user="user" />
+      </div>
+      <!-- MainNav for Desktop -->
+      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+        <MainNav class="mx-4" />
+      </div>
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
+      </div>
+      <div class="text-center items-center justify-center p-8 border-b-4">
+        <p>{{ formattedDate }}</p>
+        <p class="text-xl font-bold">{{ formattedTime }}</p>
+      </div>
+    </div>
 
-            <!-- Composant graphique dynamique -->
-            <component
-              :is="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).component"
-              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props"
-            />
-          </div>
+    <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4 pt-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex justify-center">
+          <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center"/>
         </div>
-
-        <!-- Section emploi du temps - 30% largeur à droite -->
-        <div class="col-span-1 lg:col-span-4 h-full w-full space-y-4">
+        <div>
           <!-- Calendrier avec bouton d'application -->
-          <div class="text-center mb-3">
+          <div class="text-center flex justify-center mb-3">
             <Popover>
               <PopoverTrigger as-child>
                 <Button
@@ -296,39 +270,44 @@ function formatHours(hours: number) {
               </PopoverContent>
             </Popover>
           </div>
-
-          <!-- Bouton pour appliquer la plage de dates -->
           <div class="text-center mb-3">
-            <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white">
-              Appliquer
+            <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white">
+              Apply
             </Button>
-          </div>
-
-          <!-- Emploi du temps -->
-          <div class="text-center mb-3">
-            <table class="w-full">
-              <thead>
-                <tr>
-                  <th class="px-4 py-2 text-left">Date</th>
-                  <th class="px-4 py-2 text-left">Heure de début</th>
-                  <th class="px-4 py-2 text-left">Heure de fin</th>
-                  <th class="px-4 py-2 text-left">Pointage de début</th>
-                  <th class="px-4 py-2 text-left">Pointage de fin</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in workingDataTable" :key="index">
-                  <td class="border px-4 py-2">{{ row.date }}</td>
-                  <td class="border px-4 py-2">{{ row.startTime }}</td>
-                  <td class="border px-4 py-2">{{ row.endTime }}</td>
-                  <td class="border px-4 py-2">{{ row.clockStart }}</td>
-                  <td class="border px-4 py-2">{{ row.clockEnd }}</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
-    </TabsContent>
-  </Tabs>
+      
+      <!-- Emploi du temps -->
+      <div class="text-center mb-3 overflow-x-auto">
+        <table class="w-full table-auto border-collapse">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left">Username</th>
+              <th class="px-4 py-2 text-left">Date</th>
+              <th class="px-4 py-2 text-left">Work In</th>
+              <th class="px-4 py-2 text-left">Work Out</th>
+              <th class="px-4 py-2 text-left">Clock In</th>
+              <th class="px-4 py-2 text-left">Clock Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="(row, index) in workingDataTable" :key="index">
+              <tr>
+                <!-- Affiche le nom de l'utilisateur seulement si c'est la première ligne pour cet utilisateur -->
+                <td v-if="index === 0 || row.username !== workingDataTable[index - 1].username" 
+                    :rowspan="workingDataTable.filter(data => data.username === row.username).length"
+                    class="border px-4 py-2 font-bold">{{ row.username }}</td>
+                <td class="border px-4 py-2">{{ row.date }}</td>
+                <td class="border px-4 py-2">{{ row.startTime }}</td>
+                <td class="border px-4 py-2">{{ row.endTime }}</td>
+                <td class="border px-4 py-2">{{ row.clockStart }}</td>
+                <td class="border px-4 py-2">{{ row.clockEnd }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </template>
