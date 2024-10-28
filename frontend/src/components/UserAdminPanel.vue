@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, h, computed } from "vue";
-import { createUserAdmin, deleteUser, getAllUser, updateRoleToManager, updateRoleToUser, updateUser } from "../api/apiUser.ts";
+import {
+  createUserAdmin,
+  deleteUser,
+  getAllUser,
+  updateRoleToManager,
+  updateRoleToUser,
+  updateUser,
+} from "../api/apiUser.ts";
 
 import {
   FlexRender,
@@ -20,10 +27,10 @@ import {
   TableRow,
 } from "./ui/table";
 
-import MainNav from './MainNav.vue';
-import UserNav from './UserNav.vue';
-import TeamSwitcher from './TeamSwitcher.vue';
-import { TrashIcon, PlusIcon, TimerIcon, Pencil2Icon } from "@radix-icons/vue";
+import MainNav from "./MainNav.vue";
+import UserNav from "./UserNav.vue";
+import TeamSwitcher from "./TeamSwitcher.vue";
+import { TrashIcon, PlusIcon, TimerIcon, Pencil2Icon, BarChartIcon } from "@radix-icons/vue";
 
 import {
   Dialog,
@@ -33,14 +40,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription
+  DialogDescription,
 } from "./ui/dialog";
 import Input from "./ui/input/Input.vue";
 import Label from "./ui/label/Label.vue";
 import Button from "./ui/button/Button.vue";
 import WorkingTimeModal from "./AdminPanelComponents/WorkingTimeModal.vue";
 import { User, useUserStore } from "./store/userStore.ts";
-import NavAdmin from "./NavAdmin.vue";
 import { getAllUsersFromTeam } from "../api/apiManage.ts";
 import { useTeamStore } from "./store/teamStore.ts";
 import {
@@ -50,7 +56,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select'
+} from "./ui/select";
+import { clockForTeam } from "../api/apiTeams.ts";
+import ChartRangeAdmin from "./ChartRangeAdmin.vue";
 
 const user = useUserStore().user;
 const users = ref<User[]>([]);
@@ -60,6 +68,8 @@ const openActionUserModal = ref<boolean>(false);
 const teamStore = useTeamStore();
 const roles = ["manager", "user"];
 const isDesktop = ref(false);
+const dashboardUser = ref<User>({ id: -1, username: "", role: "", email:""});
+const openDashboardUserModal = ref<boolean>(false);
 
 const checkIsDesktop = () => {
   isDesktop.value = window.innerWidth >= 1024;
@@ -69,9 +79,8 @@ const fetchAllUsers = async () => {
   const team = teamStore.currentTeam;
   if (team?.id == -1) {
     users.value = await getAllUser();
-  }
-  else {
-    users.value = await getAllUsersFromTeam(teamStore.currentTeam)
+  } else {
+    users.value = await getAllUsersFromTeam(teamStore.currentTeam);
   }
 };
 
@@ -93,7 +102,7 @@ const createOrUpdateElement = async () => {
   }
 
   let userIndex = users.value.findIndex(
-    iUser => iUser.id == actionUser.value.id
+    (iUser) => iUser.id == actionUser.value.id
   );
 
   users.value.forEach((value, index) => {
@@ -102,7 +111,7 @@ const createOrUpdateElement = async () => {
   });
 
   users.value = tempUsers;
-}
+};
 
 const handleRoleChange = async (role: string, row: Row<User>) => {
   // console.log(role, row.getValue("id"));
@@ -113,7 +122,6 @@ const handleRoleChange = async (role: string, row: Row<User>) => {
       alert("Error occured");
       window.location.reload();
     }
-
   } else if (role === "user") {
     const resp = await updateRoleToUser(row.getValue("id"));
 
@@ -123,8 +131,21 @@ const handleRoleChange = async (role: string, row: Row<User>) => {
     }
   }
 
-
   // updateUser(row.original);
+};
+
+const clockInForTeam = async () => {
+  await clockForTeamAction(true);
+};
+
+const clockOutForTeam = async () => {
+  await clockForTeamAction(false);
+};
+
+const clockForTeamAction = async (clockIn: boolean) => {
+  let team = teamStore.currentTeam;
+  if (team == undefined || team.id < 0) return;
+  await clockForTeam(team, clockIn);
 };
 
 const resetActionUser = () => {
@@ -138,7 +159,7 @@ const resetActionUser = () => {
 
 onMounted(() => {
   checkIsDesktop();
-  window.addEventListener('resize', checkIsDesktop);
+  window.addEventListener("resize", checkIsDesktop);
 
   fetchAllUsers();
 });
@@ -147,7 +168,7 @@ const columns = computed(() => {
   const columnHelper = createColumnHelper<User>();
   return [
     columnHelper.accessor("username", {
-      header: "Username",
+      header: "Nom d'utilisateur",
       cell: ({ row }) => h("div", {}, row.getValue("username")),
     }),
     columnHelper.accessor("email", {
@@ -157,41 +178,57 @@ const columns = computed(() => {
     columnHelper.accessor("role", {
       header: "Role",
       // cell: ({ row }) => h("div", {}, [h(Button, {}, row.getValue("role"))]),
-      cell: ({ row }) => h(
-        "div",
-        {},
-        user.role === "general_manager" && row.getValue("role") !== "general_manager" ? [
-          h(
-            Select,
-            {
-              value: row.getValue("role"),
-              "onUpdate:modelValue": (newValue: string) => handleRoleChange(newValue, row),
-              defaultValue: row.getValue("role"),
-            },
-            [
-              h(SelectTrigger, { class: "w-[180px]" }, [
-                h(SelectValue, { placeholder: "Select a role" }),
-              ]),
-              h(SelectContent, {}, [
-                h(SelectGroup, {}, [
-                  ...roles.map((role) =>
-                    h(
-                      SelectItem,
-                      { value: role },
-                      role.charAt(0).toUpperCase() + role.slice(1)
-                    )
-                  ),
-                ]),
-              ]),
-            ]
-          )
-        ] : row.getValue("role")
-      ),
+      cell: ({ row }) =>
+        h(
+          "div",
+          {},
+          user.role === "general_manager" &&
+            row.getValue("role") !== "general_manager"
+            ? [
+                h(
+                  Select,
+                  {
+                    value: row.getValue("role"),
+                    "onUpdate:modelValue": (newValue: string) =>
+                      handleRoleChange(newValue, row),
+                    defaultValue: row.getValue("role"),
+                  },
+                  [
+                    h(SelectTrigger, { class: "w-[180px]" }, [
+                      h(SelectValue, { placeholder: "Select a role" }),
+                    ]),
+                    h(SelectContent, {}, [
+                      h(SelectGroup, {}, [
+                        ...roles.map((role) =>
+                          h(
+                            SelectItem,
+                            { value: role },
+                            role.charAt(0).toUpperCase() + role.slice(1)
+                          )
+                        ),
+                      ]),
+                    ]),
+                  ]
+                ),
+              ]
+            : row.getValue("role")
+        ),
     }),
     columnHelper.accessor("id", {
       header: () => h("div", { class: "text-right" }, "Actions"),
       cell: ({ row }) =>
         h("div", { class: "text-right" }, [
+          h(
+            Button,
+            {
+              variant: "outline",
+              onClick: () => {
+                openDashboardUserModal.value = true;
+                dashboardUser.value = row.original;
+              }
+            },
+            h(BarChartIcon)
+          ),
           h(
             Button,
             {
@@ -209,7 +246,7 @@ const columns = computed(() => {
               onClick() {
                 openActionUserModal.value = true;
                 actionUser.value = row.original;
-              }
+              },
             },
             h(Pencil2Icon)
           ),
@@ -243,37 +280,63 @@ const updateUserDialog = computed(() => {
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
     <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative border-b-4 pb-8">
+    <div
+      class="col-span-1 lg:col-span-1/10 border-r-4 relative border-b-4 pb-8 "
+    >
       <!-- UserNav for Mobile -->
       <div class="pt-4 pl-4" v-show="!isDesktop">
         <UserNav :user="user" />
       </div>
-      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
-        Time Manager
-      </h1>
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">Time Manager</h1>
       <!-- UserNav for Desktop -->
-      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
+      <div
+        v-show="isDesktop"
+        class="flex items-center justify-center py-8 border-b-4"
+      >
         <UserNav :user="user" />
       </div>
       <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+      <div
+        class="flex items-center justify-center pb-4 border-b-4 hidden lg:block"
+      >
         <MainNav class="mx-4" />
       </div>
       <!-- MainNav for Mobile -->
       <div class="absolute top-4 right-4 lg:hidden">
         <MainNav class="mx-4" />
       </div>
+      <div
+        class="text-center items-center justify-center p-4"
+        v-if="
+          teamStore.currentTeam != undefined && teamStore.currentTeam.id >= 0
+        "
+      >
+        <Button @click="clockInForTeam" class="bg-green-500">
+          ☀️ Clock in</Button
+        >
+        <Button @click="clockOutForTeam" class="bg-red-500">
+          🌙 Clock out</Button
+        >
+      </div>
     </div>
 
     <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4 pt-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-        <h1 class="text-2xl lg:text-3xl bold uppercase mb-5">Gestion des utilisateurs</h1>
+        <h1 class="text-2xl lg:text-3xl bold uppercase mb-5">
+          Gestion des utilisateurs
+        </h1>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
           <div class="flex justify-center">
-            <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center" />
+            <TeamSwitcher
+              @teamChange="fetchAllUsers"
+              class="w-full text-center"
+            />
           </div>
           <div class="flex justify-between items-c-=0-nter">
-            <Dialog :open="openActionUserModal" @update:open="(val) => (openActionUserModal = val)">
+            <Dialog
+              :open="openActionUserModal"
+              @update:open="(val) => (openActionUserModal = val)"
+            >
               <DialogTrigger as-child>
                 <Button variant="outline" @click="resetActionUser">
                   <PlusIcon />
@@ -282,7 +345,9 @@ const updateUserDialog = computed(() => {
               <DialogContent class="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>
-                    <template v-if="updateUserDialog"> Mettre à jour l'utilisateur </template>
+                    <template v-if="updateUserDialog">
+                      Mettre à jour l'utilisateur
+                    </template>
                     <template v-else> Créer un utilisateur </template>
                   </DialogTitle>
                   <DialogDescription>
@@ -296,17 +361,30 @@ const updateUserDialog = computed(() => {
                 </DialogHeader>
                 <div class="grid gap-4 py-4">
                   <div class="grid grid-cols-4 items-center gap-4">
-                    <Label for="username" class="text-right"> Nom d'utilisateur </Label>
-                    <Input id="username" class="col-span-3" v-model="actionUser.username" />
+                    <Label for="username" class="text-right">
+                      Nom d'utilisateur
+                    </Label>
+                    <Input
+                      id="username"
+                      class="col-span-3"
+                      v-model="actionUser.username"
+                    />
                   </div>
                   <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="email" class="text-right"> Email </Label>
-                    <Input id="email" class="col-span-3" type="email" v-model="actionUser.email" />
+                    <Input
+                      id="email"
+                      class="col-span-3"
+                      type="email"
+                      v-model="actionUser.email"
+                    />
                   </div>
                 </div>
                 <DialogFooter>
                   <DialogClose>
-                    <Button @click="createOrUpdateElement"> Enregistrer les modifications </Button>
+                    <Button @click="createOrUpdateElement">
+                      Enregistrer les modifications
+                    </Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
@@ -315,16 +393,28 @@ const updateUserDialog = computed(() => {
         </div>
       </div>
 
-      <WorkingTimeModal :open="openWorkingTimeModal" :user="actionUser"
-        @close="() => (openWorkingTimeModal = false)" />
+      <WorkingTimeModal
+        :open="openWorkingTimeModal"
+        :user="actionUser"
+        @close="() => (openWorkingTimeModal = false)"
+      />
 
       <table class="w-full table-auto border-collapse">
         <TableHeader>
-          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-            <TableHead v-for="header in headerGroup.headers" :key="header.id"
-              :data-pinned="header.column.getIsPinned()">
-              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
-                :props="header.getContext()" />
+          <TableRow
+            v-for="headerGroup in table.getHeaderGroups()"
+            :key="headerGroup.id"
+          >
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              :data-pinned="header.column.getIsPinned()"
+            >
+              <FlexRender
+                v-if="!header.isPlaceholder"
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -332,9 +422,15 @@ const updateUserDialog = computed(() => {
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="row in table.getRowModel().rows" :key="row.id">
               <TableRow :data-state="row.getIsSelected() && 'selected'">
-                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
-                  :data-pinned="cell.column.getIsPinned()">
-                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                <TableCell
+                  v-for="cell in row.getVisibleCells()"
+                  :key="cell.id"
+                  :data-pinned="cell.column.getIsPinned()"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
                 </TableCell>
               </TableRow>
               <TableRow v-if="row.getIsExpanded()">
@@ -350,16 +446,51 @@ const updateUserDialog = computed(() => {
             </TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+      </table>
 
       <div class="flex items-center justify-end m-5 space-x-2 py-4">
-        <Button variant="outline" size="sm" @click="table.previousPage()" :disabled="!table.getCanPreviousPage()">
+        <Button
+          variant="outline"
+          size="sm"
+          @click="table.previousPage()"
+          :disabled="!table.getCanPreviousPage()"
+        >
           Précédent
         </Button>
-        <Button variant="outline" size="sm" @click="table.nextPage()" :disabled="!table.getCanNextPage()">
+        <Button
+          variant="outline"
+          size="sm"
+          @click="table.nextPage()"
+          :disabled="!table.getCanNextPage()"
+        >
           Suivant
         </Button>
       </div>
+
+
+      <Dialog
+              :open="openDashboardUserModal"
+              @update:open="(val) => (openDashboardUserModal = val)"
+            >
+              <DialogContent class="grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-w-[90dvw] max-h-[90dvh]">
+                <DialogHeader>
+                  <DialogTitle>Dashboard de {{ dashboardUser.username }}</DialogTitle>
+                  <DialogDescription>Visuel sur le dashboard de l'utilisateur {{ dashboardUser.username }}</DialogDescription>
+                </DialogHeader>
+                <div class="grid gap-4 py-4 overflow-y-auto px-6">
+
+                    <ChartRangeAdmin :user="dashboardUser" v-if="dashboardUser.id >= 0" />
+                </div>
+
+                <DialogFooter>
+                  <DialogClose>
+                    <Button>
+                      Close
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
     </div>
   </div>
 </template>

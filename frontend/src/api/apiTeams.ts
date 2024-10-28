@@ -49,3 +49,14 @@ export const updateTeam = async(team: Team) : Promise<boolean> => {
     }
     return false;
 }
+
+export const clockForTeam = async(team: Team, clockIn: boolean): Promise<void> => {
+    try {
+        let url = `/admin/teams/${team.id}/${clockIn ? "clock_in" : "clock_out"}`;
+        await apiClientProtected.get(url);
+
+    } catch(error) {
+        console.error(error);
+        
+    }
+}
