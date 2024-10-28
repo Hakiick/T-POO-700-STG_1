@@ -45,3 +45,5 @@ A manager can only modify user from its team.
 A general manager can create teams and modify any team or user.
 
 the working times that we have seeded are on from the 10/10 to the 31/10
+
+Also note that when clocking in out of a working time it creates a working time to account overtime work
