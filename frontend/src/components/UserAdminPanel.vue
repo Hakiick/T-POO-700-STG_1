@@ -48,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select'
+import { clockForTeam } from "../api/apiTeams.ts";
 
 const user = useUserStore().user;
 const users = ref<User[]>([]);
@@ -109,6 +110,20 @@ const handleRoleChange = async (role: string, row: Row<User>) => {
 
   // updateUser(row.original);
 };
+
+const clockInForTeam = async () => {
+  await clockForTeamAction(true);
+}
+
+const clockOutForTeam = async () => {
+  await clockForTeamAction(false);
+}
+
+const clockForTeamAction = async(clockIn : boolean) => {
+  let team = teamStore.currentTeam;
+  if (team == undefined || team.id< 0) return;
+  await clockForTeam(team, clockIn);
+}
 
 const resetActionUser = () => {
   actionUser.value = {
@@ -230,6 +245,10 @@ const updateUserDialog = computed(() => {
       <div class="m-5">
         <div class="flex justify-between text-center align-center">
           <h1 class="text-3xl bold uppercase">Gestions des users</h1>
+          <div v-if="teamStore.currentTeam != undefined && teamStore.currentTeam.id >= 0">
+            <Button @click="clockInForTeam" class="bg-green-500"> ☀️ Clock in</Button>
+            <Button @click="clockOutForTeam" class="bg-red-500"> 🌙 Clock out</Button>
+          </div>
 
           <Dialog :open="openActionUserModal" @update:open="(val) => (openActionUserModal = val)">
             <DialogTrigger as-child>
