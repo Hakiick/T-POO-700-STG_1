@@ -19,7 +19,6 @@ import { Button } from './ui/button';
 import { RangeCalendar } from './ui/range-calendar';
 import { Calendar } from './ui/calendar';
 import { cn } from '../lib/utils';
-import NavAdmin from "./NavAdmin.vue";
 
 // ============================
 // Initialisation et variables globales
@@ -29,7 +28,12 @@ const teamStore = useTeamStore();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 const workingDataTable = ref<any[]>([]);
+const isDesktop = ref(false);
 const usersList = ref<any[]>([]);
+
+const checkIsDesktop = () => {
+  isDesktop.value = window.innerWidth >= 1024;
+};
 
 const df = new DateFormatter('en-US', {
   dateStyle: 'long',
@@ -59,7 +63,12 @@ const value = ref({
 // Fonction exécutée au montage
 // ============================
 
-onMounted(fetchAllUsers);
+onMounted(() => {
+  checkIsDesktop();
+  window.addEventListener('resize', checkIsDesktop);
+
+  fetchAllUsers();
+});
 
 
 // ============================
@@ -191,28 +200,36 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
 
 </script>
 
-
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-9 lg:min-h-screen">
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
     <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-2/ lg:border-r-4 relative w-full lg:w-auto">
-      <h1 class="font-bold mt-5 flex justify-center lg:justify-center">
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4" v-show="!isDesktop">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
         Time Manager
       </h1>
-      <div v-if="user" class="flex items-center justify-center py-4 lg:py-8 border-b-4">
+      <!-- UserNav for Desktop -->
+      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
         <UserNav :user="user" />
       </div>
       <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden">
-        <NavAdmin class="mx-4" />
+      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+        <MainNav class="mx-4" />
       </div>
-      <div class="text-center items-center justify-center p-4 lg:p-8 border-b-4">
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
+      </div>
+      <div class="text-center items-center justify-center p-8 border-b-4">
         <p>{{ formattedDate }}</p>
         <p class="text-xl font-bold">{{ formattedTime }}</p>
       </div>
     </div>
 
-    <div class="col-span-1 lg:col-span-8 h-full w-full space-y-4 pt-5">
+    <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4 pt-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex justify-center">
           <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center"/>
@@ -262,8 +279,8 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
       </div>
       
       <!-- Emploi du temps -->
-      <div class="text-center mb-3">
-        <table class="w-full">
+      <div class="text-center mb-3 overflow-x-auto">
+        <table class="w-full table-auto border-collapse">
           <thead>
             <tr>
               <th class="px-4 py-2 text-left">Username</th>

@@ -199,14 +199,14 @@ const handleChangeClock = async (checked: boolean) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-10 min-h-screen">
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
     <!-- NavBar -->
     <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
       <!-- UserNav for Mobile -->
       <div class="pt-4 pl-4" v-show="!isDesktop">
         <UserNav :user="user" />
       </div>
-      <h1 class="font-bold mt-5 flex justify-center -mt-8 lg:mt-3">
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
         Time Manager
       </h1>
       <!-- UserNav for Desktop -->
