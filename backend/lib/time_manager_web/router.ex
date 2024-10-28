@@ -94,9 +94,14 @@ defmodule TimeManagerWeb.Router do
     scope "/clocks" do
       pipe_through :managed_access
 
-      get "/:userID", ClockController, :show
       get "/:userID", ClockController, :index
       post "/:userID", ClockController, :create
+    end
+
+    scope "/clock" do
+      pipe_through :managed_access
+
+      get "/:userID", ClockController, :show
     end
 
     scope "/admin" do

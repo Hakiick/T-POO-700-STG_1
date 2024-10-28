@@ -2,6 +2,7 @@ defmodule TimeManagerWeb.ManageController do
   use TimeManagerWeb, :controller
 
   alias TimeManager.Accounts
+  alias TimeManager.Timesheet
   alias TimeManager.Accounts.Manage
 
   action_fallback TimeManagerWeb.FallbackController
@@ -67,5 +68,51 @@ defmodule TimeManagerWeb.ManageController do
 
     teams = Accounts.get_teams_from_user(user)
     render(conn, :index, teams: teams)
+  end
+
+  def clock_in_for_team(conn, %{"id" => id}) do
+    team = Accounts.get_teams!(id)
+    user = Guardian.Plug.current_resource(conn)
+
+    if user.role != "general_manager" do
+      if !Accounts.is_manager?(user, team) do
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not allowed to access this resource"})
+      end
+    end
+
+    users = Accounts.get_users_from_team(team)
+
+    for user <- users do
+      Accounts.clock_in_if_last_clocked_out(user.id)
+    end
+
+    conn
+    |> put_status(:ok)
+    |> json(%{message: "clocked in for team"})
+  end
+
+  def clock_out_for_team(conn, %{"id" => id}) do
+    team = Accounts.get_teams!(id)
+    user = Guardian.Plug.current_resource(conn)
+
+    if user.role != "general_manager" do
+      if !Accounts.is_manager?(user, team) do
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "You are not allowed to access this resource"})
+      end
+    end
+
+    users = Accounts.get_users_from_team(team)
+
+    for user <- users do
+      Accounts.clock_out_if_last_clocked_out(user.id)
+    end
+
+    conn
+    |> put_status(:ok)
+    |> json(%{message: "clocked out for team"})
   end
 end
