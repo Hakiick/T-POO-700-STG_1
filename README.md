@@ -36,7 +36,7 @@ User:
 
 ---
 
-When creating a user, you need to verify it with link send to your mail box, the link will activate the account and redirect you to the login page without warning, yet.
+When creating a user, you need to verify it with the link send to your mail box, the link will activate the account and redirect you to the login page without warning, yet.
 
 When creating a user in the admin panel "users" with the "+". you don't have to give a password because the backend will send a password setting mail to the email of the user you created.
 
