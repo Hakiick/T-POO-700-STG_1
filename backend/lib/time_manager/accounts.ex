@@ -437,7 +437,7 @@ defmodule TimeManager.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_teams!(id), do: Repo.get!(Teams, id)
+  def get_teams!(id), do: Repo.get(Teams, id)
 
   @doc """
   Creates a teams.
@@ -549,6 +549,21 @@ defmodule TimeManager.Accounts do
   defp get_manage_by(%{"id" => id}), do: Repo.get!(Manage, id)
 
   defp get_manage_by(_params), do: Repo.all(Manage)
+
+  def is_managed_by?(user_id, manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^user_id and m.team_id in subquery(teams_managed_by(manager_id)),
+      select: 1
+    )
+    |> Repo.exists?()
+  end
+
+  defp teams_managed_by(manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^manager_id,
+      select: m.team_id
+    )
+  end
 
   @doc """
   Creates a manage.
