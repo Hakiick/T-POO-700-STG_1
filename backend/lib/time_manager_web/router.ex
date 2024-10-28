@@ -23,6 +23,11 @@ defmodule TimeManagerWeb.Router do
     plug TimeManagerWeb.Plugs.RolePlug, roles: ["general_manager"]
   end
 
+  pipeline :managed_access do
+    plug :accepts, ["json"]
+    plug TimeManagerWeb.Plugs.AuthorizeUserManaged
+  end
+
   pipeline :api_refresh do
     plug :accepts, ["json"]
 
@@ -75,17 +80,29 @@ defmodule TimeManagerWeb.Router do
     get "/users", UserController, :show_from_mail_and_username
     get "/users/:userID", UserController, :show
 
-    # WORKING TIME Routes
-    get "/workingtime/:userID", WorkingTimeController, :index
-    get "/workingtime/:userID/:id", WorkingTimeController, :show
-    post "/workingtime/:userID", WorkingTimeController, :create
-    put "/workingtime/:id", WorkingTimeController, :update
-    delete "/workingtime/:id", WorkingTimeController, :delete
+    scope "/workingtime" do
+      pipe_through :managed_access
+      # WORKING TIME Routes
+      get "/:userID", WorkingTimeController, :index
+      get "/:userID/:id", WorkingTimeController, :show
+      post "/:userID", WorkingTimeController, :create
+      put "/:id", WorkingTimeController, :update
+      delete "/:id", WorkingTimeController, :delete
+    end
 
     # CLOCKING Routes
-    get "/clock/:userID", ClockController, :show
-    get "/clocks/:userID", ClockController, :index
-    post "/clocks/:userID", ClockController, :create
+    scope "/clocks" do
+      pipe_through :managed_access
+
+      get "/:userID", ClockController, :index
+      post "/:userID", ClockController, :create
+    end
+
+    scope "/clock" do
+      pipe_through :managed_access
+
+      get "/:userID", ClockController, :show
+    end
 
     scope "/admin" do
       pipe_through :manager_access
@@ -94,6 +111,9 @@ defmodule TimeManagerWeb.Router do
       delete "/users/:userID", UserController, :delete
 
       post "/users", UserRegistrationController, :create_by_manager
+
+      get "/teams/:id/clock_in", ManageController, :clock_in_for_team
+      get "/teams/:id/clock_out", ManageController, :clock_out_for_team
 
       get "/teams/:id/users", ManageController, :index_users_from_team
       get "/users/teams", ManageController, :index_teams_from_user
