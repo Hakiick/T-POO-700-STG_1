@@ -19,6 +19,35 @@ defmodule TimeManager.AccountsFixtures do
     user
   end
 
+  @doc """
+  Generate a teams.
+  """
+  def teams_fixture(attrs \\ %{}) do
+    {:ok, teams} =
+      attrs
+      |> Enum.into(%{
+        description: "some description",
+        name: "some name"
+      })
+      |> TimeManager.Accounts.create_teams()
+
+    teams
+  end
+
+  @doc """
+  Generate a manage.
+  """
+  def manage_fixture(attrs \\ %{}) do
+    {:ok, manage} =
+      attrs
+      |> Enum.into(%{
+
+      })
+      |> TimeManager.Accounts.create_manage()
+
+    manage
+  end
+
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 

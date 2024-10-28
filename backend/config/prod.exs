@@ -8,7 +8,8 @@ import Config
 config :time_manager, TimeManagerWeb.Endpoint,
   # cache_static_manifest: "priv/static/cache_manifest.json",
   secret_key_base: System.get_env("SECRET_KEY_BASE"),
-  http: [port: String.to_integer(System.get_env("PORT") || "4000")]
+  http: [port: String.to_integer(System.get_env("PORT") || "4000")],
+  url: [host: "time-manager.kwer.fr", scheme: "https"]
 
 # Configure your database using the DATABASE_URL environment variable
 config :time_manager, TimeManager.Repo,

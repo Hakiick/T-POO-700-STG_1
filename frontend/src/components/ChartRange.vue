@@ -13,6 +13,8 @@ import { Tabs, TabsContent } from './ui/tabs';
 import { getMonday, getSunday } from '../manager/DateUtils';
 import type { DateRange } from 'radix-vue';
 import { Button } from './ui/button';
+import MainNav from './MainNav.vue';
+import UserNav from './UserNav.vue';
 
 // ============================
 // Initialisation et variables globales
@@ -46,15 +48,38 @@ const value = ref({
 // ============================
 // Fonction exécutée au montage
 // ============================
-
 onMounted(async () => {
+  try {
+    // Authentification de l'utilisateur
+    await userStore.login();
 
-  // Récupérer les données au chargement initial
-  await fetchData();
+    // Vérification si l'utilisateur est défini après l'authentification
+    if (user.value && user.value.id) {
+      const userId = user.value.id;
+      const { start, end } = value.value;
+
+      // Appels API pour récupérer les données
+      const workingTimeResponse = await getWorkingTimeByDate(userId, start.toString(), end.toString());
+      const clockResponse = await getClocksFromUser(userId, start.toString(), end.toString());
+
+      // Stockage des données récupérées
+      workingtime.value = workingTimeResponse?.data || [];
+      clockData.value = clockResponse?.data || [];
+
+      // Logique supplémentaire pour gérer les données récupérées
+      console.log('Working Time:', workingtime.value);
+      console.log('Clock Data:', clockData.value);
+    } else {
+      console.error("L'utilisateur n'est pas défini après l'authentification.");
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données ou de l\'authentification:', error);
+  }
 });
 
+
 // ============================
-// Fonction pour appliquer la nouvelle plage de dates
+// Fonction pour Apply la nouvelle plage de dates
 // ============================
 
 async function applyDateRange() {
@@ -75,7 +100,7 @@ async function fetchData() {
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
-    value.value.end.day + 1  // Ajout d'un jour ici
+    value.value.end.day + 1
   );
 
   try {
@@ -220,39 +245,58 @@ function formatDate(dateString: string) {
 
   return `${day}/${month}`;
 }
-
-// function formatHours(hours: number) {
-//   const h = Math.floor(hours);
-//   const m = Math.round((hours - h) * 60);
-//   return `${h}h ${m}m`;
-// }
 </script>
 
 <template>
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:hidden">
+    <!-- NavBar -->
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 mb-8">
+        Time Manager
+      </h1>
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
+      </div>
+    </div>
+  </div>
+
   <Tabs default-value="monthly" class="space-y-4 h-full w-full">
     <TabsContent value="monthly" class="space-y-4 h-full w-full">
       <div class="grid gap-4 grid-cols-1 lg:grid-cols-10 h-full w-full mt-7">
 
-        <!-- Section graphique - 70% largeur à gauche -->
-        <div class="col-span-1 lg:col-span-6 space-y-4 h-full w-full">
-          <div class="h-full w-full">
-            <div class="flex items-center justify-center space-x-4 mb-10">
-              <button v-for="type in chartTypes" :key="type" @click="currentChartType = type"
-                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                {{ type }}
-              </button>
-            </div>
-
-            <!-- Composant graphique dynamique -->
-            <component
-              :is="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).component"
-              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props" />
+        <!-- Section emploi du temps - 100% largeur en haut -->
+        <div class="col-span-1 lg:col-span-10 space-y-4 h-full w-full">
+          <div class="text-center mb-3">
+            <table class="w-full table-auto border-collapse">
+              <thead>
+                <tr>
+                  <th class="py-2 text-center border bg-blue-300">Date</th>
+                  <th class="py-2 text-center border bg-blue-300">Work In</th>
+                  <th class="py-2 text-center border bg-blue-300">Work Out</th>
+                  <th class="py-2 text-center border bg-blue-300">Clock In</th>
+                  <th class="py-2 text-center border bg-blue-300">Clock Out</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in workingDataTable" :key="index">
+                  <td class="border py-2 text-center justify-center items-center">{{ row.date }}</td>
+                  <td class="border py-2 text-center justify-center items-center">{{ row.startTime }}</td>
+                  <td class="border py-2 text-center justify-center items-center">{{ row.endTime }}</td>
+                  <td class="border py-2 text-center justify-center items-center">{{ row.clockStart }}</td>
+                  <td class="border py-2 text-center justify-center items-center">{{ row.clockEnd }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Section emploi du temps - 30% largeur à droite -->
-        <div class="col-span-1 lg:col-span-4 h-full w-full space-y-4">
-          <!-- Calendrier avec bouton d'application -->
+        <!-- Section calendrier - 100% largeur au milieu -->
+        <div class="col-span-1 lg:col-span-10 h-full w-full space-y-4">
           <div class="text-center mb-3">
             <Popover>
               <PopoverTrigger as-child>
@@ -282,35 +326,26 @@ function formatDate(dateString: string) {
             </Popover>
           </div>
 
-          <!-- Bouton pour appliquer la plage de dates -->
           <div class="text-center mb-3">
             <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white">
-              Appliquer
+              Apply
             </Button>
           </div>
+        </div>
 
-          <!-- Emploi du temps -->
-          <div class="text-center mb-3">
-            <table class="w-full">
-              <thead>
-                <tr>
-                  <th class="px-4 py-2 text-left">Date</th>
-                  <th class="px-4 py-2 text-left">Heure de début</th>
-                  <th class="px-4 py-2 text-left">Heure de fin</th>
-                  <th class="px-4 py-2 text-left">Pointage de début</th>
-                  <th class="px-4 py-2 text-left">Pointage de fin</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in workingDataTable" :key="index">
-                  <td class="border px-4 py-2">{{ row.date }}</td>
-                  <td class="border px-4 py-2">{{ row.startTime }}</td>
-                  <td class="border px-4 py-2">{{ row.endTime }}</td>
-                  <td class="border px-4 py-2">{{ row.clockStart }}</td>
-                  <td class="border px-4 py-2">{{ row.clockEnd }}</td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Section graphique - 100% largeur en bas -->
+        <div class="col-span-1 lg:col-span-10 space-y-4 h-full w-full">
+          <div class="h-full w-full">
+            <div class="flex items-center justify-center space-x-4 mb-10">
+              <button v-for="type in chartTypes" :key="type" @click="currentChartType = type"
+                class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                {{ type }}
+              </button>
+            </div>
+
+            <component
+              :is="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).component"
+              v-bind="getChartComponent(currentChartType, data, 'name', ['planned', 'real'], ['#3498db', '#2ecc71']).props" />
           </div>
         </div>
       </div>

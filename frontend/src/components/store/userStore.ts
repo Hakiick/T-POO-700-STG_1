@@ -7,25 +7,26 @@ import { ref } from "vue";
 export interface User {
   id: number;
   username: string;
+  role: string;
   email: string;
 }
 
 const accessToken = ref<string | null>(null);
 const refreshToken = ref<string | null>(null);
 
-const user = ref<User | null>(null);
+const user = ref<User>(null);
 
 export const useUserStore = defineStore("user", () => {
   // console.log(user);
 
   const login = async () => {
-    getCurrentUser().then((response) => {
-      // console.log("o max", response);
-      if (response.status === 200) {
-        user.value = response.data.data;
-        // console.log("user", user.value);
-      }
-    });
+    const resp = await getCurrentUser();
+    // console.log("o max", response);
+    if (resp.status === 200) {
+      user.value = resp.data.data;
+      // console.log("user", user.value);
+      return true;
+    }
   };
 
   const logout = () => {

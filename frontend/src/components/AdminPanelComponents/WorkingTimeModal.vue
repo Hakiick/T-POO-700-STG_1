@@ -5,8 +5,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
+  DialogTitle,
+  DialogDescription
 } from "../ui/dialog";
-
 import { Button } from "../ui/button";
 import { User } from "../store/userStore.ts";
 import { ref, watch, Ref, computed } from "vue";
@@ -17,18 +18,13 @@ import {
   updateWorkingTime,
   WorkingTime,
 } from "../../api/apiWorkingTime.ts";
-
 import { PlusIcon, TrashIcon } from "@radix-icons/vue";
-
 const props = defineProps<{
   user: User;
   open: boolean;
 }>();
-
 const emit = defineEmits(["close"]);
-
 const workingTimes: Ref<WorkingTime[], WorkingTime[]> = ref([]);
-
 async function fetchWorkingTime() {
   workingTimes.value = [];
   try {
@@ -39,7 +35,6 @@ async function fetchWorkingTime() {
     // ignored
   }
 }
-
 const formattedDates = computed(() => {
   return workingTimes.value.map((e: WorkingTime) => {
     return {
@@ -65,28 +60,26 @@ const formattedDates = computed(() => {
     };
   });
 });
-
 function formatDate(dateString) {
   let date = new Date(dateString);
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}T${date
     .getHours()
     .toString()
     .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
-
 async function newWorkingTime() {
   try {
     let res = await createWorkingTime(props.user, {
       start: "2024-10-17T09:34:41.304Z",
       end: "2024-10-17T09:34:41.304Z",
     });
-
     workingTimes.value.push(res.data);
   } catch (error) {
     console.error(error);
   }
 }
-
 async function removeWorkingTime(id: Number) {
   try {
     let workingTimeToDelete = workingTimes.value.filter(
@@ -100,15 +93,20 @@ async function removeWorkingTime(id: Number) {
     console.error("front remove working time:", error);
   }
 }
-
 watch(() => props.user?.id ?? -1, fetchWorkingTime);
 </script>
 <template>
-  <Dialog :open="props.open" @update:open="(val) => {
-    if (!val) emit('close');
-  }
-    ">
-    <DialogContent class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh]">
+  <Dialog
+    :open="props.open"
+    @update:open="
+      (val) => {
+        if (!val) emit('close');
+      }
+    "
+  >
+    <DialogContent
+      class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh] max-w-screen"
+    >
       <DialogHeader class="p-6 pb-0">
         <DialogTitle>Working time of {{ props.user?.username ?? "" }}</DialogTitle>
         <DialogDescription> </DialogDescription>
@@ -123,18 +121,26 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
               <div class="grow">
                 <div class="flex justify-between w-5/6">
                   <label>Start time </label>
-                  <Input type="datetime-local" :value="formattedDate.formattedStartTime.get()"
-                    :min="formatDate(Date.now())" @input="
-                      formattedDate.formattedStartTime.set($event.target.value)
-                      "></Input>
+                  <input
+                    type="datetime-local"
+                    :value="formattedDate.formattedStartTime.get()"
+                    :min="formatDate(Date.now())"
+                    @input="
+                      formattedDate.formattedStartTime.set((($event.target) as HTMLInputElement).value)
+                    "
+                  ></input>
                 </div>
 
                 <div class="flex justify-between w-5/6">
                   <label>End time</label>
-                  <Input type="datetime-local" :value="formattedDate.formattedEndTime.get()"
-                    :min="formatDate(Date.now())" @input="
-                      formattedDate.formattedEndTime.set($event.target.value)
-                      "></Input>
+                  <input
+                    type="datetime-local"
+                    :value="formattedDate.formattedEndTime.get()"
+                    :min="formatDate(Date.now())"
+                    @input="
+                      formattedDate.formattedEndTime.set((($event.target) as HTMLInputElement).value)  
+                    "
+                  ></input>
                 </div>
               </div>
               <div>

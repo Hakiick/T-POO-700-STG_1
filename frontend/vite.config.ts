@@ -24,6 +24,9 @@ export default defineConfig({
         // rewrite: (path) => path.replace(/^\/api/, ""), // Remove `/api` prefix from the request path
       },
     },
+    watch: {
+      usePolling: true,
+    },
   },
 
   plugins: [

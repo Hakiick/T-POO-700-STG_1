@@ -1,3 +1,4 @@
+import { LocationQueryValue } from "vue-router";
 import { User } from "../components/store/userStore";
 import { apiClient, apiClientProtected } from "./api";
 
@@ -50,7 +51,7 @@ export const getUser = async (user_id: number) => {
 // Example: Create a new user
 export const getAllUser = async (): Promise<User[]> => {
   try {
-    const response = await apiClientProtected.get(`/users/all`);
+    const response = await apiClientProtected.get(`/admin/gestion/users/all`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -138,25 +139,92 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Example: Update a user
-export const updateUser = async (user: User) => {
+export const updateUser = async (user: User): Promise<boolean> => {
   try {
-    const response = await apiClient.put(`/users/${user.id}`, { user });
-    return response.data;
+    await apiClientProtected.put(`/admin/users/${user.id}`, { user });
+    return true;
   } catch (error) {
     console.error("Error updating user:", error);
     // throw error;
-    return error;
+    return false;
   }
 };
 
 // Example: Delete a user
 export const deleteUser = async (user: User): Promise<Boolean> => {
   try {
-    const response = await apiClient.delete(`/users/${user.id}`);
+    const response = await apiClientProtected.delete(`/admin/users/${user.id}`);
     return response.status == 204;
   } catch (error) {
     console.error("Error deleting user:", error);
     // throw error;
+    return false;
+  }
+};
+
+export const createUserAdmin = async (user: User): Promise<User> => {
+  try {
+    const response = await apiClientProtected.post(`/admin/users`, { user });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateRoleToManager = async (user_id: number) => {
+  try {
+    const response = await apiClientProtected.get(
+      `/admin/gestion/promote_to_manager/${user_id}`,
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const updateRoleToUser = async (user_id: number) => {
+  try {
+    const response = await apiClientProtected.get(
+      `/admin/gestion/demote_to_user/${user_id}`,
+    );
+    return response;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+// reset password
+export const resetPassword = async (
+  password: string,
+  reset_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.put(
+      `/users/reset_password/${reset_token}`,
+      {
+        user: {
+          password: password,
+        },
+      },
+    );
+    return response;
+  } catch (error) {
+    console.error("Error reset password:", error);
+    return error;
+  }
+};
+
+// confirm mail
+export const confirmMail = async (
+  confirm_token: LocationQueryValue | LocationQueryValue[],
+) => {
+  try {
+    const response = await apiClient.get(`/users/confirm/${confirm_token}`, {});
+    return response;
+  } catch (error) {
+    console.error("Error confirm:", error);
     return error;
   }
 };

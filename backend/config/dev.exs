@@ -28,6 +28,7 @@ config :time_manager, TimeManagerWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {0, 0, 0, 0}, port: 4000],
+  url: [host: "localhost", port: 5173],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

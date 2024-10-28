@@ -21,26 +21,31 @@ users_attrs = [
   %{
     username: "Alice",
     email: "alice@example.com",
+    role: "general_manager",
     password: "ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976"
   },
   %{
     username: "Bob",
     email: "bob@example.com",
+    role: "manager",
     password: "5ff860bf1190596c7188ab851db691f0f3169c453936e9e1eba2f9a47f7a0018"
   },
   %{
     username: "Charlie",
     email: "charlie@example.com",
+    role: "manager",
     password: "add7232b65bb559f896cbcfa9a600170a7ca381a0366789dcf59ad986bdf4a98"
   },
   %{
     username: "David",
     email: "david@example.com",
+    role: "manager",
     password: "d4e3f52c47a33949241f67af482f562ece6f62e618b041a62d00fa7ba5dae280"
   },
   %{
     username: "Eve",
     email: "eve@example.com",
+    role: "user",
     password: "d0574c4966d2c326193622feebc64991c5b59807ae68fa8255b26c79f4bf917a"
   }
 ]
@@ -65,144 +70,144 @@ end
 # Define clock attributes for the user
 clock_attrs = [
   # Alice (user_id: 1)
-  %{user_id: 1, status: true, time: ~N[2023-10-16 08:00:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-16 17:00:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-17 08:15:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-17 16:45:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-18 09:00:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-18 17:30:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-19 07:45:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-19 16:30:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-20 08:10:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-20 17:00:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-21 08:30:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-21 16:45:00]},
-  %{user_id: 1, status: true, time: ~N[2023-10-22 09:00:00]},
-  %{user_id: 1, status: false, time: ~N[2023-10-22 16:50:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-16 08:00:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-16 17:00:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-17 08:15:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-17 16:45:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-18 09:00:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-18 17:30:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-19 07:45:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-19 16:30:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-20 08:10:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-20 17:00:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-21 08:30:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-21 16:45:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-22 09:00:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-22 16:50:00]},
 
   # Deux derniers jours + aujourd'hui (juste true)
   # Aujourd'hui
-  %{user_id: 1, status: true, time: ~N[2023-10-23 08:00:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-23 08:00:00]},
   # Hier
-  %{user_id: 1, status: true, time: ~N[2023-10-22 08:30:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-22 08:30:00]},
   # Hier
-  %{user_id: 1, status: false, time: ~N[2023-10-22 17:30:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-22 17:30:00]},
   # Avant-hier
-  %{user_id: 1, status: true, time: ~N[2023-10-21 09:00:00]},
+  %{user_id: 1, status: true, time: ~N[2024-10-21 09:00:00]},
   # Avant-hier
-  %{user_id: 1, status: false, time: ~N[2023-10-21 17:00:00]},
+  %{user_id: 1, status: false, time: ~N[2024-10-21 17:00:00]},
 
   # Bob (user_id: 2)
-  %{user_id: 2, status: true, time: ~N[2023-10-16 08:20:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-16 16:55:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-17 08:10:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-17 16:30:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-18 09:05:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-18 17:40:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-19 07:50:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-19 16:35:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-20 08:25:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-20 17:05:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-21 08:45:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-21 16:50:00]},
-  %{user_id: 2, status: true, time: ~N[2023-10-22 09:05:00]},
-  %{user_id: 2, status: false, time: ~N[2023-10-22 16:55:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-16 08:20:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-16 16:55:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-17 08:10:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-17 16:30:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-18 09:05:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-18 17:40:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-19 07:50:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-19 16:35:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-20 08:25:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-20 17:05:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-21 08:45:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-21 16:50:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-22 09:05:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-22 16:55:00]},
 
   # Deux derniers jours + aujourd'hui (juste true)
   # Aujourd'hui
-  %{user_id: 2, status: true, time: ~N[2023-10-23 08:00:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-23 08:00:00]},
   # Hier
-  %{user_id: 2, status: true, time: ~N[2023-10-22 08:30:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-22 08:30:00]},
   # Hier
-  %{user_id: 2, status: false, time: ~N[2023-10-22 17:30:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-22 17:30:00]},
   # Avant-hier
-  %{user_id: 2, status: true, time: ~N[2023-10-21 09:00:00]},
+  %{user_id: 2, status: true, time: ~N[2024-10-21 09:00:00]},
   # Avant-hier
-  %{user_id: 2, status: false, time: ~N[2023-10-21 17:00:00]},
+  %{user_id: 2, status: false, time: ~N[2024-10-21 17:00:00]},
 
   # Clara (user_id: 3)
-  %{user_id: 3, status: true, time: ~N[2023-10-16 08:30:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-16 17:10:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-17 08:25:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-17 16:40:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-18 09:10:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-18 17:35:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-19 07:55:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-19 16:40:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-20 08:35:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-20 17:15:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-21 08:50:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-21 16:55:00]},
-  %{user_id: 3, status: true, time: ~N[2023-10-22 09:10:00]},
-  %{user_id: 3, status: false, time: ~N[2023-10-22 17:00:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-16 08:30:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-16 17:10:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-17 08:25:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-17 16:40:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-18 09:10:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-18 17:35:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-19 07:55:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-19 16:40:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-20 08:35:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-20 17:15:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-21 08:50:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-21 16:55:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-22 09:10:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-22 17:00:00]},
 
   # Deux derniers jours + aujourd'hui (juste true)
   # Aujourd'hui
-  %{user_id: 3, status: true, time: ~N[2023-10-23 08:00:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-23 08:00:00]},
   # Hier
-  %{user_id: 3, status: true, time: ~N[2023-10-22 08:30:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-22 08:30:00]},
   # Hier
-  %{user_id: 3, status: false, time: ~N[2023-10-22 17:30:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-22 17:30:00]},
   # Avant-hier
-  %{user_id: 3, status: true, time: ~N[2023-10-21 09:00:00]},
+  %{user_id: 3, status: true, time: ~N[2024-10-21 09:00:00]},
   # Avant-hier
-  %{user_id: 3, status: false, time: ~N[2023-10-21 17:00:00]},
+  %{user_id: 3, status: false, time: ~N[2024-10-21 17:00:00]},
 
   # David (user_id: 4)
-  %{user_id: 4, status: true, time: ~N[2023-10-16 08:30:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-16 17:10:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-17 08:25:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-17 16:40:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-18 09:10:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-18 17:35:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-19 07:55:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-19 16:40:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-20 08:35:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-20 17:15:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-21 08:50:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-21 16:55:00]},
-  %{user_id: 4, status: true, time: ~N[2023-10-22 09:10:00]},
-  %{user_id: 4, status: false, time: ~N[2023-10-22 17:00:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-16 08:30:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-16 17:10:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-17 08:25:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-17 16:40:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-18 09:10:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-18 17:35:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-19 07:55:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-19 16:40:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-20 08:35:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-20 17:15:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-21 08:50:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-21 16:55:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-22 09:10:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-22 17:00:00]},
 
   # Deux dern4ers jours + aujourd'hui (juste true)
   # Aujourd'hui
-  %{user_id: 4, status: true, time: ~N[2023-10-23 08:00:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-23 08:00:00]},
   # Hier
-  %{user_id: 4, status: true, time: ~N[2023-10-22 08:30:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-22 08:30:00]},
   # Hier
-  %{user_id: 4, status: false, time: ~N[2023-10-22 17:30:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-22 17:30:00]},
   # Avant-hier
-  %{user_id: 4, status: true, time: ~N[2023-10-21 09:00:00]},
+  %{user_id: 4, status: true, time: ~N[2024-10-21 09:00:00]},
   # Avant-hier
-  %{user_id: 4, status: false, time: ~N[2023-10-21 17:00:00]},
+  %{user_id: 4, status: false, time: ~N[2024-10-21 17:00:00]},
 
   # David (user_id: 4)
-  %{user_id: 5, status: true, time: ~N[2023-10-16 09:30:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-16 17:10:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-17 09:25:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-17 16:40:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-18 09:10:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-18 17:35:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-19 07:55:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-19 16:40:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-20 08:35:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-20 17:15:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-21 08:50:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-21 16:55:00]},
-  %{user_id: 5, status: true, time: ~N[2023-10-22 09:10:00]},
-  %{user_id: 5, status: false, time: ~N[2023-10-22 17:00:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-16 09:30:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-16 17:10:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-17 09:25:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-17 16:40:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-18 09:10:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-18 17:35:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-19 07:55:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-19 16:40:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-20 08:35:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-20 17:15:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-21 08:50:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-21 16:55:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-22 09:10:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-22 17:00:00]},
 
   # Deux dern5ers jours + aujourd'hui (juste true)
   # Aujourd'hui
-  %{user_id: 5, status: true, time: ~N[2023-10-23 08:00:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-23 08:00:00]},
   # Hier
-  %{user_id: 5, status: true, time: ~N[2023-10-22 08:30:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-22 08:30:00]},
   # Hier
-  %{user_id: 5, status: false, time: ~N[2023-10-22 17:30:00]},
+  %{user_id: 5, status: false, time: ~N[2024-10-22 17:30:00]},
   # Avant-hier
-  %{user_id: 5, status: true, time: ~N[2023-10-21 09:00:00]},
+  %{user_id: 5, status: true, time: ~N[2024-10-21 09:00:00]},
   # Avant-hier
-  %{user_id: 5, status: false, time: ~N[2023-10-21 17:00:00]}
+  %{user_id: 5, status: false, time: ~N[2024-10-21 17:00:00]}
 ]
 
 # Loop through each clock attribute

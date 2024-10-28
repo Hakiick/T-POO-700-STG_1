@@ -1,15 +1,10 @@
-import { ref } from "vue";
-import { BarChart } from "../components/ui/chart-bar";
-// import { DonutChart } from "../components/ui/chart-donut/index.ts";
-import { AreaChart } from "../components/ui/chart-area/index.ts";
-import { LineChart } from "../components/ui/chart-line/index.ts";
+import { ref } from 'vue';
+import { BarChart } from '../components/ui/chart-bar';
+//import { DonutChart } from '../components/ui/chart-donut/index.ts';
+import { AreaChart } from '../components/ui/chart-area/index.ts';
+import { LineChart } from '../components/ui/chart-line/index.ts';
 
-const chartTypes = [
-  "BarChart",
-  // "DonutChart",
-  "AreaChart",
-  "LineChart",
-] as const;
+const chartTypes = ['BarChart'/*, 'DonutChart'*/, 'AreaChart', 'LineChart'] as const;
 
 type ChartType = (typeof chartTypes)[number];
 
@@ -33,16 +28,9 @@ const getChartComponent = (
   switch (type) {
     case "BarChart":
       return { component: BarChart, props };
-    // case "DonutChart":
-    //   return {
-    //     component: DonutChart,
-    //     props: {
-    //       ...props,
-    //       categories: categories[0],
-    //       valueFormatter: props.valueFormatter,
-    //     },
-    //   };
-    case "AreaChart":
+    // case 'DonutChart':
+    //   return { component: DonutChart, props: { ...props, category: categories[0], valueFormatter: props.valueFormatter } };
+    case 'AreaChart':
       return { component: AreaChart, props };
     case "LineChart":
       return { component: LineChart, props };

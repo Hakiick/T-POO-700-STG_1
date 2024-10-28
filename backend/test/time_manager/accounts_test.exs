@@ -59,6 +59,114 @@ defmodule TimeManager.AccountsTest do
     end
   end
 
+  describe "teams" do
+    alias TimeManager.Accounts.Teams
+
+    import TimeManager.AccountsFixtures
+
+    @invalid_attrs %{name: nil, description: nil}
+
+    test "list_teams/0 returns all teams" do
+      teams = teams_fixture()
+      assert Accounts.list_teams() == [teams]
+    end
+
+    test "get_teams!/1 returns the teams with given id" do
+      teams = teams_fixture()
+      assert Accounts.get_teams!(teams.id) == teams
+    end
+
+    test "create_teams/1 with valid data creates a teams" do
+      valid_attrs = %{name: "some name", description: "some description"}
+
+      assert {:ok, %Teams{} = teams} = Accounts.create_teams(valid_attrs)
+      assert teams.name == "some name"
+      assert teams.description == "some description"
+    end
+
+    test "create_teams/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_teams(@invalid_attrs)
+    end
+
+    test "update_teams/2 with valid data updates the teams" do
+      teams = teams_fixture()
+      update_attrs = %{name: "some updated name", description: "some updated description"}
+
+      assert {:ok, %Teams{} = teams} = Accounts.update_teams(teams, update_attrs)
+      assert teams.name == "some updated name"
+      assert teams.description == "some updated description"
+    end
+
+    test "update_teams/2 with invalid data returns error changeset" do
+      teams = teams_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_teams(teams, @invalid_attrs)
+      assert teams == Accounts.get_teams!(teams.id)
+    end
+
+    test "delete_teams/1 deletes the teams" do
+      teams = teams_fixture()
+      assert {:ok, %Teams{}} = Accounts.delete_teams(teams)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_teams!(teams.id) end
+    end
+
+    test "change_teams/1 returns a teams changeset" do
+      teams = teams_fixture()
+      assert %Ecto.Changeset{} = Accounts.change_teams(teams)
+    end
+  end
+
+  describe "manage" do
+    alias TimeManager.Accounts.Manage
+
+    import TimeManager.AccountsFixtures
+
+    @invalid_attrs %{}
+
+    test "list_manage/0 returns all manage" do
+      manage = manage_fixture()
+      assert Accounts.list_manage() == [manage]
+    end
+
+    test "get_manage!/1 returns the manage with given id" do
+      manage = manage_fixture()
+      assert Accounts.get_manage!(manage.id) == manage
+    end
+
+    test "create_manage/1 with valid data creates a manage" do
+      valid_attrs = %{}
+
+      assert {:ok, %Manage{} = manage} = Accounts.create_manage(valid_attrs)
+    end
+
+    test "create_manage/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_manage(@invalid_attrs)
+    end
+
+    test "update_manage/2 with valid data updates the manage" do
+      manage = manage_fixture()
+      update_attrs = %{}
+
+      assert {:ok, %Manage{} = manage} = Accounts.update_manage(manage, update_attrs)
+    end
+
+    test "update_manage/2 with invalid data returns error changeset" do
+      manage = manage_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_manage(manage, @invalid_attrs)
+      assert manage == Accounts.get_manage!(manage.id)
+    end
+
+    test "delete_manage/1 deletes the manage" do
+      manage = manage_fixture()
+      assert {:ok, %Manage{}} = Accounts.delete_manage(manage)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_manage!(manage.id) end
+    end
+
+    test "change_manage/1 returns a manage changeset" do
+      manage = manage_fixture()
+      assert %Ecto.Changeset{} = Accounts.change_manage(manage)
+    end
+  end
+
   import TimeManager.AccountsFixtures
   alias TimeManager.Accounts.{User, UserToken}
 

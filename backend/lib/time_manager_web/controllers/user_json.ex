@@ -19,7 +19,8 @@ defmodule TimeManagerWeb.UserJSON do
     %{
       id: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   end
 
@@ -31,5 +32,18 @@ defmodule TimeManagerWeb.UserJSON do
   defp data(users) when is_list(users) do
     # Map each user to the data function
     Enum.map(users, &data/1)
+  end
+
+  def show_role(%{user: user}) do
+    %{data: data_role(user)}
+  end
+
+  defp data_role(%User{} = user) do
+    %{
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    }
   end
 end

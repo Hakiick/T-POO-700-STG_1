@@ -1,16 +1,20 @@
 # TimeManager
 
-To start your Phoenix server:
+To start the project:
 
-- Run `docker-compose -p time-manager -f docker-compose.yml up` to start the project
+- Run `docker-compose -p time-manager -f docker-compose.yml up`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Now you can visit [`localhost:5173`](http://localhost:5173) from your browser.
 
-## Learn more
+## Details
 
-- Official website: https://www.phoenixframework.org/
-- Guides: https://hexdocs.pm/phoenix/overview.html
-- Docs: https://hexdocs.pm/phoenix
-- Forum: https://elixirforum.com/c/phoenix-forum
-- Source: https://github.com/phoenixframework/phoenix
-  test de fou o max !!!!!!!
+the developement server requires a .env with OVH login for the SMTP server to work
+
+or you can visit the production server where everything should work, at [`time-manager.kwer.fr`](https://time-manager.kwer.fr)
+
+Here's the login for a general manager :
+
+```
+email: alice@example.com
+password: alice@example.com
+```

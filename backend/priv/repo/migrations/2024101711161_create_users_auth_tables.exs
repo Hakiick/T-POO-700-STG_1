@@ -6,6 +6,7 @@ defmodule TimeManager.Repo.Migrations.CreateUsersAuthTables do
 
     create table(:users) do
       add :username, :string, null: false
+      add :role, :string, null: false
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :utc_datetime

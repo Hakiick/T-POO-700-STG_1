@@ -9,6 +9,7 @@ defmodule TimeManager.Accounts do
   alias TimeManager.Accounts.User
   alias TimeManager.Accounts.UserToken
   alias TimeManager.Accounts.UserNotifier
+  alias TimeManager.Timesheet.Clock
 
   @doc """
   Returns the list of users.
@@ -59,6 +60,28 @@ defmodule TimeManager.Accounts do
 
   defp get_user_by(_params) do
     Repo.all(User)
+  end
+
+  def update_user_role_to_manager(%User{} = user) do
+    user
+    |> User.role_changeset(%{role: "manager"})
+    |> Repo.update()
+  end
+
+  def update_user_role_to_user(%User{} = user) do
+    user
+    |> User.role_changeset(%{role: "user"})
+    |> Repo.update()
+  end
+
+  def update_user(%User{} = user, user_params) do
+    user
+    |> User.manager_changeset(user_params)
+    |> Repo.update()
+  end
+
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 
   @doc """
@@ -384,5 +407,309 @@ defmodule TimeManager.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  alias TimeManager.Accounts.Teams
+
+  @doc """
+  Returns the list of teams.
+
+  ## Examples
+
+      iex> list_teams()
+      [%Teams{}, ...]
+
+  """
+  def list_teams do
+    Repo.all(Teams)
+  end
+
+  @doc """
+  Gets a single teams.
+
+  Raises `Ecto.NoResultsError` if the Teams does not exist.
+
+  ## Examples
+
+      iex> get_teams!(123)
+      %Teams{}
+
+      iex> get_teams!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_teams!(id), do: Repo.get(Teams, id)
+
+  @doc """
+  Creates a teams.
+
+  ## Examples
+
+      iex> create_teams(%{field: value})
+      {:ok, %Teams{}}
+
+      iex> create_teams(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_teams(attrs \\ %{}) do
+    %Teams{}
+    |> Teams.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a teams.
+
+  ## Examples
+
+      iex> update_teams(teams, %{field: new_value})
+      {:ok, %Teams{}}
+
+      iex> update_teams(teams, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_teams(%Teams{} = teams, attrs) do
+    teams
+    |> Teams.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a teams.
+
+  ## Examples
+
+      iex> delete_teams(teams)
+      {:ok, %Teams{}}
+
+      iex> delete_teams(teams)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_teams(%Teams{} = teams) do
+    Repo.delete(teams)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking teams changes.
+
+  ## Examples
+
+      iex> change_teams(teams)
+      %Ecto.Changeset{data: %Teams{}}
+
+  """
+  def change_teams(%Teams{} = teams, attrs \\ %{}) do
+    Teams.changeset(teams, attrs)
+  end
+
+  alias TimeManager.Accounts.Manage
+
+  @doc """
+  Returns the list of manage.
+
+  ## Examples
+
+      iex> list_manage()
+      [%Manage{}, ...]
+
+  """
+  def list_manage do
+    Repo.all(Manage)
+  end
+
+  @doc """
+  Gets a single manage.
+
+  Raises `Ecto.NoResultsError` if the Manage does not exist.
+
+  ## Examples
+
+      iex> get_manage!(123)
+      %Manage{}
+
+      iex> get_manage!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_manage!(params) do
+    get_manage_by(params)
+  end
+
+  defp get_manage_by(%{"user_id" => user_id, "team_id" => team_id}),
+    do: Repo.all(from m in Manage, where: m.team_id == ^team_id and m.user_id == ^user_id)
+
+  defp get_manage_by(%{"team_id" => team_id}),
+    do: Repo.all(from m in Manage, where: m.team_id == ^team_id)
+
+  defp get_manage_by(%{"user_id" => user_id}),
+    do: Repo.all(from m in Manage, where: m.user_id == ^user_id)
+
+  defp get_manage_by(%{"id" => id}), do: Repo.get!(Manage, id)
+
+  defp get_manage_by(_params), do: Repo.all(Manage)
+
+  def is_managed_by?(user_id, manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^user_id and m.team_id in subquery(teams_managed_by(manager_id)),
+      select: 1
+    )
+    |> Repo.exists?()
+  end
+
+  defp teams_managed_by(manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^manager_id,
+      select: m.team_id
+    )
+  end
+
+  def clock_in_for_all_team_members(manager_id) do
+    team_ids = teams_managed_by(manager_id)
+
+    from(u in TimeManager.Accounts.User,
+      join: m in TimeManager.Accounts.Manage,
+      on: m.user_id == u.id,
+      where: m.team_id in ^team_ids,
+      select: u.id
+    )
+    |> Repo.all()
+    |> Enum.each(&clock_in_if_last_clocked_out/1)
+  end
+
+  def clock_in_if_last_clocked_out(user_id) do
+    case last_clock_entry(user_id) do
+      %{status: false} ->
+        %Clock{}
+        |> Clock.changeset(%{"user_id" => user_id, "time" => DateTime.utc_now(), "status" => true})
+        |> Repo.insert()
+
+      _ ->
+        :ok
+    end
+  end
+
+  def clock_out_if_last_clocked_out(user_id) do
+    case last_clock_entry(user_id) do
+      %{status: true} ->
+        %Clock{}
+        |> Clock.changeset(%{
+          "user_id" => user_id,
+          "time" => DateTime.utc_now(),
+          "status" => false
+        })
+        |> Repo.insert()
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp last_clock_entry(user_id) do
+    from(c in Clock,
+      where: c.user_id == ^user_id,
+      order_by: [desc: c.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a manage.
+
+  ## Examples
+
+      iex> create_manage(%{field: value})
+      {:ok, %Manage{}}
+
+      iex> create_manage(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_manage(attrs \\ %{}) do
+    %Manage{}
+    |> Manage.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a manage.
+
+  ## Examples
+
+      iex> update_manage(manage, %{field: new_value})
+      {:ok, %Manage{}}
+
+      iex> update_manage(manage, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_manage(%Manage{} = manage, attrs) do
+    manage
+    |> Manage.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a manage.
+
+  ## Examples
+
+      iex> delete_manage(manage)
+      {:ok, %Manage{}}
+
+      iex> delete_manage(manage)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_manage(%Manage{} = manage) do
+    Repo.delete(manage)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking manage changes.
+
+  ## Examples
+
+      iex> change_manage(manage)
+      %Ecto.Changeset{data: %Manage{}}
+
+  """
+  def change_manage(%Manage{} = manage, attrs \\ %{}) do
+    Manage.changeset(manage, attrs)
+  end
+
+  @doc """
+  Returns true if the user is a manager of the team.
+  """
+  def is_manager?(%User{} = user, %Teams{} = team) do
+    case get_from_user_and_team(user, team) do
+      nil -> false
+      _ -> true
+    end
+  end
+
+  @doc """
+  Returns an users list get from team id
+  """
+  def get_users_from_team(%Teams{} = team) do
+    Repo.all(
+      from u in User, join: m in Manage, on: u.id == m.user_id, where: m.team_id == ^team.id
+    )
+  end
+
+  def get_teams_from_user(%User{} = user) do
+    Repo.all(
+      from t in Teams, join: m in Manage, on: t.id == m.team_id, where: m.user_id == ^user.id
+    )
+  end
+
+  def get_from_user_and_team(%User{} = user, %Teams{} = team) do
+    Repo.one(
+      from m in Manage,
+        where: m.user_id == ^user.id and m.team_id == ^team.id
+    )
   end
 end
