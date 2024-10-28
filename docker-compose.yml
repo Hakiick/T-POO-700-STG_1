@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
     # restart: always
     ports:
-      - "5432:5432"
+      - 127.0.0.1:5432:5432
 
   backend:
     image: "ghcr.io/epitechmscpropromo2026/teams/t-poo-700-stg_1/time-manager-backend:v1"
