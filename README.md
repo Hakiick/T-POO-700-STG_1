@@ -11,6 +11,7 @@ Now you can visit [`localhost:5173`](http://localhost:5173) from your browser.
 the developement server requires a .env with OVH login for the SMTP server to work
 
 or you can visit the production server where everything should work, at [`time-manager.kwer.fr`](https://time-manager.kwer.fr)
+the production code base is on the "prod" branch
 
 Here's the login for the seeded users general manager :
 
