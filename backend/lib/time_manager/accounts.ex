@@ -9,6 +9,7 @@ defmodule TimeManager.Accounts do
   alias TimeManager.Accounts.User
   alias TimeManager.Accounts.UserToken
   alias TimeManager.Accounts.UserNotifier
+  alias TimeManager.Timesheet.Clock
 
   @doc """
   Returns the list of users.
@@ -437,7 +438,7 @@ defmodule TimeManager.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_teams!(id), do: Repo.get!(Teams, id)
+  def get_teams!(id), do: Repo.get(Teams, id)
 
   @doc """
   Creates a teams.
@@ -549,6 +550,71 @@ defmodule TimeManager.Accounts do
   defp get_manage_by(%{"id" => id}), do: Repo.get!(Manage, id)
 
   defp get_manage_by(_params), do: Repo.all(Manage)
+
+  def is_managed_by?(user_id, manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^user_id and m.team_id in subquery(teams_managed_by(manager_id)),
+      select: 1
+    )
+    |> Repo.exists?()
+  end
+
+  defp teams_managed_by(manager_id) do
+    from(m in Manage,
+      where: m.user_id == ^manager_id,
+      select: m.team_id
+    )
+  end
+
+  def clock_in_for_all_team_members(manager_id) do
+    team_ids = teams_managed_by(manager_id)
+
+    from(u in TimeManager.Accounts.User,
+      join: m in TimeManager.Accounts.Manage,
+      on: m.user_id == u.id,
+      where: m.team_id in ^team_ids,
+      select: u.id
+    )
+    |> Repo.all()
+    |> Enum.each(&clock_in_if_last_clocked_out/1)
+  end
+
+  def clock_in_if_last_clocked_out(user_id) do
+    case last_clock_entry(user_id) do
+      %{status: false} ->
+        %Clock{}
+        |> Clock.changeset(%{"user_id" => user_id, "time" => DateTime.utc_now(), "status" => true})
+        |> Repo.insert()
+
+      _ ->
+        :ok
+    end
+  end
+
+  def clock_out_if_last_clocked_out(user_id) do
+    case last_clock_entry(user_id) do
+      %{status: true} ->
+        %Clock{}
+        |> Clock.changeset(%{
+          "user_id" => user_id,
+          "time" => DateTime.utc_now(),
+          "status" => false
+        })
+        |> Repo.insert()
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp last_clock_entry(user_id) do
+    from(c in Clock,
+      where: c.user_id == ^user_id,
+      order_by: [desc: c.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
 
   @doc """
   Creates a manage.

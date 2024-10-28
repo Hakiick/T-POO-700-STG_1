@@ -41,13 +41,19 @@ import { TrashIcon, Pencil2Icon, PlusIcon, PersonIcon } from "@radix-icons/vue";
 import ManageUserModal from "./AdminPanelComponents/ManageUserModal.vue";
 
 import { computed, h, onMounted, ref } from "vue";
-import NavAdmin from "./NavAdmin.vue";
+import MainNav from './MainNav.vue';
+import UserNav from './UserNav.vue';
 import { useTeamStore } from "./store/teamStore.ts";
 
 const teams = ref<Team[]>([]);
 const actionTeam = ref<Team>({ id: -1, name: "", description: "" });
 const open = ref<boolean>(false);
 const openManageModal = ref<boolean>(false);
+const isDesktop = ref(false);
+
+const checkIsDesktop = () => {
+  isDesktop.value = window.innerWidth >= 1024;
+};
 
 const columns = computed(() => {
   const columnHelper = createColumnHelper<Team>();
@@ -124,6 +130,9 @@ const updateTeamDialog = computed(() => {
 
 onMounted(() => {
   teams.value = useTeamStore().accessibleTeams.filter(iTeam => iTeam.id != -1);
+
+  checkIsDesktop();
+  window.addEventListener('resize', checkIsDesktop);
 });
 
 
@@ -158,133 +167,149 @@ async function createOrUpdateElement() {
   teams.value = tempTeams;
 }
 </script>
-<template>
-  <div class="h-screen">
-    <div class="border-b">
-      <div class="flex h-16 items-center px-4">
-        <NavAdmin class="mx-6" />
-      </div>
-    </div>
-    <div class="rounded-md border">
-      <div class="m-5">
-        <div class="flex justify-between text-center align-center">
-          <h1 class="text-3xl bold uppercase">Gestions des teams</h1>
-          <Dialog
-            :open="open"
-            @update:open="
-              (val : boolean) => {
-                open = val;
-              }
-            "
-          >
-            <DialogTrigger as-child>
-              <Button variant="outline" @click="resetActionTeam"
-                ><PlusIcon
-              /></Button>
-            </DialogTrigger>
-            <DialogContent class="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  <template v-if="updateTeamDialog"> Update team </template>
-                  <template v-else> Create team </template>
-                </DialogTitle>
-                <DialogDescription>
-                  <template v-if="updateTeamDialog">
-                    Update the team {{ actionTeam.name }}
-                  </template>
-                  <template v-else>
-                    Create the team {{ actionTeam.name }}
-                  </template>
-                </DialogDescription>
-              </DialogHeader>
-              <div class="grid gap-4 py-4">
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Label for="name" class="text-right"> Name </Label>
-                  <Input
-                    id="name"
-                    class="col-span-3"
-                    v-model="actionTeam.name"
-                  />
-                </div>
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Label for="description" class="text-right">
-                    Description
-                  </Label>
-                  <Input
-                    id="description"
-                    class="col-span-3"
-                    v-model="actionTeam.description"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose>
-                  <Button :onclick="createOrUpdateElement">
-                    Save changes
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-        <ManageUserModal
-          :open="openManageModal"
-          :team="actionTeam"
-          @close="() => (openManageModal = false)"
-        />
-        <Table>
-          <TableHeader>
-            <TableRow
-              v-for="headerGroup in table.getHeaderGroups()"
-              :key="headerGroup.id"
-            >
-              <TableHead
-                v-for="header in headerGroup.headers"
-                :key="header.id"
-                :data-pinned="header.column.getIsPinned()"
-              >
-                <FlexRender
-                  v-if="!header.isPlaceholder"
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <template v-if="table.getRowModel().rows?.length">
-              <template v-for="row in table.getRowModel().rows" :key="row.id">
-                <TableRow :data-state="row.getIsSelected() && 'selected'">
-                  <TableCell
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                    :data-pinned="cell.column.getIsPinned()"
-                  >
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow v-if="row.getIsExpanded()">
-                  <TableCell :colspan="row.getAllCells().length">
-                    {{ row.original }}
-                  </TableCell>
-                </TableRow>
-              </template>
-            </template>
 
-            <TableRow v-else>
-              <TableCell :colspan="columns.length" class="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+<template>
+  <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
+    <!-- NavBar -->
+    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative border-b-4 pb-8">
+      <!-- UserNav for Mobile -->
+      <div class="pt-4 pl-4" v-show="!isDesktop">
+        <UserNav :user="user" />
+      </div>
+      <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
+        Time Manager
+      </h1>
+      <!-- UserNav for Desktop -->
+      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
+        <UserNav :user="user" />
+      </div>
+      <!-- MainNav for Desktop -->
+      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+        <MainNav class="mx-4" />
+      </div>
+      <!-- MainNav for Mobile -->
+      <div class="absolute top-4 right-4 lg:hidden">
+        <MainNav class="mx-4" />
       </div>
     </div>
-    <div class="flex items-center m-5 justify-end space-x-2 py-4">
-      <div class="space-x-2">
+
+    <div class="col-span-1 lg:col-span-9 flex flex-col justify-between p-8">
+      <div class="flex justify-between text-center align-center">
+        <h1 class="text-2xl lg:text-3xl bold uppercase mb-5">Gestions des teams</h1>
+        <Dialog
+          :open="open"
+          @update:open="
+            (val : boolean) => {
+              open = val;
+            }
+          "
+        >
+          <DialogTrigger as-child>
+            <Button variant="outline" @click="resetActionTeam"
+              ><PlusIcon
+            /></Button>
+          </DialogTrigger>
+          <DialogContent class="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                <template v-if="updateTeamDialog"> Update team </template>
+                <template v-else> Create team </template>
+              </DialogTitle>
+              <DialogDescription>
+                <template v-if="updateTeamDialog">
+                  Update the team {{ actionTeam.name }}
+                </template>
+                <template v-else>
+                  Create the team {{ actionTeam.name }}
+                </template>
+              </DialogDescription>
+            </DialogHeader>
+            <div class="grid gap-4 py-4">
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label for="name" class="text-right"> Name </Label>
+                <Input
+                  id="name"
+                  class="col-span-3"
+                  v-model="actionTeam.name"
+                />
+              </div>
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label for="description" class="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  class="col-span-3"
+                  v-model="actionTeam.description"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose>
+                <Button :onclick="createOrUpdateElement">
+                  Save changes
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <ManageUserModal
+        :open="openManageModal"
+        :team="actionTeam"
+        @close="() => (openManageModal = false)"
+      />
+      <table class="w-full table-auto border-collapse">
+        <TableHeader>
+          <TableRow
+            v-for="headerGroup in table.getHeaderGroups()"
+            :key="headerGroup.id"
+          >
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              :data-pinned="header.column.getIsPinned()"
+            >
+              <FlexRender
+                v-if="!header.isPlaceholder"
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <template v-if="table.getRowModel().rows?.length">
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow :data-state="row.getIsSelected() && 'selected'">
+                <TableCell
+                  v-for="cell in row.getVisibleCells()"
+                  :key="cell.id"
+                  :data-pinned="cell.column.getIsPinned()"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow v-if="row.getIsExpanded()">
+                <TableCell :colspan="row.getAllCells().length">
+                  {{ row.original }}
+                </TableCell>
+              </TableRow>
+            </template>
+          </template>
+
+          <TableRow v-else>
+            <TableCell :colspan="columns.length" class="h-24 text-center">
+              No results.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <!-- Boutons de pagination en bas à droite -->
+      <div class="flex justify-end mt-4">
         <Button
           variant="outline"
           size="sm"
@@ -298,6 +323,7 @@ async function createOrUpdateElement() {
           size="sm"
           :disabled="!table.getCanNextPage()"
           @click="table.nextPage()"
+          class="ml-2"
         >
           Next
         </Button>
