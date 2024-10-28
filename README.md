@@ -46,4 +46,6 @@ A general manager can create teams and modify any team or user.
 
 the working times that we have seeded are on from the 10/10 to the 31/10
 
+You can clock in or out for the whole team if you're the manager of it, in the admin Users page
+
 Also note that when clocking in out of a working time it creates a working time to account overtime work
