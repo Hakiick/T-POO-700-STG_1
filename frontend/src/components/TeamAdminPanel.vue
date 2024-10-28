@@ -15,7 +15,6 @@ import {
 } from "@tanstack/vue-table";
 
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -44,7 +43,9 @@ import { computed, h, onMounted, ref } from "vue";
 import MainNav from './MainNav.vue';
 import UserNav from './UserNav.vue';
 import { useTeamStore } from "./store/teamStore.ts";
+import { useUserStore } from "./store/userStore.ts";
 
+const user = computed(() => useUserStore().user);
 const teams = ref<Team[]>([]);
 const actionTeam = ref<Team>({ id: -1, name: "", description: "" });
 const open = ref<boolean>(false);
@@ -196,18 +197,14 @@ async function createOrUpdateElement() {
     <div class="col-span-1 lg:col-span-9 flex flex-col justify-between p-8">
       <div class="flex justify-between text-center align-center">
         <h1 class="text-2xl lg:text-3xl bold uppercase mb-5">Gestions des teams</h1>
-        <Dialog
-          :open="open"
-          @update:open="
-            (val : boolean) => {
-              open = val;
-            }
-          "
-        >
+        <Dialog :open="open" @update:open="(val: boolean) => {
+          open = val;
+        }
+          ">
           <DialogTrigger as-child>
-            <Button variant="outline" @click="resetActionTeam"
-              ><PlusIcon
-            /></Button>
+            <Button variant="outline" @click="resetActionTeam">
+              <PlusIcon />
+            </Button>
           </DialogTrigger>
           <DialogContent class="sm:max-w-[425px]">
             <DialogHeader>
@@ -227,21 +224,13 @@ async function createOrUpdateElement() {
             <div class="grid gap-4 py-4">
               <div class="grid grid-cols-4 items-center gap-4">
                 <Label for="name" class="text-right"> Name </Label>
-                <Input
-                  id="name"
-                  class="col-span-3"
-                  v-model="actionTeam.name"
-                />
+                <Input id="name" class="col-span-3" v-model="actionTeam.name" />
               </div>
               <div class="grid grid-cols-4 items-center gap-4">
                 <Label for="description" class="text-right">
                   Description
                 </Label>
-                <Input
-                  id="description"
-                  class="col-span-3"
-                  v-model="actionTeam.description"
-                />
+                <Input id="description" class="col-span-3" v-model="actionTeam.description" />
               </div>
             </div>
             <DialogFooter>
@@ -254,27 +243,14 @@ async function createOrUpdateElement() {
           </DialogContent>
         </Dialog>
       </div>
-      <ManageUserModal
-        :open="openManageModal"
-        :team="actionTeam"
-        @close="() => (openManageModal = false)"
-      />
+      <ManageUserModal :open="openManageModal" :team="actionTeam" @close="() => (openManageModal = false)" />
       <table class="w-full table-auto border-collapse">
         <TableHeader>
-          <TableRow
-            v-for="headerGroup in table.getHeaderGroups()"
-            :key="headerGroup.id"
-          >
-            <TableHead
-              v-for="header in headerGroup.headers"
-              :key="header.id"
-              :data-pinned="header.column.getIsPinned()"
-            >
-              <FlexRender
-                v-if="!header.isPlaceholder"
-                :render="header.column.columnDef.header"
-                :props="header.getContext()"
-              />
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead v-for="header in headerGroup.headers" :key="header.id"
+              :data-pinned="header.column.getIsPinned()">
+              <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header"
+                :props="header.getContext()" />
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -282,15 +258,9 @@ async function createOrUpdateElement() {
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="row in table.getRowModel().rows" :key="row.id">
               <TableRow :data-state="row.getIsSelected() && 'selected'">
-                <TableCell
-                  v-for="cell in row.getVisibleCells()"
-                  :key="cell.id"
-                  :data-pinned="cell.column.getIsPinned()"
-                >
-                  <FlexRender
-                    :render="cell.column.columnDef.cell"
-                    :props="cell.getContext()"
-                  />
+                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
+                  :data-pinned="cell.column.getIsPinned()">
+                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </TableCell>
               </TableRow>
               <TableRow v-if="row.getIsExpanded()">
@@ -310,21 +280,10 @@ async function createOrUpdateElement() {
       </Table>
       <!-- Boutons de pagination en bas à droite -->
       <div class="flex justify-end mt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.previousPage()"
-        >
+        <Button variant="outline" size="sm" :disabled="!table.getCanPreviousPage()" @click="table.previousPage()">
           Previous
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanNextPage()"
-          @click="table.nextPage()"
-          class="ml-2"
-        >
+        <Button variant="outline" size="sm" :disabled="!table.getCanNextPage()" @click="table.nextPage()" class="ml-2">
           Next
         </Button>
       </div>

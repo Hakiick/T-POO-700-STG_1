@@ -8,11 +8,9 @@ import { Button } from './ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { useUserStore } from './store/userStore';
@@ -48,25 +46,8 @@ const userInitial = computed(() => {
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        <DropdownMenuItem>
-          Profile
-          <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          Billing
-          <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          Settings
-          <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem>New Team</DropdownMenuItem>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
       <DropdownMenuItem>
         <Button class="w-full" @click="userStore.logout"> Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </Button>
       </DropdownMenuItem>
     </DropdownMenuContent>

@@ -4,7 +4,7 @@ import UserNav from './UserNav.vue';
 import TeamSwitcher from './TeamSwitcher.vue';
 import moment from 'moment';
 
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, Ref } from 'vue';
 import { useUserStore } from './store/userStore';
 import { useTeamStore } from "./store/teamStore.ts";
 import { getAllUser } from '../api/apiUser';
@@ -12,13 +12,13 @@ import { getAllUsersFromTeam } from "../api/apiManage.ts";
 import { getWorkingTimeByDate } from '../api/apiWorkingTime';
 import { getClocksFromUser } from '../api/apiClock';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarDate, DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date';
 import { getMonday, getSunday } from '../manager/DateUtils';
 import { CalendarIcon } from '@radix-icons/vue';
 import { Button } from './ui/button';
 import { RangeCalendar } from './ui/range-calendar';
-import { Calendar } from './ui/calendar';
 import { cn } from '../lib/utils';
+import { DateRange } from 'radix-vue';
 
 // ============================
 // Initialisation et variables globales
@@ -99,7 +99,7 @@ async function fetchData() {
     value.value.start.month - 1,
     value.value.start.day
   );
-  
+
   const endDate = new Date(
     value.value.end.year,
     value.value.end.month - 1,
@@ -232,24 +232,22 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
     <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4 pt-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex justify-center">
-          <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center"/>
+          <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center" />
         </div>
         <div>
           <!-- Calendrier avec bouton d'application -->
           <div class="text-center flex justify-center mb-3">
             <Popover>
               <PopoverTrigger as-child>
-                <Button
-                  variant="outline"
-                  :class="cn(
-                    'w-full justify-start text-left font-normal',
-                    !value && 'text-muted-foreground',
-                  )"
-                >
+                <Button variant="outline" :class="cn(
+                  'w-full justify-start text-left font-normal',
+                  !value && 'text-muted-foreground',
+                )">
                   <CalendarIcon class="mr-2 h-4 w-4" />
                   <template v-if="value.start">
                     <template v-if="value.end">
-                      {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{ df.format(value.end.toDate(getLocalTimeZone())) }}
+                      {{ df.format(value.start.toDate(getLocalTimeZone())) }} - {{
+                        df.format(value.end.toDate(getLocalTimeZone())) }}
                     </template>
                     <template v-else>
                       {{ df.format(value.start.toDate(getLocalTimeZone())) }}
@@ -261,12 +259,8 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-auto p-0">
-                <RangeCalendar
-                  v-model="value"
-                  initial-focus
-                  :number-of-months="2"
-                  @update:start-value="(startDate) => value.start = startDate"
-                />
+                <RangeCalendar v-model="value" initial-focus :number-of-months="2"
+                  @update:start-value="(startDate) => value.start = startDate" />
               </PopoverContent>
             </Popover>
           </div>
@@ -277,7 +271,7 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
           </div>
         </div>
       </div>
-      
+
       <!-- Emploi du temps -->
       <div class="text-center mb-3 overflow-x-auto">
         <table class="w-full table-auto border-collapse">
@@ -295,9 +289,9 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
             <template v-for="(row, index) in workingDataTable" :key="index">
               <tr>
                 <!-- Affiche le nom de l'utilisateur seulement si c'est la première ligne pour cet utilisateur -->
-                <td v-if="index === 0 || row.username !== workingDataTable[index - 1].username" 
-                    :rowspan="workingDataTable.filter(data => data.username === row.username).length"
-                    class="border px-4 py-2 font-bold">{{ row.username }}</td>
+                <td v-if="index === 0 || row.username !== workingDataTable[index - 1].username"
+                  :rowspan="workingDataTable.filter(data => data.username === row.username).length"
+                  class="border px-4 py-2 font-bold">{{ row.username }}</td>
                 <td class="border px-4 py-2">{{ row.date }}</td>
                 <td class="border px-4 py-2">{{ row.startTime }}</td>
                 <td class="border px-4 py-2">{{ row.endTime }}</td>

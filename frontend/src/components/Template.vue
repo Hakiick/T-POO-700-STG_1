@@ -10,7 +10,7 @@ import MainNav from './MainNav.vue';
 import UserNav from './UserNav.vue';
 import ChartRange from './ChartRange.vue';
 import { Card, CardHeader, CardTitle } from './ui/card';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useClockStore } from './store/clockStore';
 
 import moment, { Moment } from 'moment'
@@ -25,7 +25,7 @@ import { createClock, getClockFromUser, getClocksFromUser } from '../api/apiCloc
 // ============================
 // Import du store
 // ============================
-import { User, useUserStore } from './store/userStore';
+import { useUserStore } from './store/userStore';
 
 // ============================
 // Variables liées à l'utilisateur et aux données de pointage

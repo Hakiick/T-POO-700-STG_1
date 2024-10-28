@@ -19,7 +19,6 @@ import {
 } from "@tanstack/vue-table";
 
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
