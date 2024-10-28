@@ -105,7 +105,7 @@ watch(() => props.user?.id ?? -1, fetchWorkingTime);
     "
   >
     <DialogContent
-      class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh]"
+      class="sm:max-w-[425px] grid-rows-[auto_minmax(0,4fr)_auto] p-0 max-h-[90dvh] max-w-screen"
     >
       <DialogHeader class="p-6 pb-0">
         <DialogTitle
