@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { watch } from 'vue'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { cn } from '@/lib/utils'
 
