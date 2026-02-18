@@ -1,22 +1,19 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import HomePage from "./components/Template.vue";
 import LoginPage from "./components/LoginPage.vue";
 import ChartRange from "./components/ChartRange.vue";
-import UserAdminManagementPage from "./components/UserAdminPanel.vue";
-import TeamsAdminPage from "./components/TeamAdminPanel.vue";
-import DashBoardAdmin from "./components/DashBoardAdmin.vue";
 import NewPassword from "./components/NewPassword.vue";
 import ConfirmAccount from "./components/ConfirmAccount.vue";
+import AdminPage from "./pages/Admin.vue";
 import { useUserStore } from "./components/store/userStore";
 import { useTeamStore } from "./components/store/teamStore";
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: "/",
     name: "home",
     component: HomePage,
     meta: { requiresAuth: true },
-    // props: true,
   },
   {
     path: "/login",
@@ -40,22 +37,22 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/admin/users",
-    name: "UserAdminManagement",
-    component: UserAdminManagementPage,
+    path: "/admin",
+    name: "Admin",
+    component: AdminPage,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin/users",
+    redirect: "/admin",
   },
   {
     path: "/admin/teams",
-    name: "GestionTeams",
-    component: TeamsAdminPage,
-    meta: { requiresAuth: true },
+    redirect: "/admin",
   },
   {
     path: "/admin/dashboard",
-    name: "DashBoardAdmin",
-    component: DashBoardAdmin,
-    meta: { requiresAuth: true },
+    redirect: "/admin",
   },
 ];
 
