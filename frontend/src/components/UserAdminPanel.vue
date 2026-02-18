@@ -190,7 +190,7 @@ const columns = computed(() => {
                     value: row.getValue("role"),
                     "onUpdate:modelValue": (newValue: string) =>
                       handleRoleChange(newValue, row),
-                    defaultValue: row.getValue("role"),
+                    defaultValue: row.getValue("role") as string,
                   },
                   [
                     h(SelectTrigger, { class: "w-[180px]" }, [
