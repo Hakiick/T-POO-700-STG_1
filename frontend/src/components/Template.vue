@@ -9,9 +9,9 @@ defineOptions({
 import MainNav from './MainNav.vue';
 import UserNav from './UserNav.vue';
 import ChartRange from './ChartRange.vue';
-import { Card, CardHeader, CardTitle } from './ui/card';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useClockStore } from './store/clockStore';
+import { Sun, Moon, Check, Loader2 } from 'lucide-vue-next';
 
 import moment, { Moment } from 'moment'
 import 'moment/locale/fr';
@@ -44,12 +44,69 @@ const last_clock_value = computed(() => clockStore.lastClock?.status);
 const clock_disable = ref(false);
 const current_time = ref("");
 
+// ============================
+// Clock WOW effect state
+// ============================
+const isClocking = ref(false);
+const showRipple = ref(false);
+const rippleStyle = ref({ top: '0px', left: '0px', width: '0px', height: '0px' });
+const showSuccess = ref(false);
+const showShake = ref(false);
+const iconAnimClass = ref('');
+const liveTimer = ref<string | null>(null);
+let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+const clockingText = computed(() => {
+  return last_clock_value.value ? 'Clocking out...' : 'Clocking in...';
+});
+
 const formattedDate = computed(() => {
   return moment().format('dddd D MMMM');
 });
 
 const formattedTime = computed(() => {
   return moment().format('HH[h] mm[m]');
+});
+
+// ============================
+// Real-time timer functions
+// ============================
+function startLiveTimer() {
+  stopLiveTimer();
+  updateLiveTimer();
+  timerInterval = setInterval(updateLiveTimer, 1000);
+}
+
+function stopLiveTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  liveTimer.value = null;
+}
+
+function updateLiveTimer() {
+  if (!arrivalTime.value) {
+    liveTimer.value = null;
+    return;
+  }
+  const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+  const duration = moment.duration(moment().diff(arrivalMoment));
+  const h = Math.floor(duration.asHours());
+  const m = duration.minutes();
+  const s = duration.seconds();
+  liveTimer.value = `${h}h ${m}m ${s}s`;
+}
+
+// ============================
+// Watch clock state to start/stop timer
+// ============================
+watch(last_clock_value, (newVal) => {
+  if (newVal === true && arrivalTime.value) {
+    startLiveTimer();
+  } else {
+    stopLiveTimer();
+  }
 });
 
 // ============================
@@ -65,7 +122,7 @@ onMounted(async () => {
     if (lastTrueClock) {
       arrivalTime.value = moment(lastTrueClock.time).format('HH:mm');
     } else {
-      arrivalTime.value = null; // Pas d'heure de pointage trouvée
+      arrivalTime.value = null;
     }
 
     if (arrivalTime.value) {
@@ -73,7 +130,12 @@ onMounted(async () => {
       const duration = moment.duration(moment().diff(arrivalMoment));
       workTime.value = formatHours(duration.asHours());
     } else {
-      workTime.value = '...'; // Pas d'heure d'arrivée, donc on affiche "..."
+      workTime.value = '...';
+    }
+
+    // Start live timer if already clocked in
+    if (last_clock_value.value === true && arrivalTime.value) {
+      startLiveTimer();
     }
 
     // ============================
@@ -93,6 +155,10 @@ onMounted(async () => {
     const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
     workedHoursThisMonth.value = formatHours(hoursThisMonth);
   }
+});
+
+onUnmounted(() => {
+  stopLiveTimer();
 });
 
 const formattedArrivalTime = computed(() => {
@@ -167,17 +233,97 @@ async function calculateWorkedHours(userId: number, startDate: string, endDate: 
 }
 
 // ============================
-// Fonction handleChangeClock: Gestion du changement de pointage (clock)
+// Ripple effect handler
 // ============================
-const handleChangeClock = async (checked: boolean) => {
-  clock_disable.value = true;
-  const response = await createClock(
-    checked, user.value.id
-  );
-  if (response.data) {
-    clockStore.setLastClock(response.data);
+function triggerRipple(event: MouseEvent) {
+  const target = event.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+
+  rippleStyle.value = {
+    top: `${y}px`,
+    left: `${x}px`,
+    width: `${size}px`,
+    height: `${size}px`,
+  };
+
+  showRipple.value = false;
+  requestAnimationFrame(() => {
+    showRipple.value = true;
+  });
+
+  setTimeout(() => {
+    showRipple.value = false;
+  }, 600);
+}
+
+// ============================
+// Fonction handleClockClick: Gestion du changement de pointage avec WOW effect
+// ============================
+async function handleClockClick(event: MouseEvent | KeyboardEvent) {
+  if (isClocking.value || clock_disable.value) return;
+
+  if (event instanceof MouseEvent) {
+    triggerRipple(event);
   }
-  else {
+  isClocking.value = true;
+  iconAnimClass.value = '';
+
+  try {
+    const newStatus = !last_clock_value.value;
+    const response = await createClock(newStatus, user.value.id);
+
+    if (response.data) {
+      clockStore.setLastClock(response.data);
+
+      // Update arrival time on clock-in
+      if (newStatus) {
+        arrivalTime.value = moment().format('HH:mm');
+        const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+        const duration = moment.duration(moment().diff(arrivalMoment));
+        workTime.value = formatHours(duration.asHours());
+      } else {
+        // On clock-out, update workTime with final value
+        if (arrivalTime.value) {
+          const arrivalMoment = moment(arrivalTime.value, 'HH:mm');
+          const duration = moment.duration(moment().diff(arrivalMoment));
+          workTime.value = formatHours(duration.asHours());
+        }
+      }
+
+      // Trigger icon animation
+      iconAnimClass.value = 'animate-icon-enter';
+
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
+      // Success feedback
+      showSuccess.value = true;
+      setTimeout(() => {
+        showSuccess.value = false;
+      }, 1500);
+    } else {
+      // Error feedback: shake animation
+      showShake.value = true;
+      setTimeout(() => {
+        showShake.value = false;
+      }, 500);
+    }
+  } catch {
+    // Error feedback: shake animation
+    showShake.value = true;
+    if (navigator.vibrate) {
+      navigator.vibrate([100, 50, 100]);
+    }
+    setTimeout(() => {
+      showShake.value = false;
+    }, 500);
+  } finally {
+    isClocking.value = false;
     clock_disable.value = false;
   }
 }
@@ -242,22 +388,71 @@ const handleChangeClock = async (checked: boolean) => {
 
     <!-- Main Content -->
     <div class="col-span-1 lg:col-span-8 flex flex-col justify-between p-4 lg:p-8">
-      <Card class="box-content p-6 lg:p-9 border-4 cursor-pointer m-0 mb-8 min-h-[2.75rem]"
-        :class="last_clock_value ? 'bg-red-500' : 'bg-green-500'" @click="handleChangeClock(!last_clock_value)">
-        <CardHeader class="flex flex-col items-center justify-center space-y-0 pb-1 px-6 pt-3">
-          <div class="text-4xl text-white">
-            <template v-if="last_clock_value">
-              🌙
-            </template>
-            <template v-else>
-              ☀️
-            </template>
+      <!-- Clock In/Out WOW Button -->
+      <div
+        class="relative overflow-hidden rounded-2xl cursor-pointer min-h-[2.75rem]
+               transition-all duration-500 ease-in-out
+               border-4 m-0 mb-8 select-none"
+        :class="[
+          last_clock_value
+            ? 'bg-gradient-to-br from-red-400 to-red-600 border-red-700'
+            : 'bg-gradient-to-br from-green-400 to-green-600 border-green-700',
+          showShake ? 'animate-clock-shake' : '',
+          last_clock_value === false && !isClocking ? 'animate-clock-pulse' : '',
+          isClocking ? 'opacity-70 pointer-events-none' : '',
+        ]"
+        role="button"
+        :aria-label="last_clock_value ? 'Clock out' : 'Clock in'"
+        tabindex="0"
+        @click="handleClockClick"
+        @keydown.enter="handleClockClick"
+        @keydown.space.prevent="handleClockClick"
+      >
+        <!-- Ripple effect -->
+        <span
+          v-if="showRipple"
+          class="absolute rounded-full bg-white/30 animate-clock-ripple pointer-events-none"
+          :style="rippleStyle"
+        />
+
+        <!-- Loading overlay -->
+        <div
+          v-if="isClocking"
+          class="absolute inset-0 bg-black/20 flex items-center justify-center z-10"
+        >
+          <Loader2 class="w-8 h-8 text-white animate-spin" />
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col items-center justify-center py-8 lg:py-12 relative">
+          <!-- Animated icon -->
+          <div class="text-white" :class="iconAnimClass">
+            <Sun v-if="!last_clock_value" class="w-12 h-12 lg:w-16 lg:h-16 drop-shadow-lg" />
+            <Moon v-else class="w-12 h-12 lg:w-16 lg:h-16 drop-shadow-lg" />
           </div>
-          <CardTitle class="text-xl font-bold text-white mt-2">
-            {{ last_clock_value ? 'Clock Out' : 'Clock In' }}
-          </CardTitle>
-        </CardHeader>
-      </Card>
+
+          <!-- Success checkmark overlay -->
+          <div
+            v-if="showSuccess"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <Check class="w-16 h-16 text-white animate-clock-success drop-shadow-lg" />
+          </div>
+
+          <!-- Label -->
+          <p class="text-xl lg:text-2xl font-bold text-white mt-3 drop-shadow-sm">
+            {{ isClocking ? clockingText : (last_clock_value ? 'Clock Out' : 'Clock In') }}
+          </p>
+
+          <!-- Real-time timer when clocked in -->
+          <p
+            v-if="last_clock_value && liveTimer"
+            class="text-sm text-white/80 mt-1 font-mono"
+          >
+            {{ liveTimer }}
+          </p>
+        </div>
+      </div>
 
       <!-- ChartRange visible on all viewports -->
       <div class="mt-4 lg:mt-8">
