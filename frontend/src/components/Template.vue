@@ -54,18 +54,20 @@ const showSuccess = ref(false);
 const showShake = ref(false);
 const iconAnimClass = ref('');
 const liveTimer = ref<string | null>(null);
+const currentMoment = ref(moment());
 let timerInterval: ReturnType<typeof setInterval> | null = null;
+let dateTimeInterval: ReturnType<typeof setInterval> | null = null;
 
 const clockingText = computed(() => {
   return last_clock_value.value ? 'Clocking out...' : 'Clocking in...';
 });
 
 const formattedDate = computed(() => {
-  return moment().format('dddd D MMMM');
+  return currentMoment.value.format('dddd D MMMM');
 });
 
 const formattedTime = computed(() => {
-  return moment().format('HH[h] mm[m]');
+  return currentMoment.value.format('HH[h] mm[m]');
 });
 
 // ============================
@@ -113,6 +115,11 @@ watch(last_clock_value, (newVal) => {
 // onMounted: Initialisation des données au montage du composant
 // ============================
 onMounted(async () => {
+  // Update currentMoment every minute for reactive date/time display
+  dateTimeInterval = setInterval(() => {
+    currentMoment.value = moment();
+  }, 60000);
+
   const response_clock = await getClockFromUser(user.value.id);
   if (response_clock.status === 200) {
     clockStore.setClock(response_clock.data.data);
@@ -159,6 +166,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopLiveTimer();
+  if (dateTimeInterval) clearInterval(dateTimeInterval);
 });
 
 const formattedArrivalTime = computed(() => {
@@ -260,6 +268,26 @@ function triggerRipple(event: MouseEvent) {
 }
 
 // ============================
+// Centered ripple for keyboard activation
+// ============================
+function triggerCenteredRipple(target: HTMLElement) {
+  const prefersMotion = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  if (!prefersMotion) return;
+
+  const rect = target.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  rippleStyle.value = {
+    top: `${rect.height / 2 - size / 2}px`,
+    left: `${rect.width / 2 - size / 2}px`,
+    width: `${size}px`,
+    height: `${size}px`,
+  };
+  showRipple.value = false;
+  requestAnimationFrame(() => { showRipple.value = true; });
+  setTimeout(() => { showRipple.value = false; }, 600);
+}
+
+// ============================
 // Fonction handleClockClick: Gestion du changement de pointage avec WOW effect
 // ============================
 async function handleClockClick(event: MouseEvent | KeyboardEvent) {
@@ -267,6 +295,8 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
 
   if (event instanceof MouseEvent) {
     triggerRipple(event);
+  } else {
+    triggerCenteredRipple(event.currentTarget as HTMLElement);
   }
   isClocking.value = true;
   iconAnimClass.value = '';
@@ -293,8 +323,9 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
         }
       }
 
-      // Trigger icon animation
-      iconAnimClass.value = 'animate-icon-enter';
+      // Trigger icon animation (respect prefers-reduced-motion)
+      const prefersMotion = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+      iconAnimClass.value = prefersMotion ? 'animate-icon-enter' : '';
 
       // Haptic feedback
       if (navigator.vibrate) {
@@ -397,8 +428,8 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
           last_clock_value
             ? 'bg-gradient-to-br from-red-400 to-red-600 border-red-700'
             : 'bg-gradient-to-br from-green-400 to-green-600 border-green-700',
-          showShake ? 'animate-clock-shake' : '',
-          last_clock_value === false && !isClocking ? 'animate-clock-pulse' : '',
+          showShake ? 'motion-safe:animate-clock-shake' : '',
+          last_clock_value === false && !isClocking ? 'motion-safe:animate-clock-pulse' : '',
           isClocking ? 'opacity-70 pointer-events-none' : '',
         ]"
         role="button"
@@ -411,7 +442,7 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
         <!-- Ripple effect -->
         <span
           v-if="showRipple"
-          class="absolute rounded-full bg-white/30 animate-clock-ripple pointer-events-none"
+          class="absolute rounded-full bg-white/30 motion-safe:animate-clock-ripple pointer-events-none"
           :style="rippleStyle"
         />
 
@@ -436,7 +467,7 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
             v-if="showSuccess"
             class="absolute inset-0 flex items-center justify-center"
           >
-            <Check class="w-16 h-16 text-white animate-clock-success drop-shadow-lg" />
+            <Check class="w-16 h-16 text-white motion-safe:animate-clock-success drop-shadow-lg" />
           </div>
 
           <!-- Label -->
