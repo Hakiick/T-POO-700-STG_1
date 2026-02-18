@@ -26,6 +26,6 @@ onMounted(async () => {
 </script>
 <template>
   <div class="flex w-screen h-screen items-center gap-8 justify-center flex-col">
-    <h2 if="error" class="text-red-500">{{ error }}</h2>
+    <h2 v-if="error" class="text-red-500">{{ error }}</h2>
   </div>
 </template>

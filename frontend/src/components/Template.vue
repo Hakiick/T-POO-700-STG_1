@@ -418,7 +418,7 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
     </div>
 
     <!-- Main Content -->
-    <div class="col-span-1 lg:col-span-8 flex flex-col justify-between p-4 lg:p-8">
+    <main class="col-span-1 lg:col-span-8 flex flex-col justify-between p-4 lg:p-8">
       <!-- Clock In/Out WOW Button -->
       <div
         class="relative overflow-hidden rounded-2xl cursor-pointer min-h-[2.75rem]
@@ -489,6 +489,6 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
       <div class="mt-4 lg:mt-8">
         <ChartRange :user="user" />
       </div>
-    </div>
+    </main>
   </div>
 </template>

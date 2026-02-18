@@ -174,7 +174,7 @@ function createDataTable(workingTimeEntries: Array<{start: string; end: string}>
       </div>
     </div>
 
-    <div class="col-span-1 lg:col-span-8 h-full w-full space-y-4 pt-5">
+    <main class="col-span-1 lg:col-span-8 h-full w-full space-y-4 pt-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex justify-center">
           <TeamSwitcher class="w-full text-center" />
@@ -204,7 +204,7 @@ function createDataTable(workingTimeEntries: Array<{start: string; end: string}>
             </Popover>
           </div>
           <div class="text-center mb-3">
-            <Button @click="applyDate" class="min-h-[2.75rem] bg-green-500 hover:bg-green-600 text-white">
+            <Button @click="applyDate" class="min-h-[2.75rem] bg-green-500 hover:bg-green-600 text-white focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
               Apply
             </Button>
           </div>
@@ -234,6 +234,6 @@ function createDataTable(workingTimeEntries: Array<{start: string; end: string}>
           </tbody>
         </table>
       </div>
-    </div>
+    </main>
   </div>
 </template>

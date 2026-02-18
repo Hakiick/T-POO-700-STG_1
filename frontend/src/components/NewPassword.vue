@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { Label } from './ui/label'
 import { useRoute } from 'vue-router';
 import { resetPassword } from '../api/apiUser'
 import router from '@/router';
@@ -27,7 +28,6 @@ function bufferToHex(buffer: ArrayBuffer) {
 }
 
 const handleNewPassword = async () => {
-  console.log(newPassword.value)
   if (newPassword.value.length < 12) {
     error.value = 'Password must be at least 12 characters'
     return
@@ -45,11 +45,14 @@ const handleNewPassword = async () => {
 <template>
   <div class="flex w-screen h-screen items-center gap-8 justify-center flex-col">
     <h2 class="text-2xl font-bold">New Password</h2>
-    <Input v-model="newPassword" id="password" type="text" placeholder="12 char 1 maj 1 min 1 num 1 spec"
-      class="max-w-sm" />
+    <div class="w-full max-w-sm">
+      <Label class="sr-only" for="new-password">New password</Label>
+      <Input v-model="newPassword" id="new-password" type="text" placeholder="12 char 1 maj 1 min 1 num 1 spec"
+        class="w-full" />
+    </div>
     <Button @click="handleNewPassword" type="submit">
       Validate
     </Button>
-    <h2 if="error" class="text-red-500">{{ error }}</h2>
+    <h2 v-if="error" class="text-red-500">{{ error }}</h2>
   </div>
 </template>

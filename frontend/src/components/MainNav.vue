@@ -23,6 +23,7 @@ const toggleMenu = () => {
     <button
       @click="toggleMenu"
       aria-label="Menu de navigation"
+      :aria-expanded="isMenuOpen"
       class="lg:hidden min-h-[2.75rem] min-w-[2.75rem] p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
     >
       <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

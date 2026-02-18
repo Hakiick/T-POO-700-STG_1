@@ -339,7 +339,7 @@ function formatDate(dateString: string) {
           </div>
 
           <div class="text-center mb-3">
-            <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white">
+            <Button @click="applyDateRange" class="bg-green-500 hover:bg-green-600 text-white focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
               Apply
             </Button>
           </div>
@@ -350,7 +350,7 @@ function formatDate(dateString: string) {
           <div class="h-full w-full">
             <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
               <button v-for="type in chartTypes" :key="type" @click="currentChartType = type"
-                class="min-h-[2.75rem] min-w-[2.75rem] px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                class="min-h-[2.75rem] min-w-[2.75rem] px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                 {{ type }}
               </button>
             </div>

@@ -27,9 +27,9 @@ const userInitial = computed(() => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="ghost" class="relative h-12 w-12 rounded-full">
+      <Button variant="ghost" class="relative h-12 w-12 rounded-full" aria-label="Menu utilisateur">
         <Avatar class="h-12 w-12">
-          <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+          <AvatarImage src="/avatars/01.png" :alt="user.username ? `Avatar de ${user.username}` : 'Avatar utilisateur'" />
           <AvatarFallback>{{ userInitial }}</AvatarFallback>
         </Avatar>
       </Button>

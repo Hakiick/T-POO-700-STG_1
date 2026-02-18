@@ -25,8 +25,7 @@ const passwordSignup = ref('')
 // Variable pour suivre quelle div est actuellement active
 const activeDiv = ref<'signin' | 'signup' | null>(null)
 
-async function onSubmitSignIn(event: Event) {
-  event.preventDefault()
+async function onSubmitSignIn() {
   isLoadingSignIn.value = true
 
   // Simuler un chargement
@@ -41,9 +40,7 @@ async function onSubmitSignIn(event: Event) {
 
   // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignIn.value = true
-  // console.log({ email: emailSignup.value, username: passwordSignup.value })
   const response = await loginUser(emailSignIn.value, passwordSignIn.value)
-  console.log(response)
   if (response.status === 200) {
 
     sessionStorage.setItem('access_token', response.data.access_token)
@@ -56,15 +53,13 @@ async function onSubmitSignIn(event: Event) {
   }
   //catch error 
   if (response.data.errors) {
-    // console.log(response)
     errorMessageSignUp.value = response.data.errors
     return
   }
   errorMessageSignIn.value = ''  // Réinitialiser le message d'erreur
 }
 
-async function onSubmitSignUp(event: Event) {
-  event.preventDefault()
+async function onSubmitSignUp() {
   isLoadingSignUp.value = true
 
   // Simuler un chargement
@@ -80,9 +75,7 @@ async function onSubmitSignUp(event: Event) {
   // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignUp.value = true
 
-  // console.log({ email: emailSignup.value, username: passwordSignup.value })
   const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
-  console.log(response)
   if (response.status === 201) {
     if (window.confirm("veuillez vérifier votre boite mail pour activer votre compte")) {
       window.location.reload(); // Refreshes the page if "OK" is clicked
@@ -93,7 +86,6 @@ async function onSubmitSignUp(event: Event) {
   }
   //catch error 
   if (response.data.errors) {
-    // console.log(response)
     errorMessageSignUp.value = response.data.errors
     return
   }
@@ -103,7 +95,7 @@ async function onSubmitSignUp(event: Event) {
 </script>
 
 <template>
-  <div class="flex flex-col md:flex-row min-h-screen">
+  <main class="flex flex-col md:flex-row min-h-screen">
     <!-- Première div (Sign In) -->
     <div class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
       @mouseenter="activeDiv = 'signin'" @mouseleave="activeDiv = null">
@@ -119,17 +111,20 @@ async function onSubmitSignUp(event: Event) {
         </div>
 
         <!-- Formulaire -->
-        <form @submit="onSubmitSignIn" class="space-y-6">
+        <form @submit.prevent="onSubmitSignIn" class="space-y-6">
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email">Email</Label>
               <Input v-model="emailSignIn" id="email" placeholder="name@example.com" type="email" auto-capitalize="none"
                 auto-complete="email" auto-correct="off" :disabled="isLoadingSignIn"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
             </div>
-            <Input v-model="passwordSignIn" id="password" placeholder="Enter your password" type="password"
-              auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
+            <div>
+              <Label class="sr-only" for="password">Password</Label>
+              <Input v-model="passwordSignIn" id="password" placeholder="Enter your password" type="password"
+                auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
+            </div>
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignIn">
               Sign In with Email
             </Button>
@@ -178,17 +173,20 @@ async function onSubmitSignUp(event: Event) {
         </div>
 
         <!-- Formulaire -->
-        <form @submit="onSubmitSignUp" class="space-y-6">
+        <form @submit.prevent="onSubmitSignUp" class="space-y-6">
           <div class="space-y-4">
             <div>
               <Label class="sr-only" for="email-signup">Email</Label>
               <Input v-model="emailSignup" id="email-signup" placeholder="name@example.com" type="email"
                 auto-capitalize="none" auto-complete="email" auto-correct="off" :disabled="isLoadingSignUp"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
             </div>
-            <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
-              auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
-              class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800" />
+            <div>
+              <Label class="sr-only" for="password-signup">Password</Label>
+              <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
+                auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
+                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
+            </div>
             <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignUp">
               Sign Up
             </Button>
@@ -221,5 +219,5 @@ async function onSubmitSignUp(event: Event) {
         </p>
       </div>
     </div>
-  </div>
+  </main>
 </template>

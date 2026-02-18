@@ -12,9 +12,7 @@ const workDays = ref<any[]>([]);
 const data = ref<any[]>([]);
 
 onMounted(async () => {
-  // console.log(userStore.user);
   workingtime.value = await getWorkingTimes(userStore.user);
-  // console.log("working time list", workingtime.value);
 
   // Récupérer les données réelles et formater pour le graphique
   workDays.value = workingtime.value.map((entry) => {

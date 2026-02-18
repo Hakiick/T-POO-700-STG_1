@@ -96,7 +96,6 @@ const createOrUpdateElement = async () => {
     await updateUser(actionUser.value);
   } else {
     let newUser = await createUserAdmin(actionUser.value);
-    console.log(newUser);
     tempUsers.push(newUser);
   }
 
@@ -113,7 +112,6 @@ const createOrUpdateElement = async () => {
 };
 
 const handleRoleChange = async (role: string, row: Row<User>) => {
-  // console.log(role, row.getValue("id"));
   if (role === "manager") {
     const resp = await updateRoleToManager(row.getValue("id"));
 
@@ -129,8 +127,6 @@ const handleRoleChange = async (role: string, row: Row<User>) => {
       window.location.reload();
     }
   }
-
-  // updateUser(row.original);
 };
 
 const clockInForTeam = async () => {
@@ -216,11 +212,13 @@ const columns = computed(() => {
     columnHelper.accessor("id", {
       header: () => h("div", { class: "text-right" }, "Actions"),
       cell: ({ row }) =>
-        h("div", { class: "text-right" }, [
+        h("div", { class: "text-right flex justify-end gap-1" }, [
           h(
             Button,
             {
               variant: "outline",
+              class: "min-h-[2.75rem] min-w-[2.75rem] p-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              'aria-label': 'Voir le dashboard',
               onClick: () => {
                 openDashboardUserModal.value = true;
                 dashboardUser.value = row.original;
@@ -232,6 +230,8 @@ const columns = computed(() => {
             Button,
             {
               variant: "outline",
+              class: "min-h-[2.75rem] min-w-[2.75rem] p-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              'aria-label': 'Gestion du temps de travail',
               onClick: () => {
                 openWorkingTimeModal.value = true;
                 actionUser.value = row.original;
@@ -242,6 +242,8 @@ const columns = computed(() => {
           h(
             Button,
             {
+              class: "min-h-[2.75rem] min-w-[2.75rem] p-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              'aria-label': 'Modifier l\'utilisateur',
               onClick() {
                 openActionUserModal.value = true;
                 actionUser.value = row.original;
@@ -253,6 +255,8 @@ const columns = computed(() => {
             Button,
             {
               variant: "destructive",
+              class: "min-h-[2.75rem] min-w-[2.75rem] p-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              'aria-label': 'Supprimer l\'utilisateur',
               onClick: () => deleteUserById(row.getValue("id")),
             },
             h(TrashIcon)
