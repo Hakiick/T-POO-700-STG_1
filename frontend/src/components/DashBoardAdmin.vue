@@ -4,7 +4,7 @@ import UserNav from './UserNav.vue';
 import TeamSwitcher from './TeamSwitcher.vue';
 import moment from 'moment';
 
-import { onMounted, ref, computed, Ref } from 'vue';
+import { onMounted, onUnmounted, ref, computed, Ref } from 'vue';
 import { useUserStore } from './store/userStore';
 import { useTeamStore } from "./store/teamStore.ts";
 import { getAllUser } from '../api/apiUser';
@@ -28,12 +28,16 @@ const teamStore = useTeamStore();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 const workingDataTable = ref<any[]>([]);
-const isDesktop = ref(false);
 const usersList = ref<any[]>([]);
 
-const checkIsDesktop = () => {
-  isDesktop.value = window.innerWidth >= 1024;
+// Responsive calendar: 1 month on mobile, 2 on desktop
+const calendarMonths = ref(1);
+const mediaQuery = window.matchMedia('(min-width: 768px)');
+const updateCalendarMonths = (e: MediaQueryList | MediaQueryListEvent) => {
+  calendarMonths.value = e.matches ? 2 : 1;
 };
+updateCalendarMonths(mediaQuery);
+mediaQuery.addEventListener('change', updateCalendarMonths);
 
 const df = new DateFormatter('en-US', {
   dateStyle: 'long',
@@ -64,10 +68,11 @@ const value = ref({
 // ============================
 
 onMounted(() => {
-  checkIsDesktop();
-  window.addEventListener('resize', checkIsDesktop);
-
   fetchAllUsers();
+});
+
+onUnmounted(() => {
+  mediaQuery.removeEventListener('change', updateCalendarMonths);
 });
 
 
@@ -112,7 +117,6 @@ async function fetchData() {
 
     // Initialise le tableau avant de le remplir
     workingDataTable.value = [];
-    console.log(startDate, endDate)
     for (const user of usersList.value) {
       const workingTimeResponse = await getWorkingTimeByDate(user.id, startDate.toISOString(), endDate.toISOString());
       const clockDataResponse = await getClocksFromUser(user.id, startDate.toISOString(), endDate.toISOString());
@@ -202,34 +206,34 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
 
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
-    <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+    <!-- Sidebar -->
+    <div class="col-span-1 lg:col-span-2 lg:border-r-4 relative">
       <!-- UserNav for Mobile -->
-      <div class="pt-4 pl-4" v-show="!isDesktop">
+      <div class="pt-4 pl-4 block lg:hidden">
         <UserNav :user="user" />
       </div>
       <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
         Time Manager
       </h1>
       <!-- UserNav for Desktop -->
-      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
+      <div class="hidden lg:flex items-center justify-center py-8 border-b-4">
         <UserNav :user="user" />
       </div>
       <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+      <div class="hidden lg:flex items-center justify-center pb-4 border-b-4">
         <MainNav class="mx-4" />
       </div>
       <!-- MainNav for Mobile -->
       <div class="absolute top-4 right-4 lg:hidden">
         <MainNav class="mx-4" />
       </div>
-      <div class="text-center items-center justify-center p-8 border-b-4">
+      <div class="text-center items-center justify-center p-4 lg:p-8 border-b-4">
         <p>{{ formattedDate }}</p>
         <p class="text-xl font-bold">{{ formattedTime }}</p>
       </div>
     </div>
 
-    <div class="col-span-1 lg:col-span-9 h-full w-full space-y-4 pt-5">
+    <div class="col-span-1 lg:col-span-8 h-full w-full space-y-4 pt-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex justify-center">
           <TeamSwitcher @teamChange="fetchAllUsers" class="w-full text-center" />
@@ -259,7 +263,7 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
                 </Button>
               </PopoverTrigger>
               <PopoverContent class="w-auto p-0">
-                <RangeCalendar v-model="value" initial-focus :number-of-months="2"
+                <RangeCalendar v-model="value" initial-focus :number-of-months="calendarMonths"
                   @update:start-value="(startDate) => value.start = startDate" />
               </PopoverContent>
             </Popover>
@@ -274,7 +278,7 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
 
       <!-- Emploi du temps -->
       <div class="text-center mb-3 overflow-x-auto">
-        <table class="w-full table-auto border-collapse">
+        <table class="w-full table-auto border-collapse min-w-[36rem]">
           <thead>
             <tr>
               <th class="px-4 py-2 text-left">Username</th>
