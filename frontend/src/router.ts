@@ -1,125 +1,110 @@
-import { createRouter, createWebHistory } from "vue-router";
-import HomePage from "./components/Template.vue";
-import LoginPage from "./components/LoginPage.vue";
-import ChartRange from "./components/ChartRange.vue";
-import UserAdminManagementPage from "./components/UserAdminPanel.vue";
-import TeamsAdminPage from "./components/TeamAdminPanel.vue";
-import DashBoardAdmin from "./components/DashBoardAdmin.vue";
-import NewPassword from "./components/NewPassword.vue";
-import ConfirmAccount from "./components/ConfirmAccount.vue";
-import { useUserStore } from "./components/store/userStore";
-import { useTeamStore } from "./components/store/teamStore";
+import { createRouter, createWebHistory } from "vue-router"
+import type { RouteRecordRaw } from "vue-router"
+import { useUserStore } from "./components/store/userStore"
+import { useTeamStore } from "./components/store/teamStore"
 
-const routes = [
+declare module "vue-router" {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    layout?: "main" | "auth"
+  }
+}
+
+const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    name: "home",
-    component: HomePage,
-    meta: { requiresAuth: true },
-    // props: true,
+    name: "clock",
+    component: () => import("./pages/Clock.vue"),
+    meta: { requiresAuth: true, layout: "main" },
+  },
+  {
+    path: "/dashboard",
+    name: "dashboard",
+    component: () => import("./pages/Dashboard.vue"),
+    meta: { requiresAuth: true, layout: "main" },
+  },
+  {
+    path: "/team",
+    name: "team",
+    component: () => import("./pages/Team.vue"),
+    meta: { requiresAuth: true, layout: "main" },
+  },
+  {
+    path: "/admin",
+    name: "admin",
+    component: () => import("./pages/Admin.vue"),
+    meta: { requiresAuth: true, layout: "main" },
+  },
+  {
+    path: "/settings",
+    name: "settings",
+    component: () => import("./pages/Settings.vue"),
+    meta: { requiresAuth: true, layout: "main" },
   },
   {
     path: "/login",
     name: "login",
-    component: LoginPage,
+    component: () => import("./pages/Login.vue"),
+    meta: { layout: "auth" },
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: () => import("./pages/Register.vue"),
+    meta: { layout: "auth" },
   },
   {
     path: "/users/reset_password",
     name: "passwordReset",
-    component: NewPassword,
+    component: () => import("./components/NewPassword.vue"),
+    meta: { layout: "auth" },
   },
   {
     path: "/users/confirm",
     name: "confirmAccount",
-    component: ConfirmAccount,
+    component: () => import("./components/ConfirmAccount.vue"),
+    meta: { layout: "auth" },
   },
-  {
-    path: "/dashboard",
-    name: "ChartRange",
-    component: ChartRange,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/users",
-    name: "UserAdminManagement",
-    component: UserAdminManagementPage,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/teams",
-    name: "GestionTeams",
-    component: TeamsAdminPage,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/admin/dashboard",
-    name: "DashBoardAdmin",
-    component: DashBoardAdmin,
-    meta: { requiresAuth: true },
-  },
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+})
 
 router.beforeEach(async (to, _from, next) => {
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-  // const groups = to.matched[0].meta.groups;
-  const userStore = useUserStore();
-  const teamStore = useTeamStore();
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const userStore = useUserStore()
+  const teamStore = useTeamStore()
 
   // Redirect to home if trying to access the login page while already logged in
   if (to.name === "login" && sessionStorage.getItem("refresh_token")) {
-    return next({ name: "home" });
+    return next({ name: "clock" })
   }
 
   // If route doesn't require auth, proceed
   if (!requiresAuth) {
-    return next();
+    return next()
   }
 
   // If auth is required, check if refresh_token exists
   if (!sessionStorage.getItem("refresh_token")) {
-    return next({ name: "login" });
+    return next({ name: "login" })
   }
 
   // Attempt to log in with stored token
-  await userStore.login();
+  await userStore.login()
 
   // populate the team store
-  await teamStore.populateTeamStore();
+  await teamStore.populateTeamStore()
 
   // If user is not logged in after attempting login, redirect to login
   if (!userStore.user) {
-    return next({ name: "login" });
+    return next({ name: "login" })
   }
 
   // If all checks pass, allow route navigation
-  next();
+  next()
+})
 
-  // const user = computed(userStore.user);
-
-  // let groupCheck = false;
-
-  // if (!groups) {
-  //   groupCheck = true;
-  // } else if (
-  //   Array.isArray(groups) &&
-  //   groups.every((group) => typeof group === "string") &&
-  //   user !== false
-  // ) {
-  //   groupCheck = groups.some((group) => {
-  //     return user.groups.map((g) => g.name).includes(group);
-  //   });
-  // }
-
-  // if (!groupCheck && to.name !== "Login") {
-  //   next({ name: "Login" });
-  // } else {
-  //   next();
-  // }
-});
-
-export default router;
+export default router
