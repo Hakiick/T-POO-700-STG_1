@@ -1,223 +1,367 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { createUser, loginUser } from '../api/apiUser';
-import router from '@/router';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
+import { createUser, loginUser } from '../api/apiUser'
+import router from '@/router'
 
+const activeTab = ref<string>('signin')
 
-// Variables pour le formulaire de connexion
+// Sign In form state
 const isLoadingSignIn = ref(false)
 const isCheckedSignIn = ref(false)
 const errorMessageSignIn = ref('')
 const emailSignIn = ref('')
 const passwordSignIn = ref('')
 
-// Variables pour le formulaire de création de compte
+// Sign Up form state
 const isLoadingSignUp = ref(false)
 const isCheckedSignUp = ref(false)
 const errorMessageSignUp = ref('')
 const emailSignup = ref('')
 const passwordSignup = ref('')
 
+const signUpSuccess = ref(false)
 
-// Variable pour suivre quelle div est actuellement active
-const activeDiv = ref<'signin' | 'signup' | null>(null)
+const isSignInDisabled = computed(() => isLoadingSignIn.value)
+const isSignUpDisabled = computed(() => isLoadingSignUp.value)
 
 async function onSubmitSignIn() {
-  isLoadingSignIn.value = true
-
-  // Simuler un chargement
-  setTimeout(() => {
-    isLoadingSignIn.value = false
-  }, 3000)
+  errorMessageSignIn.value = ''
 
   if (!isCheckedSignIn.value) {
     errorMessageSignIn.value = "You haven't accepted our Terms of Service and Privacy Policy."
     return
   }
 
-  // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignIn.value = true
-  const response = await loginUser(emailSignIn.value, passwordSignIn.value)
-  if (response.status === 200) {
 
-    sessionStorage.setItem('access_token', response.data.access_token)
-    sessionStorage.setItem('refresh_token', response.data.refresh_token)
-    // userStore.login()
-
-    //redirect to login page
-    router.push({ name: 'home' })
-    return
+  try {
+    const response = await loginUser(emailSignIn.value, passwordSignIn.value)
+    if (response.status === 200) {
+      sessionStorage.setItem('access_token', response.data.access_token)
+      sessionStorage.setItem('refresh_token', response.data.refresh_token)
+      router.push({ name: 'home' })
+      return
+    }
+    if (response.data?.errors) {
+      errorMessageSignIn.value = typeof response.data.errors === 'string'
+        ? response.data.errors
+        : 'Invalid email or password.'
+      return
+    }
+    errorMessageSignIn.value = 'An unexpected error occurred.'
+  } catch {
+    errorMessageSignIn.value = 'Unable to connect. Please try again.'
+  } finally {
+    isLoadingSignIn.value = false
   }
-  //catch error 
-  if (response.data.errors) {
-    errorMessageSignUp.value = response.data.errors
-    return
-  }
-  errorMessageSignIn.value = ''  // Réinitialiser le message d'erreur
 }
 
 async function onSubmitSignUp() {
-  isLoadingSignUp.value = true
-
-  // Simuler un chargement
-  setTimeout(() => {
-    isLoadingSignUp.value = false
-  }, 5000)
+  errorMessageSignUp.value = ''
 
   if (!isCheckedSignUp.value) {
     errorMessageSignUp.value = "You haven't accepted our Terms of Service and Privacy Policy."
     return
   }
 
-  // Si la checkbox est cochée, soumettre le formulaire
   isLoadingSignUp.value = true
 
-  const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
-  if (response.status === 201) {
-    if (window.confirm("veuillez vérifier votre boite mail pour activer votre compte")) {
-      window.location.reload(); // Refreshes the page if "OK" is clicked
+  try {
+    const response = await createUser(emailSignup.value, emailSignup.value, passwordSignup.value)
+    if (response.status === 201) {
+      signUpSuccess.value = true
+      return
     }
-    //redirect to login page
-    router.push({ name: 'login' })
-    return
+    if (response.data?.errors) {
+      const errors = response.data.errors
+      if (typeof errors === 'string') {
+        errorMessageSignUp.value = errors
+      } else if (typeof errors === 'object') {
+        const messages: string[] = []
+        for (const key in errors) {
+          const val = errors[key]
+          if (Array.isArray(val)) {
+            messages.push(...val)
+          } else if (typeof val === 'string') {
+            messages.push(val)
+          }
+        }
+        errorMessageSignUp.value = messages.join(' ')
+      }
+      return
+    }
+    errorMessageSignUp.value = 'An unexpected error occurred.'
+  } catch {
+    errorMessageSignUp.value = 'Unable to connect. Please try again.'
+  } finally {
+    isLoadingSignUp.value = false
   }
-  //catch error 
-  if (response.data.errors) {
-    errorMessageSignUp.value = response.data.errors
-    return
-  }
-
-  errorMessageSignUp.value = ''  // Réinitialiser le message d'erreur
 }
 </script>
 
 <template>
-  <main class="flex flex-col md:flex-row min-h-screen">
-    <!-- Première div (Sign In) -->
-    <div class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signin'" @mouseleave="activeDiv = null">
-      <div v-if="activeDiv === 'signup'">
-        <!-- Image de Batman pour l'autre div -->
-        <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
-      </div>
-      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signin' || activeDiv === null">
-        <!-- Titre -->
-        <div class="text-center">
-          <h2 class="text-2xl md:text-3xl font-bold">Sign In</h2>
-          <p class="mt-2 text-sm md:text-base text-gray-400">Enter your email below to sign in</p>
-        </div>
+  <main
+    class="flex min-h-dvh w-full items-center justify-center bg-gray-900 px-4 py-8 pb-[env(safe-area-inset-bottom)]"
+  >
+    <div class="w-full max-w-md">
+      <Tabs v-model="activeTab" class="w-full">
+        <TabsList class="grid w-full grid-cols-2 bg-gray-800">
+          <TabsTrigger
+            value="signin"
+            class="min-h-[2.75rem] text-gray-300 data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+          >
+            Sign In
+          </TabsTrigger>
+          <TabsTrigger
+            value="signup"
+            class="min-h-[2.75rem] text-gray-300 data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+          >
+            Sign Up
+          </TabsTrigger>
+        </TabsList>
 
-        <!-- Formulaire -->
-        <form @submit.prevent="onSubmitSignIn" class="space-y-6">
-          <div class="space-y-4">
-            <div>
-              <Label class="sr-only" for="email">Email</Label>
-              <Input v-model="emailSignIn" id="email" placeholder="name@example.com" type="email" auto-capitalize="none"
-                auto-complete="email" auto-correct="off" :disabled="isLoadingSignIn"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
+        <!-- Sign In Tab -->
+        <TabsContent value="signin" class="mt-6">
+          <div class="space-y-6 text-white">
+            <div class="text-center">
+              <h2 class="text-2xl font-bold md:text-3xl">Sign In</h2>
+              <p class="mt-2 text-sm text-gray-400 md:text-base">
+                Enter your email below to sign in
+              </p>
             </div>
-            <div>
-              <Label class="sr-only" for="password">Password</Label>
-              <Input v-model="passwordSignIn" id="password" placeholder="Enter your password" type="password"
-                auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignIn"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
-            </div>
-            <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignIn">
-              Sign In with Email
-            </Button>
+
+            <form @submit.prevent="onSubmitSignIn" class="space-y-5">
+              <div class="space-y-4">
+                <div>
+                  <Label for="email-signin" class="mb-1 block text-sm text-gray-300">
+                    Email
+                  </Label>
+                  <Input
+                    v-model="emailSignIn"
+                    id="email-signin"
+                    placeholder="name@example.com"
+                    type="email"
+                    autocapitalize="none"
+                    autocomplete="email"
+                    autocorrect="off"
+                    required
+                    :disabled="isSignInDisabled"
+                    class="w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <Label for="password-signin" class="mb-1 block text-sm text-gray-300">
+                    Password
+                  </Label>
+                  <Input
+                    v-model="passwordSignIn"
+                    id="password-signin"
+                    placeholder="Enter your password"
+                    type="password"
+                    autocapitalize="none"
+                    autocomplete="current-password"
+                    autocorrect="off"
+                    required
+                    :disabled="isSignInDisabled"
+                    class="w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                class="w-full min-h-[2.75rem] bg-blue-600 hover:bg-blue-700 rounded-md font-medium"
+                :disabled="isSignInDisabled"
+              >
+                <svg
+                  v-if="isLoadingSignIn"
+                  class="mr-2 h-4 w-4 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {{ isLoadingSignIn ? 'Signing in...' : 'Sign In with Email' }}
+              </Button>
+
+              <!-- Separator -->
+              <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                  <span class="w-full border-t border-gray-600" />
+                </div>
+                <div class="relative flex justify-center text-xs uppercase">
+                  <span class="bg-gray-900 px-2 text-gray-400">Or continue with</span>
+                </div>
+              </div>
+            </form>
+
+            <!-- Terms checkbox -->
+            <label
+              for="agree-signin"
+              class="flex min-h-[2.75rem] cursor-pointer items-center gap-3 text-xs text-gray-500"
+            >
+              <input
+                type="checkbox"
+                id="agree-signin"
+                v-model="isCheckedSignIn"
+                class="h-5 w-5 shrink-0 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                :disabled="isSignInDisabled"
+              />
+              <span>
+                By clicking continue, you agree to our
+                <a href="#" class="underline hover:text-gray-300">Terms of Service</a> and
+                <a href="#" class="underline hover:text-gray-300">Privacy Policy</a>.
+              </span>
+            </label>
+
+            <!-- Error message -->
+            <p
+              v-if="errorMessageSignIn"
+              class="rounded-md bg-red-900/30 p-3 text-center text-sm text-red-400"
+              role="alert"
+            >
+              {{ errorMessageSignIn }}
+            </p>
           </div>
+        </TabsContent>
 
-          <!-- Séparateur -->
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <span class="w-full border-t border-gray-600"></span>
+        <!-- Sign Up Tab -->
+        <TabsContent value="signup" class="mt-6">
+          <div class="space-y-6 text-white">
+            <!-- Success message -->
+            <div v-if="signUpSuccess" class="space-y-4 text-center">
+              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-900/50">
+                <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-green-400">Account created!</h3>
+              <p class="text-sm text-gray-400">
+                Please check your email to confirm your account.
+              </p>
+              <Button
+                class="min-h-[2.75rem] w-full bg-blue-600 hover:bg-blue-700 rounded-md"
+                @click="activeTab = 'signin'; signUpSuccess = false"
+              >
+                Go to Sign In
+              </Button>
             </div>
-            <div class="relative flex justify-center text-xs uppercase">
-              <span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-            </div>
+
+            <!-- Sign Up form -->
+            <template v-if="!signUpSuccess">
+              <div class="text-center">
+                <h2 class="text-2xl font-bold md:text-3xl">Create an account</h2>
+                <p class="mt-2 text-sm text-gray-400 md:text-base">
+                  Enter your email below to create your account
+                </p>
+              </div>
+
+              <form @submit.prevent="onSubmitSignUp" class="space-y-5">
+                <div class="space-y-4">
+                  <div>
+                    <Label for="email-signup" class="mb-1 block text-sm text-gray-300">
+                      Email
+                    </Label>
+                    <Input
+                      v-model="emailSignup"
+                      id="email-signup"
+                      placeholder="name@example.com"
+                      type="email"
+                      autocapitalize="none"
+                      autocomplete="email"
+                      autocorrect="off"
+                      required
+                      :disabled="isSignUpDisabled"
+                      class="w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <Label for="password-signup" class="mb-1 block text-sm text-gray-300">
+                      Password
+                    </Label>
+                    <Input
+                      v-model="passwordSignup"
+                      id="password-signup"
+                      placeholder="Enter your password"
+                      type="password"
+                      autocapitalize="none"
+                      autocomplete="new-password"
+                      autocorrect="off"
+                      required
+                      :disabled="isSignUpDisabled"
+                      class="w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  class="w-full min-h-[2.75rem] bg-blue-600 hover:bg-blue-700 rounded-md font-medium"
+                  :disabled="isSignUpDisabled"
+                >
+                  <svg
+                    v-if="isLoadingSignUp"
+                    class="mr-2 h-4 w-4 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {{ isLoadingSignUp ? 'Creating account...' : 'Sign Up' }}
+                </Button>
+
+                <!-- Separator -->
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center">
+                    <span class="w-full border-t border-gray-600" />
+                  </div>
+                  <div class="relative flex justify-center text-xs uppercase">
+                    <span class="bg-gray-900 px-2 text-gray-400">Or continue with</span>
+                  </div>
+                </div>
+              </form>
+
+              <!-- Terms checkbox -->
+              <label
+                for="agree-signup"
+                class="flex min-h-[2.75rem] cursor-pointer items-center gap-3 text-xs text-gray-500"
+              >
+                <input
+                  type="checkbox"
+                  id="agree-signup"
+                  v-model="isCheckedSignUp"
+                  class="h-5 w-5 shrink-0 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  :disabled="isSignUpDisabled"
+                />
+                <span>
+                  By clicking continue, you agree to our
+                  <a href="#" class="underline hover:text-gray-300">Terms of Service</a> and
+                  <a href="#" class="underline hover:text-gray-300">Privacy Policy</a>.
+                </span>
+              </label>
+
+              <!-- Error message -->
+              <p
+                v-if="errorMessageSignUp"
+                class="rounded-md bg-red-900/30 p-3 text-center text-sm text-red-400"
+                role="alert"
+              >
+                {{ errorMessageSignUp }}
+              </p>
+            </template>
           </div>
-        </form>
-
-        <!-- Conditions générales -->
-        <p class="text-xs text-center text-gray-500">
-          <input type="checkbox" id="agree-signin" v-model="isCheckedSignIn"
-            class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignIn" />
-          By clicking continue, you agree to our
-          <a href="#" class="underline">Terms of Service</a> and
-          <a href="#" class="underline">Privacy Policy</a>.
-        </p>
-
-        <!-- Message d'erreur -->
-        <p v-if="errorMessageSignIn" class="text-red-500 text-sm text-center">
-          {{ errorMessageSignIn }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Deuxième div (Create an account) -->
-    <div class="flex-1 flex items-center justify-center bg-gray-900 text-white p-4 md:p-8"
-      @mouseenter="activeDiv = 'signup'" @mouseleave="activeDiv = null">
-      <div v-if="activeDiv === 'signin'">
-        <!-- Image pour l'autre div -->
-        <img src="./ui/images/batman.jpg" alt="Batman coding" class="w-full max-w-xs md:max-w-md" />
-      </div>
-      <div class="w-full max-w-sm md:max-w-md space-y-8" v-if="activeDiv === 'signup' || activeDiv === null">
-        <!-- Titre -->
-        <div class="text-center">
-          <h2 class="text-2xl md:text-3xl font-bold">Create an account</h2>
-          <p class="mt-2 text-sm md:text-base text-gray-400">Enter your email below to create your account</p>
-        </div>
-
-        <!-- Formulaire -->
-        <form @submit.prevent="onSubmitSignUp" class="space-y-6">
-          <div class="space-y-4">
-            <div>
-              <Label class="sr-only" for="email-signup">Email</Label>
-              <Input v-model="emailSignup" id="email-signup" placeholder="name@example.com" type="email"
-                auto-capitalize="none" auto-complete="email" auto-correct="off" :disabled="isLoadingSignUp"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
-            </div>
-            <div>
-              <Label class="sr-only" for="password-signup">Password</Label>
-              <Input v-model="passwordSignup" id="password-signup" placeholder="Enter your password" type="password"
-                auto-capitalize="none" auto-complete="password" auto-correct="off" :disabled="isLoadingSignUp"
-                class="w-full px-4 py-2 rounded-md border border-gray-700 bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary" />
-            </div>
-            <Button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-md" :disabled="isLoadingSignUp">
-              Sign Up
-            </Button>
-          </div>
-
-          <!-- Séparateur -->
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <span class="w-full border-t border-gray-600"></span>
-            </div>
-            <div class="relative flex justify-center text-xs uppercase">
-              <span class="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-            </div>
-          </div>
-        </form>
-
-        <!-- Conditions générales -->
-        <p class="text-xs text-center text-gray-500">
-          <input type="checkbox" id="agree-signup" v-model="isCheckedSignUp"
-            class="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            :disabled="isLoadingSignUp" />
-          By clicking continue, you agree to our
-          <a href="#" class="underline">Terms of Service</a> and
-          <a href="#" class="underline">Privacy Policy</a>.
-        </p>
-
-        <!-- Message d'erreur -->
-        <p v-if="errorMessageSignUp" class="text-red-500 text-sm text-center">
-          {{ errorMessageSignUp }}
-        </p>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   </main>
 </template>
