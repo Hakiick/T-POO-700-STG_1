@@ -32,12 +32,10 @@ const usersList = ref<any[]>([]);
 
 // Responsive calendar: 1 month on mobile, 2 on desktop
 const calendarMonths = ref(1);
-const mediaQuery = window.matchMedia('(min-width: 768px)');
+let mediaQuery: MediaQueryList | null = null;
 const updateCalendarMonths = (e: MediaQueryList | MediaQueryListEvent) => {
   calendarMonths.value = e.matches ? 2 : 1;
 };
-updateCalendarMonths(mediaQuery);
-mediaQuery.addEventListener('change', updateCalendarMonths);
 
 const df = new DateFormatter('en-US', {
   dateStyle: 'long',
@@ -68,11 +66,16 @@ const value = ref({
 // ============================
 
 onMounted(() => {
+  // Initialize responsive calendar on client-side only
+  mediaQuery = window.matchMedia('(min-width: 768px)');
+  updateCalendarMonths(mediaQuery);
+  mediaQuery.addEventListener('change', updateCalendarMonths);
+
   fetchAllUsers();
 });
 
 onUnmounted(() => {
-  mediaQuery.removeEventListener('change', updateCalendarMonths);
+  mediaQuery?.removeEventListener('change', updateCalendarMonths);
 });
 
 
@@ -146,11 +149,11 @@ async function fetchAllUsers() {
 // Fonction pour créer un tableau de données
 // ============================
 
-function createDataTable(workingTimeEntries, clockEntries, user) {
+function createDataTable(workingTimeEntries: Array<{start: string; end: string}>, clockEntries: Array<{time: string; status: boolean}>, user: {username: string; id: number}) {
   let dataTable = [];
 
   // Grouper par date pour simplifier l'affichage
-  const groupedEntries = {};
+  const groupedEntries: Record<string, { workingTime: Array<{start: string; end: string}>; clockData: Array<{time: string; status: boolean}> }> = {};
 
   workingTimeEntries.forEach((entry) => {
     const date = new Date(entry.start).toLocaleDateString('fr-FR');
@@ -281,12 +284,12 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
         <table class="w-full table-auto border-collapse min-w-[36rem]">
           <thead>
             <tr>
-              <th class="px-4 py-2 text-left">Username</th>
-              <th class="px-4 py-2 text-left">Date</th>
-              <th class="px-4 py-2 text-left">Work In</th>
-              <th class="px-4 py-2 text-left">Work Out</th>
-              <th class="px-4 py-2 text-left">Clock In</th>
-              <th class="px-4 py-2 text-left">Clock Out</th>
+              <th scope="col" class="px-4 py-2 text-left">Username</th>
+              <th scope="col" class="px-4 py-2 text-left">Date</th>
+              <th scope="col" class="px-4 py-2 text-left">Work In</th>
+              <th scope="col" class="px-4 py-2 text-left">Work Out</th>
+              <th scope="col" class="px-4 py-2 text-left">Clock In</th>
+              <th scope="col" class="px-4 py-2 text-left">Clock Out</th>
             </tr>
           </thead>
           <tbody>

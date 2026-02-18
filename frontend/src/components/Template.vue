@@ -100,7 +100,7 @@ const formattedArrivalTime = computed(() => {
 });
 
 
-const formatHours = (hours) => {
+const formatHours = (hours: number): string => {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return `${h}h ${m}m`;
@@ -127,7 +127,7 @@ function getCurrentMonth() {
 // ============================
 // Fonction calculateWorkedHours: Recuperation du temps de travail. (clock)
 // ============================
-async function calculateWorkedHours(userId, startDate, endDate) {
+async function calculateWorkedHours(userId: number, startDate: string, endDate: string) {
   const utcStartDate = moment.utc(startDate).toISOString();
   const utcEndDate = moment.utc(endDate).toISOString();
 

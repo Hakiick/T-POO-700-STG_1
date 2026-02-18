@@ -18,12 +18,10 @@ import UserNav from './UserNav.vue';
 
 // Responsive calendar: 1 month on mobile, 2 on desktop
 const calendarMonths = ref(1);
-const mediaQuery = window.matchMedia('(min-width: 768px)');
+let mediaQuery: MediaQueryList | null = null;
 const updateCalendarMonths = (e: MediaQueryList | MediaQueryListEvent) => {
   calendarMonths.value = e.matches ? 2 : 1;
 };
-updateCalendarMonths(mediaQuery);
-mediaQuery.addEventListener('change', updateCalendarMonths);
 
 // ============================
 // Initialisation et variables globales
@@ -58,6 +56,11 @@ const value = ref({
 // Fonction exécutée au montage
 // ============================
 onMounted(async () => {
+  // Initialize responsive calendar on client-side only
+  mediaQuery = window.matchMedia('(min-width: 768px)');
+  updateCalendarMonths(mediaQuery);
+  mediaQuery.addEventListener('change', updateCalendarMonths);
+
   try {
     // Authentification de l'utilisateur
     await userStore.login();
@@ -83,7 +86,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  mediaQuery.removeEventListener('change', updateCalendarMonths);
+  mediaQuery?.removeEventListener('change', updateCalendarMonths);
 });
 
 
@@ -284,11 +287,11 @@ function formatDate(dateString: string) {
             <table class="w-full table-auto border-collapse min-w-[30rem]">
               <thead>
                 <tr>
-                  <th class="py-2 text-center border bg-blue-300">Date</th>
-                  <th class="py-2 text-center border bg-blue-300">Work In</th>
-                  <th class="py-2 text-center border bg-blue-300">Work Out</th>
-                  <th class="py-2 text-center border bg-blue-300">Clock In</th>
-                  <th class="py-2 text-center border bg-blue-300">Clock Out</th>
+                  <th scope="col" class="py-2 text-center border bg-blue-300">Date</th>
+                  <th scope="col" class="py-2 text-center border bg-blue-300">Work In</th>
+                  <th scope="col" class="py-2 text-center border bg-blue-300">Work Out</th>
+                  <th scope="col" class="py-2 text-center border bg-blue-300">Clock In</th>
+                  <th scope="col" class="py-2 text-center border bg-blue-300">Clock Out</th>
                 </tr>
               </thead>
               <tbody>
