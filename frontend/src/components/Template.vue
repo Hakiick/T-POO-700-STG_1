@@ -9,6 +9,7 @@ defineOptions({
 import MainNav from './MainNav.vue';
 import UserNav from './UserNav.vue';
 import ChartRange from './ChartRange.vue';
+import SkeletonLoader from './SkeletonLoader.vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useClockStore } from './store/clockStore';
 import { Sun, Moon, Check, Loader2 } from 'lucide-vue-next';
@@ -43,6 +44,7 @@ const clocks = computed(() => clockStore.clocks);
 const last_clock_value = computed(() => clockStore.lastClock?.status);
 const clock_disable = ref(false);
 const current_time = ref("");
+const isLoading = ref(true);
 
 // ============================
 // Clock WOW effect state
@@ -162,6 +164,8 @@ onMounted(async () => {
     const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
     workedHoursThisMonth.value = formatHours(hoursThisMonth);
   }
+
+  isLoading.value = false;
 });
 
 onUnmounted(() => {
@@ -389,28 +393,31 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
         <p class="text-xl font-bold">{{ formattedTime }}</p>
       </div>
       <!-- Stats: compact grid on mobile, vertical list on desktop -->
-      <div class="grid grid-cols-3 gap-2 p-4 text-center lg:grid-cols-1 lg:gap-0">
-        <div class="mb-0 lg:mb-2">
+      <div v-if="isLoading" class="p-4">
+        <SkeletonLoader :lines="5" />
+      </div>
+      <div v-else class="grid grid-cols-3 gap-2 p-4 text-center lg:grid-cols-1 lg:gap-0">
+        <div class="mb-0 lg:mb-2 rounded-lg p-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <p class="text-sm lg:text-base">Day</p>
           <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</p>
         </div>
         <hr class="hidden lg:block my-2">
-        <div class="mb-0 lg:mb-2">
+        <div class="mb-0 lg:mb-2 rounded-lg p-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <p class="text-sm lg:text-base">Week</p>
           <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</p>
         </div>
         <hr class="hidden lg:block my-2">
-        <div class="mb-0 lg:mb-2">
+        <div class="mb-0 lg:mb-2 rounded-lg p-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <p class="text-sm lg:text-base">Month</p>
           <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</p>
         </div>
         <hr class="hidden lg:block my-2">
-        <div class="mb-0 lg:mb-2">
+        <div class="mb-0 lg:mb-2 rounded-lg p-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <p class="text-sm lg:text-base">Time worked</p>
           <p class="text-lg lg:text-2xl font-bold text-success">{{ workTime || "..." }}</p>
         </div>
         <hr class="hidden lg:block my-2">
-        <div class="mb-0 lg:mb-2">
+        <div class="mb-0 lg:mb-2 rounded-lg p-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <p class="text-sm lg:text-base">Check In</p>
           <p class="text-lg lg:text-2xl font-bold text-danger">{{ formattedArrivalTime || '...' }}</p>
         </div>
@@ -422,7 +429,7 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
       <!-- Clock In/Out WOW Button -->
       <div
         class="relative overflow-hidden rounded-2xl cursor-pointer min-h-[2.75rem]
-               transition-all duration-500 ease-in-out
+               transition-all duration-500 ease-in-out active:scale-[0.98]
                border-4 m-0 mb-8 select-none"
         :class="[
           last_clock_value
@@ -487,7 +494,12 @@ async function handleClockClick(event: MouseEvent | KeyboardEvent) {
 
       <!-- ChartRange visible on all viewports -->
       <div class="mt-4 lg:mt-8">
-        <ChartRange :user="user" />
+        <template v-if="isLoading">
+          <SkeletonLoader :lines="2" :chart="true" />
+        </template>
+        <template v-else>
+          <ChartRange :user="user" />
+        </template>
       </div>
     </main>
   </div>

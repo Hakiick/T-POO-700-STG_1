@@ -32,27 +32,27 @@ const toggleMenu = () => {
     </button>
     <NavigationMenuList :class="cn('lg:flex lg:flex-col lg:items-center', { 'block': isMenuOpen, 'hidden': !isMenuOpen })">
       <NavigationMenuItem>
-        <NavigationMenuLink href="/" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/" :class="cn(navigationMenuTriggerStyle(), 'active:scale-95 transition-transform duration-150')">
           Home
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <NavigationMenuLink href="/dashboard" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/dashboard" :class="cn(navigationMenuTriggerStyle(), 'active:scale-95 transition-transform duration-150')">
           Dashboard
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem v-if="userStore.user.role === 'manager' || userStore.user.role === 'general_manager'">
-        <NavigationMenuLink href="/admin/dashboard" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/admin/dashboard" :class="cn(navigationMenuTriggerStyle(), 'active:scale-95 transition-transform duration-150')">
           Admin Dashboard
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem v-if="userStore.user.role === 'manager' || userStore.user.role === 'general_manager'">
-        <NavigationMenuLink href="/admin/users" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/admin/users" :class="cn(navigationMenuTriggerStyle(), 'active:scale-95 transition-transform duration-150')">
           Users
         </NavigationMenuLink>
       </NavigationMenuItem>
       <NavigationMenuItem v-if="userStore.user.role === 'general_manager'">
-        <NavigationMenuLink href="/admin/teams" :class="navigationMenuTriggerStyle()">
+        <NavigationMenuLink href="/admin/teams" :class="cn(navigationMenuTriggerStyle(), 'active:scale-95 transition-transform duration-150')">
           Teams
         </NavigationMenuLink>
       </NavigationMenuItem>

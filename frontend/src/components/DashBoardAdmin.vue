@@ -272,7 +272,7 @@ function createDataTable(workingTimeEntries: Array<{start: string; end: string}>
             </Popover>
           </div>
           <div class="text-center mb-3">
-            <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 transition-transform duration-150">
               Apply
             </Button>
           </div>
