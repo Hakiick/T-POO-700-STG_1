@@ -7,10 +7,10 @@
 - **Objectif** : Rebuild frontend Vue 3 mobile-first pour portfolio
 
 ## US Courante
-- **US** : (en attente)
-- **Branche** : —
-- **Statut** : —
-- **Équipe** : —
+- **US** : US-01 — Design system mobile-first + setup
+- **Branche** : feat/frontend/design-system-mobile
+- **Statut** : in-progress
+- **Équipe** : mobile-dev, stabilizer
 
 ## Plan d'exécution
 1. US-01 : Design system (mobile-dev, stabilizer)
