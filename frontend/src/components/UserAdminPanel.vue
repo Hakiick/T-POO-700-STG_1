@@ -187,10 +187,10 @@ const columns = computed(() => {
                 h(
                   Select,
                   {
-                    value: row.getValue("role"),
+                    value: row.getValue("role") as string,
                     "onUpdate:modelValue": (newValue: string) =>
                       handleRoleChange(newValue, row),
-                    defaultValue: row.getValue("role"),
+                    defaultValue: row.getValue("role") as string,
                   },
                   [
                     h(SelectTrigger, { class: "w-[180px]" }, [

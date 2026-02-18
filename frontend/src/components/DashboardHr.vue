@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MainNav from './MainNav.vue';
+import NavAdmin from './NavAdmin.vue';
 import UserNav from './UserNav.vue';
 import TeamSwitcher from './TeamSwitcher.vue';
 import moment from 'moment'
@@ -81,16 +82,16 @@ async function fetchData() {
 
     // Initialise le tableau avant de le remplir
     hrDataTable.value = [];
-    usersList.value.forEach(async (user) => {
-      const workingTimeResponse = await getWorkingTimeByDate(user.id, startDate.toISOString(), endDate.toISOString());
-      const clockDataResponse = await getClocksFromUser(user.id, startDate.toISOString(), endDate.toISOString());
+    for (const usr of usersList.value) {
+      const workingTimeResponse = await getWorkingTimeByDate(usr.id, startDate.toISOString(), endDate.toISOString());
+      const clockDataResponse = await getClocksFromUser(usr.id, startDate.toISOString(), endDate.toISOString());
 
       const workingTimeData = workingTimeResponse?.data?.data ?? [];
       const clockDataEntries = clockDataResponse?.data?.data ?? [];
 
       // Ajouter les données au tableau au lieu de les écraser
-      hrDataTable.value.push(...createDataTable(workingTimeData, clockDataEntries, user));
-    });
+      hrDataTable.value.push(...createDataTable(workingTimeData, clockDataEntries, usr));
+    }
   } catch (error) {
     console.error("Erreur lors de la récupération des données : ", error);
   }
@@ -110,7 +111,7 @@ function generateSalaryAndMatricule() {
 // Fonction pour créer un tableau de données
 // ============================
 
-function createDataTable(workingTimeEntries, clockEntries, user) {
+function createDataTable(workingTimeEntries: Array<{start: string; end: string}>, clockEntries: Array<{time: string; status: boolean}>, user: {username: string; id: number}) {
   let dataTable = [];
 
   // Génère un matricule et un salaire pour chaque utilisateur
@@ -151,16 +152,16 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
 
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
-    <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-2/ lg:border-r-4 relative w-full lg:w-auto">
-      <h1 class="font-bold mt-5 flex justify-center lg:justify-center">
+    <!-- Sidebar -->
+    <div class="col-span-1 lg:col-span-2 lg:border-r-4 relative w-full lg:w-auto">
+      <h1 class="font-bold mt-5 flex justify-center">
         Time Manager
       </h1>
       <div v-if="user" class="flex items-center justify-center py-4 lg:py-8 border-b-4">
         <NavAdmin :user="user" />
       </div>
       <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+      <div class="hidden lg:flex items-center justify-center pb-4 border-b-4">
         <MainNav class="mx-4" />
       </div>
       <!-- MainNav for Mobile -->
@@ -203,7 +204,7 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
             </Popover>
           </div>
           <div class="text-center mb-3">
-            <Button @click="applyDate" class="bg-green-500 hover:bg-green-600 text-white">
+            <Button @click="applyDate" class="min-h-[2.75rem] bg-green-500 hover:bg-green-600 text-white">
               Apply
             </Button>
           </div>
@@ -211,15 +212,15 @@ function createDataTable(workingTimeEntries, clockEntries, user) {
       </div>
       
       <!-- Emploi du temps -->
-      <div class="text-center mb-3">
-        <table class="w-full">
+      <div class="text-center mb-3 overflow-x-auto">
+        <table class="w-full table-auto border-collapse min-w-[30rem]">
           <thead>
             <tr>
-              <th class="px-4 py-2 text-left">Username</th>
-              <th class="px-4 py-2 text-left">Matricule</th>
-              <th class="px-4 py-2 text-left">Salary/H</th>
-              <th class="px-4 py-2 text-left">Working Time</th>
-              <th class="px-4 py-2 text-left">Night TIme</th>
+              <th scope="col" class="px-4 py-2 text-left">Username</th>
+              <th scope="col" class="px-4 py-2 text-left">Matricule</th>
+              <th scope="col" class="px-4 py-2 text-left">Salary/H</th>
+              <th scope="col" class="px-4 py-2 text-left">Working Time</th>
+              <th scope="col" class="px-4 py-2 text-left">Night Time</th>
             </tr>
           </thead>
           <tbody>

@@ -39,16 +39,10 @@ const workedHoursThisWeek = ref<string | null>(null);
 const workedHoursThisMonth = ref<string | null>(null);
 const arrivalTime = ref<string | null>(null);
 const workTime = ref<string | null>(null);
-const isDesktop = ref(false);
 const clocks = computed(() => clockStore.clocks);
-// const last_clock = computed(() => clockStore.lastClock);
 const last_clock_value = computed(() => clockStore.lastClock?.status);
 const clock_disable = ref(false);
 const current_time = ref("");
-
-const checkIsDesktop = () => {
-  isDesktop.value = window.innerWidth >= 1024;
-};
 
 const formattedDate = computed(() => {
   return moment().format('dddd D MMMM');
@@ -66,7 +60,6 @@ onMounted(async () => {
   if (response_clock.status === 200) {
     clockStore.setClock(response_clock.data.data);
     current_time.value = moment().format('HH[h] mm[m]');
-    // console.log("clock", clocks.value);
     const lastTrueClock = clocks.value.find((entry) => entry.status === true);
 
     if (lastTrueClock) {
@@ -100,9 +93,6 @@ onMounted(async () => {
     const hoursThisMonth = await calculateWorkedHours(user.value.id, startOfMonth, endOfMonth);
     workedHoursThisMonth.value = formatHours(hoursThisMonth);
   }
-
-  checkIsDesktop();
-  window.addEventListener('resize', checkIsDesktop);
 });
 
 const formattedArrivalTime = computed(() => {
@@ -110,7 +100,7 @@ const formattedArrivalTime = computed(() => {
 });
 
 
-const formatHours = (hours) => {
+const formatHours = (hours: number): string => {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
   return `${h}h ${m}m`;
@@ -137,13 +127,11 @@ function getCurrentMonth() {
 // ============================
 // Fonction calculateWorkedHours: Recuperation du temps de travail. (clock)
 // ============================
-async function calculateWorkedHours(userId, startDate, endDate) {
+async function calculateWorkedHours(userId: number, startDate: string, endDate: string) {
   const utcStartDate = moment.utc(startDate).toISOString();
   const utcEndDate = moment.utc(endDate).toISOString();
-  // console.log(utcStartDate, utcEndDate);
 
   const cardDay = await getClocksFromUser(userId, utcStartDate, utcEndDate);
-  //console.log(cardDay);
 
   if (cardDay.status === 404) {
     return 0;
@@ -182,7 +170,6 @@ async function calculateWorkedHours(userId, startDate, endDate) {
 // Fonction handleChangeClock: Gestion du changement de pointage (clock)
 // ============================
 const handleChangeClock = async (checked: boolean) => {
-  //console.log(last_clock_value.value);
   clock_disable.value = true;
   const response = await createClock(
     checked, user.value.id
@@ -193,70 +180,69 @@ const handleChangeClock = async (checked: boolean) => {
   else {
     clock_disable.value = false;
   }
-  // console.log(response);
 }
 
 </script>
 
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-10 lg:min-h-screen">
-    <!-- NavBar -->
-    <div class="col-span-1 lg:col-span-1/10 border-r-4 relative">
+    <!-- Sidebar -->
+    <div class="col-span-1 lg:col-span-2 lg:border-r-4 relative">
       <!-- UserNav for Mobile -->
-      <div class="pt-4 pl-4" v-show="!isDesktop">
+      <div class="pt-4 pl-4 block lg:hidden">
         <UserNav :user="user" />
       </div>
       <h1 class="font-bold flex justify-center -mt-8 lg:mt-3">
         Time Manager
       </h1>
       <!-- UserNav for Desktop -->
-      <div v-show="isDesktop" class="flex items-center justify-center py-8 border-b-4">
+      <div class="hidden lg:flex items-center justify-center py-8 border-b-4">
         <UserNav :user="user" />
       </div>
       <!-- MainNav for Desktop -->
-      <div class="flex items-center justify-center pb-4 border-b-4 hidden lg:block">
+      <div class="hidden lg:flex items-center justify-center pb-4 border-b-4">
         <MainNav class="mx-4" />
       </div>
       <!-- MainNav for Mobile -->
       <div class="absolute top-4 right-4 lg:hidden">
         <MainNav class="mx-4" />
       </div>
-      <div class="text-center items-center justify-center p-8 border-b-4">
+      <div class="text-center items-center justify-center p-4 lg:p-8 border-b-4">
         <p>{{ formattedDate }}</p>
         <p class="text-xl font-bold">{{ formattedTime }}</p>
       </div>
-      <div class="text-center items-center justify-center p-4">
-        <div class="mb-2">
-          <p>Day</p>
-          <p class="text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</p>
+      <!-- Stats: compact grid on mobile, vertical list on desktop -->
+      <div class="grid grid-cols-3 gap-2 p-4 text-center lg:grid-cols-1 lg:gap-0">
+        <div class="mb-0 lg:mb-2">
+          <p class="text-sm lg:text-base">Day</p>
+          <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursToday !== null ? workedHoursToday : '0h' }}</p>
         </div>
-        <hr class="my-2">
-        <div class="mb-2">
-          <p>Week</p>
-          <p class="text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</p>
+        <hr class="hidden lg:block my-2">
+        <div class="mb-0 lg:mb-2">
+          <p class="text-sm lg:text-base">Week</p>
+          <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursThisWeek !== null ? workedHoursThisWeek : '0h' }}</p>
         </div>
-        <hr class="my-2">
-        <div class="mb-2">
-          <p>Month</p>
-          <p class="text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}
-          </p>
+        <hr class="hidden lg:block my-2">
+        <div class="mb-0 lg:mb-2">
+          <p class="text-sm lg:text-base">Month</p>
+          <p class="text-lg lg:text-2xl font-bold text-primary">{{ workedHoursThisMonth !== null ? workedHoursThisMonth : '0h' }}</p>
         </div>
-        <hr class="my-2">
-        <div class="mb-2">
-          <p>Time worked</p>
-          <p class="text-2xl font-bold text-success">{{ workTime || "..." }}</p>
+        <hr class="hidden lg:block my-2">
+        <div class="mb-0 lg:mb-2">
+          <p class="text-sm lg:text-base">Time worked</p>
+          <p class="text-lg lg:text-2xl font-bold text-success">{{ workTime || "..." }}</p>
         </div>
-        <hr class="my-2">
-        <div class="mb-2">
-          <p>Check In</p>
-          <p class="text-2xl font-bold text-danger">{{ formattedArrivalTime || '...' }}</p>
+        <hr class="hidden lg:block my-2">
+        <div class="mb-0 lg:mb-2">
+          <p class="text-sm lg:text-base">Check In</p>
+          <p class="text-lg lg:text-2xl font-bold text-danger">{{ formattedArrivalTime || '...' }}</p>
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="col-span-1 lg:col-span-9 flex flex-col justify-between p-8">
-      <Card class="box-content p-9 border-4 cursor-pointer m-0 mb-8"
+    <div class="col-span-1 lg:col-span-8 flex flex-col justify-between p-4 lg:p-8">
+      <Card class="box-content p-6 lg:p-9 border-4 cursor-pointer m-0 mb-8 min-h-[2.75rem]"
         :class="last_clock_value ? 'bg-red-500' : 'bg-green-500'" @click="handleChangeClock(!last_clock_value)">
         <CardHeader class="flex flex-col items-center justify-center space-y-0 pb-1 px-6 pt-3">
           <div class="text-4xl text-white">
@@ -273,8 +259,8 @@ const handleChangeClock = async (checked: boolean) => {
         </CardHeader>
       </Card>
 
-      <!-- ChartRange for Desktop -->
-      <div v-if="isDesktop" class="mt-8">
+      <!-- ChartRange visible on all viewports -->
+      <div class="mt-4 lg:mt-8">
         <ChartRange :user="user" />
       </div>
     </div>
