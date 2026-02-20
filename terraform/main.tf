@@ -60,15 +60,12 @@ resource "azurerm_linux_web_app" "timemanager" {
   }
 
   app_settings = {
-    PORT                            = "4000"
-    PHX_SERVER                      = "true"
-    PHX_HOST                        = "app-${local.resource_prefix}.azurewebsites.net"
-    SECRET_KEY_BASE                 = var.secret_key_base
-    DATABASE_URL                    = "ecto://${var.postgres_admin_login}:${var.postgres_admin_password}@${azurerm_postgresql_flexible_server.main.fqdn}/${azurerm_postgresql_flexible_server_database.main.name}?ssl=true"
-    WEBSITES_PORT                   = "80"
-    DOCKER_REGISTRY_SERVER_URL      = "https://${azurerm_container_registry.main.login_server}"
-    DOCKER_REGISTRY_SERVER_USERNAME = azurerm_container_registry.main.admin_username
-    DOCKER_REGISTRY_SERVER_PASSWORD = azurerm_container_registry.main.admin_password
+    PORT            = "4000"
+    PHX_SERVER      = "true"
+    PHX_HOST        = "app-${local.resource_prefix}.azurewebsites.net"
+    SECRET_KEY_BASE = var.secret_key_base
+    DATABASE_URL    = "ecto://${var.postgres_admin_login}:${var.postgres_admin_password}@${azurerm_postgresql_flexible_server.main.fqdn}/${azurerm_postgresql_flexible_server_database.main.name}?ssl=true"
+    WEBSITES_PORT   = "80"
   }
 }
 
