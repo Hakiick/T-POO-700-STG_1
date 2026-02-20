@@ -1,4 +1,56 @@
-backend/deps/*
+# Version control
+.git
+.gitignore
+.gitattributes
 
-backend/mix.lock
-frontend/node_modules
+# Project management
+.forge/
+*.md
+LICENSE
+
+# Terraform (not needed in image)
+terraform/
+
+# CI/CD
+.github/
+
+# Backend build artifacts
+backend/_build/
+backend/deps/
+backend/.elixir-tools/
+backend/cover/
+backend/doc/
+backend/.iex.exs
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Docker files (avoid copying into the build context unnecessarily)
+docker-compose.yml
+docker-compose.*.yml
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets and environment files
+*.env
+.env.*
+backend/config/dev.secret.exs
+backend/config/test.secret.exs
+
+# Misc project files
+access_db.sh
+Audit_securite.pdf
+MLD.text
+*.xlsx
+*.docx
+scripts/

@@ -1,0 +1,32 @@
+# Copy this file to terraform.tfvars and fill in the real values.
+# NEVER commit terraform.tfvars — it is gitignored.
+
+# Azure subscription ID (find with: az account show --query id -o tsv)
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# Environment: dev | staging | prod
+env = "dev"
+
+# Azure region (swedencentral recommended for cost)
+location = "swedencentral"
+
+# Project name — used in resource naming
+project_name = "timemanager"
+
+# App Service Plan SKU (B1 ~$13/month, F1 is free but always_on disabled)
+sku_name = "B1"
+
+# PostgreSQL Flexible Server
+postgres_admin_login    = "pgadmin"
+postgres_admin_password = "CHANGE_ME_min8chars!"
+postgres_sku_name       = "B_Standard_B1ms"
+postgres_version        = "16"
+
+# Azure Container Registry SKU (Basic is cheapest)
+acr_sku = "Basic"
+
+# Docker image tag to deploy
+docker_image_tag = "latest"
+
+# Phoenix secret key base — generate with: mix phx.gen.secret
+secret_key_base = "CHANGE_ME_generate_with_mix_phx_gen_secret"

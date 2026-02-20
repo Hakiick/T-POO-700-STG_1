@@ -41,6 +41,12 @@ defmodule TimeManagerWeb.Router do
     plug TimeManager.Accounts.Middleware
   end
 
+  # Health check (no auth required)
+  scope "/api", TimeManagerWeb do
+    pipe_through :api
+    get "/health", HealthController, :index
+  end
+
   scope "/api", TimeManagerWeb do
     pipe_through :api_auth
 
