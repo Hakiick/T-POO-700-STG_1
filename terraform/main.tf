@@ -64,7 +64,7 @@ resource "azurerm_linux_web_app" "timemanager" {
     PHX_SERVER      = "true"
     PHX_HOST        = "app-${local.resource_prefix}.azurewebsites.net"
     SECRET_KEY_BASE = var.secret_key_base
-    DATABASE_URL    = "ecto://${var.postgres_admin_login}:${var.postgres_admin_password}@${azurerm_postgresql_flexible_server.main.fqdn}/${azurerm_postgresql_flexible_server_database.main.name}?ssl=true"
+    DATABASE_URL    = "ecto://${var.postgres_admin_login}:${var.postgres_admin_password}@${azurerm_postgresql_flexible_server.main.fqdn}/${azurerm_postgresql_flexible_server_database.main.name}"
     WEBSITES_PORT   = "80"
   }
 }
